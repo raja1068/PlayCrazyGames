@@ -5,57 +5,33 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Chess Game</title>
 
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="./style.css">
 
-<!-- Chess.js (REAL rules engine) -->
+<!-- Chess.js -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.13.4/chess.min.js"></script>
 
-<!-- Stockfish AI -->
+<!-- Stockfish -->
 <script src="https://cdn.jsdelivr.net/npm/stockfish/stockfish.js"></script>
 
-<!-- AdSense -->
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9770610643444805"
-crossorigin="anonymous"></script>
 </head>
 
 <body>
-
-<div class="ad">
-    <ins class="adsbygoogle"
-        style="display:block"
-        data-ad-client="ca-pub-9770610643444805"
-        data-ad-slot="4587389292"
-        data-ad-format="auto"></ins>
-</div>
 
 <h1>♜ Chess Game ♞</h1>
 
 <div class="controls">
     <button onclick="setMode('offline')">2 Player</button>
     <button onclick="setMode('bot')">Play vs AI</button>
+    <button onclick="resetGame()">New Game</button>
 </div>
 
-<h3 id="turn"></h3>
+<h3 id="turn">Loading...</h3>
 
 <div id="board" class="board"></div>
 
-<button onclick="resetGame()">New Game</button>
-
 <p id="status"></p>
 
-<div class="ad">
-    <ins class="adsbygoogle"
-        style="display:block"
-        data-ad-client="ca-pub-9770610643444805"
-        data-ad-slot="4587389292"
-        data-ad-format="auto"></ins>
-</div>
-
-<script src="script.js"></script>
-
-<script>
-(adsbygoogle = window.adsbygoogle || []).push({});
-</script>
+<script src="./script.js"></script>
 
 </body>
 </html>
