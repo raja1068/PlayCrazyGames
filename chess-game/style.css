@@ -1,8 +1,14 @@
 body {
     text-align: center;
-    font-family: Arial;
+    font-family: Arial, sans-serif;
     background: linear-gradient(135deg, #667eea, #764ba2);
     color: white;
+    margin: 0;
+}
+
+/* TITLE */
+h1 {
+    margin-top: 20px;
 }
 
 /* BOARD */
@@ -11,28 +17,35 @@ body {
     grid-template-columns: repeat(8, 70px);
     margin: 20px auto;
     border: 4px solid white;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.4);
 }
 
-/* SQUARES */
+/* SQUARE */
 .square {
     width: 70px;
     height: 70px;
-    font-size: 2.5rem;
+    font-size: 2.6rem; /* Bigger pieces */
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
+    transition: transform 0.1s;
 }
 
-/* COLORS (FIXED) */
+.square:hover {
+    transform: scale(1.05);
+}
+
+/* COLORS (Green + Orange as you wanted) */
 .light {
-    background: #b7e4c7;  /* green */
+    background: #b7e4c7;  /* light green */
 }
 
 .dark {
-    background: #f7b267;  /* orange */
+    background: #f7b267;  /* light orange */
 }
 
+/* SELECTED */
 .selected {
     outline: 3px solid red;
 }
@@ -43,12 +56,19 @@ button {
     margin: 5px;
     border: none;
     border-radius: 8px;
-    background: #ffffff;
+    background: white;
     color: black;
     font-weight: bold;
     cursor: pointer;
+    transition: 0.2s;
 }
 
 button:hover {
     background: #ddd;
+}
+
+/* STATUS TEXT */
+#status {
+    margin-top: 10px;
+    font-weight: bold;
 }
