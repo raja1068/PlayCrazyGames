@@ -1,8 +1,3 @@
-// ========================================
-// COMPLETE CHESS GAME - ENLARGED PIECES
-// Bigger Board | Larger Chessmen | Full Logic
-// ========================================
-
 // Chess Board Initial Setup
 const initialBoard = [
     ['♜', '♞', '♝', '♛', '♚', '♝', '♞', '♜'],
@@ -16,42 +11,36 @@ const initialBoard = [
 ];
 
 let board = JSON.parse(JSON.stringify(initialBoard));
-let currentPlayer = 'white';
+let currentPlayer = 'white'; // white moves first
 let selectedSquare = null;
 let gameActive = true;
 let whiteCaptured = [];
 let blackCaptured = [];
 
-// Helper functions
-function isWhitePiece(piece) {
-    return piece && '♙♖♘♗♕♔'.includes(piece);
-}
-
-function isBlackPiece(piece) {
-    return piece && '♟♜♞♝♛♚'.includes(piece);
-}
-
 // Piece movement rules
 function isValidMove(piece, fromRow, fromCol, toRow, toCol, board) {
+    const pieceType = piece;
     const rowDiff = toRow - fromRow;
     const colDiff = toCol - fromCol;
     const targetPiece = board[toRow][toCol];
     
     // Can't capture own piece
-    if (targetPiece && ((currentPlayer === 'white' && isWhitePiece(targetPiece)) ||
-                       (currentPlayer === 'black' && isBlackPiece(targetPiece)))) {
+    if (targetPiece && ((currentPlayer === 'white' && '♙♖♘♗♕♔'.includes(targetPiece)) ||
+                       (currentPlayer === 'black' && '♟♜♞♝♛♚'.includes(targetPiece)))) {
         return false;
     }
     
     // Pawn moves
-    if (piece === '♙' || piece === '♟') {
-        const direction = piece === '♙' ? -1 : 1;
-        const startRow = piece === '♙' ? 6 : 1;
+    if (pieceType === '♙' || pieceType === '♟') {
+        const direction = pieceType === '♙' ? -1 : 1;
+        const startRow = pieceType === '♙' ? 6 : 1;
         
+        // Move forward
         if (colDiff === 0 && !targetPiece) {
             if (rowDiff === direction) return true;
             if (rowDiff === 2 * direction && fromRow === startRow && !board[fromRow + direction][fromCol]) return true;
         }
+        // Capture diagonally
         else if (Math.abs(colDiff) === 1 && rowDiff === direction && targetPiece) {
             return true;
         }
@@ -59,25 +48,25 @@ function isValidMove(piece, fromRow, fromCol, toRow, toCol, board) {
     }
     
     // Rook moves
-    if (piece === '♖' || piece === '♜') {
+    if (pieceType === '♖' || pieceType === '♜') {
         if (fromRow !== toRow && fromCol !== toCol) return false;
         return isClearPath(fromRow, fromCol, toRow, toCol, board);
     }
     
     // Knight moves
-    if (piece === '♘' || piece === '♞') {
+    if (pieceType === '♘' || pieceType === '♞') {
         return (Math.abs(rowDiff) === 2 && Math.abs(colDiff) === 1) ||
                (Math.abs(rowDiff) === 1 && Math.abs(colDiff) === 2);
     }
     
     // Bishop moves
-    if (piece === '♗' || piece === '♝') {
+    if (pieceType === '♗' || pieceType === '♝') {
         if (Math.abs(rowDiff) !== Math.abs(colDiff)) return false;
         return isClearPath(fromRow, fromCol, toRow, toCol, board);
     }
     
     // Queen moves
-    if (piece === '♕' || piece === '♛') {
+    if (pieceType === '♕' || pieceType === '♛') {
         if (fromRow === toRow || fromCol === toCol) {
             return isClearPath(fromRow, fromCol, toRow, toCol, board);
         }
@@ -88,7 +77,7 @@ function isValidMove(piece, fromRow, fromCol, toRow, toCol, board) {
     }
     
     // King moves
-    if (piece === '♔' || piece === '♚') {
+    if (pieceType === '♔' || pieceType === '♚') {
         return Math.abs(rowDiff) <= 1 && Math.abs(colDiff) <= 1;
     }
     
@@ -113,6 +102,7 @@ function isKingInCheck(board, player) {
     const king = player === 'white' ? '♔' : '♚';
     let kingPos = null;
     
+    // Find king position
     for (let i = 0; i < 8; i++) {
         for (let j = 0; j < 8; j++) {
             if (board[i][j] === king) {
@@ -124,12 +114,13 @@ function isKingInCheck(board, player) {
     
     if (!kingPos) return false;
     
+    // Check if any enemy piece can capture king
     const opponent = player === 'white' ? 'black' : 'white';
     for (let i = 0; i < 8; i++) {
         for (let j = 0; j < 8; j++) {
             const piece = board[i][j];
-            if (piece && ((opponent === 'white' && isWhitePiece(piece)) ||
-                         (opponent === 'black' && isBlackPiece(piece)))) {
+            if (piece && ((opponent === 'white' && '♙♖♘♗♕♔'.includes(piece)) ||
+                         (opponent === 'black' && '♟♜♞♝♛♚'.includes(piece)))) {
                 if (isValidMove(piece, i, j, kingPos.row, kingPos.col, board)) {
                     return true;
                 }
@@ -143,6 +134,7 @@ function makeMove(fromRow, fromCol, toRow, toCol) {
     const piece = board[fromRow][fromCol];
     const targetPiece = board[toRow][toCol];
     
+    // Capture piece
     if (targetPiece) {
         if (currentPlayer === 'white') {
             whiteCaptured.push(targetPiece);
@@ -152,10 +144,13 @@ function makeMove(fromRow, fromCol, toRow, toCol) {
         updateCapturedDisplay();
     }
     
+    // Move piece
     board[toRow][toCol] = piece;
     board[fromRow][fromCol] = '';
     
+    // Check if move puts own king in check
     if (isKingInCheck(board, currentPlayer)) {
+        // Undo move
         board[fromRow][fromCol] = piece;
         board[toRow][toCol] = targetPiece;
         if (targetPiece) {
@@ -173,8 +168,8 @@ function makeMove(fromRow, fromCol, toRow, toCol) {
 }
 
 function updateCapturedDisplay() {
-    document.getElementById('whiteCaptured').textContent = whiteCaptured.length;
-    document.getElementById('blackCaptured').textContent = blackCaptured.length;
+    document.getElementById('whiteCaptured').textContent = whiteCaptured.join(' ');
+    document.getElementById('blackCaptured').textContent = blackCaptured.join(' ');
 }
 
 function renderBoard() {
@@ -194,6 +189,7 @@ function renderBoard() {
                 square.classList.add('selected');
             }
             
+            // Check if king is in check
             if (board[i][j] === '♔' && currentPlayer === 'white' && isKingInCheck(board, 'white')) {
                 square.classList.add('check');
             }
@@ -212,37 +208,33 @@ function handleSquareClick(row, col) {
     
     const piece = board[row][col];
     
+    // No piece selected
     if (selectedSquare === null) {
-        if (piece && ((currentPlayer === 'white' && isWhitePiece(piece)) ||
-                     (currentPlayer === 'black' && isBlackPiece(piece)))) {
+        // Select piece if it belongs to current player
+        if (piece && ((currentPlayer === 'white' && '♙♖♘♗♕♔'.includes(piece)) ||
+                     (currentPlayer === 'black' && '♟♜♞♝♛♚'.includes(piece)))) {
             selectedSquare = {row, col};
             renderBoard();
             showValidMoves(row, col);
         }
     } else {
+        // Try to move
         const fromRow = selectedSquare.row;
         const fromCol = selectedSquare.col;
         const piece = board[fromRow][fromCol];
         
         if (isValidMove(piece, fromRow, fromCol, row, col, board)) {
             if (makeMove(fromRow, fromCol, row, col)) {
+                // Switch players
                 currentPlayer = currentPlayer === 'white' ? 'black' : 'white';
-                document.getElementById('turnIndicator').innerHTML = 
-                    currentPlayer === 'white' ? '<span>⚪</span> White\'s Turn' : '<span>⚫</span> Black\'s Turn';
+                document.getElementById('turnIndicator').textContent = 
+                    currentPlayer === 'white' ? "White's Turn" : "Black's Turn";
                 
+                // Check for checkmate
                 if (isCheckmate()) {
                     const winner = currentPlayer === 'white' ? 'Black' : 'White';
-                    document.getElementById('status').innerHTML = `🏆 CHECKMATE! ${winner} wins! 🏆`;
+                    document.getElementById('status').textContent = `${winner} wins by checkmate! 🎉`;
                     gameActive = false;
-                } else if (isKingInCheck(board, currentPlayer)) {
-                    document.getElementById('status').innerHTML = '⚠️ CHECK! ⚠️';
-                    setTimeout(() => {
-                        if (document.getElementById('status').innerHTML === '⚠️ CHECK! ⚠️') {
-                            document.getElementById('status').innerHTML = '';
-                        }
-                    }, 1500);
-                } else {
-                    document.getElementById('status').innerHTML = '';
                 }
             }
         }
@@ -266,14 +258,17 @@ function showValidMoves(row, col) {
 }
 
 function isCheckmate() {
+    // Simplified checkmate detection
     for (let i = 0; i < 8; i++) {
         for (let j = 0; j < 8; j++) {
             const piece = board[i][j];
-            if (piece && ((currentPlayer === 'white' && isWhitePiece(piece)) ||
-                         (currentPlayer === 'black' && isBlackPiece(piece)))) {
+            if (piece && ((currentPlayer === 'white' && '♙♖♘♗♕♔'.includes(piece)) ||
+                         (currentPlayer === 'black' && '♟♜♞♝♛♚'.includes(piece)))) {
+                // Try all possible moves
                 for (let k = 0; k < 8; k++) {
                     for (let l = 0; l < 8; l++) {
                         if (isValidMove(piece, i, j, k, l, board)) {
+                            // Test if move gets out of check
                             const tempBoard = JSON.parse(JSON.stringify(board));
                             const targetPiece = tempBoard[k][l];
                             tempBoard[k][l] = tempBoard[i][j];
@@ -297,8 +292,8 @@ function resetGame() {
     gameActive = true;
     whiteCaptured = [];
     blackCaptured = [];
-    document.getElementById('turnIndicator').innerHTML = '<span>⚪</span> White\'s Turn';
-    document.getElementById('status').innerHTML = '';
+    document.getElementById('turnIndicator').textContent = "White's Turn";
+    document.getElementById('status').textContent = '';
     updateCapturedDisplay();
     renderBoard();
 }
@@ -308,6 +303,4 @@ document.getElementById('backBtn').addEventListener('click', () => {
     window.location.href = '../index.html';
 });
 
-// Initialize game
 renderBoard();
-console.log('♜ Chess Game Loaded! Bigger pieces ready!');
