@@ -1,45 +1,54 @@
 body {
     text-align: center;
     font-family: Arial;
-    background: #f2f2f2;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
 }
 
+/* BOARD */
 .board {
     display: grid;
-    grid-template-columns: repeat(8, 75px);
+    grid-template-columns: repeat(8, 70px);
     margin: 20px auto;
-    width: fit-content;
-    border: 3px solid black;
+    border: 4px solid white;
 }
 
+/* SQUARES */
 .square {
-    width: 75px;
-    height: 75px;
-    font-size: 2.8rem;
+    width: 70px;
+    height: 70px;
+    font-size: 2.5rem;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
 }
 
+/* COLORS (FIXED) */
 .light {
-    background: #b7e4c7; /* green */
+    background: #b7e4c7;  /* green */
 }
 
 .dark {
-    background: #f7b267; /* orange */
+    background: #f7b267;  /* orange */
 }
 
 .selected {
     outline: 3px solid red;
 }
 
+/* BUTTONS */
 button {
-    padding: 10px;
+    padding: 10px 15px;
     margin: 5px;
+    border: none;
+    border-radius: 8px;
+    background: #ffffff;
+    color: black;
+    font-weight: bold;
     cursor: pointer;
 }
 
-.ad {
-    margin: 10px;
+button:hover {
+    background: #ddd;
 }
