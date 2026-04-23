@@ -1,25 +1,21 @@
 body {
-    font-family: Arial;
     text-align: center;
-    background: #f5f5f5;
-}
-
-.container {
-    margin-top: 20px;
+    font-family: Arial;
+    background: #f2f2f2;
 }
 
 .board {
     display: grid;
-    grid-template-columns: repeat(8, 70px);
-    width: fit-content;
+    grid-template-columns: repeat(8, 75px);
     margin: 20px auto;
-    border: 3px solid #333;
+    width: fit-content;
+    border: 3px solid black;
 }
 
 .square {
-    width: 70px;
-    height: 70px;
-    font-size: 2.5rem; /* BIGGER PIECES */
+    width: 75px;
+    height: 75px;
+    font-size: 2.8rem;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -27,11 +23,11 @@ body {
 }
 
 .light {
-    background: #b7e4c7; /* light green */
+    background: #b7e4c7; /* green */
 }
 
 .dark {
-    background: #f7b267; /* light orange */
+    background: #f7b267; /* orange */
 }
 
 .selected {
@@ -39,14 +35,9 @@ body {
 }
 
 button {
-    padding: 10px 15px;
+    padding: 10px;
     margin: 5px;
     cursor: pointer;
-}
-
-.modes button {
-    background: black;
-    color: white;
 }
 
 .ad {
