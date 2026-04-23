@@ -3,7 +3,6 @@ const game = new Chess();
 let selected = null;
 let mode = 'offline';
 
-/* Stockfish */
 let engine = new Worker("https://cdn.jsdelivr.net/npm/stockfish/stockfish.js");
 
 function setMode(m) {
@@ -19,20 +18,20 @@ function renderBoard() {
 
     for (let i = 0; i < 8; i++) {
         for (let j = 0; j < 8; j++) {
-            const sq = document.createElement("div");
-            sq.className = "square " + ((i+j)%2===0 ? "light":"dark");
+            const square = document.createElement("div");
+            square.className = "square " + ((i+j)%2===0 ? "light":"dark");
 
             const piece = board[i][j];
             if (piece) {
-                sq.textContent = pieceToUnicode(piece);
+                square.textContent = pieceUnicode(piece);
             }
 
-            if (selected && selected.row===i && selected.col===j) {
-                sq.classList.add("selected");
+            if (selected && selected.row === i && selected.col === j) {
+                square.classList.add("selected");
             }
 
-            sq.onclick = () => handleClick(i,j);
-            boardDiv.appendChild(sq);
+            square.addEventListener("click", () => handleClick(i, j));
+            boardDiv.appendChild(square);
         }
     }
 
@@ -44,26 +43,21 @@ function renderBoard() {
     }
 }
 
-function handleClick(i,j) {
-    const board = game.board();
-
+function handleClick(i, j) {
     if (!selected) {
-        if (board[i][j]) {
-            selected = {row:i,col:j};
-        }
+        selected = {row: i, col: j};
     } else {
         const move = {
-            from: coordsToSquare(selected.row, selected.col),
-            to: coordsToSquare(i,j),
+            from: coordToSquare(selected.row, selected.col),
+            to: coordToSquare(i, j),
             promotion: 'q'
         };
 
         const result = game.move(move);
-
         selected = null;
 
         if (result && mode === 'bot' && game.turn() === 'b') {
-            setTimeout(botMove, 400);
+            setTimeout(botMove, 300);
         }
 
         renderBoard();
@@ -72,11 +66,11 @@ function handleClick(i,j) {
 
 function botMove() {
     engine.postMessage("position fen " + game.fen());
-    engine.postMessage("go depth 12");
+    engine.postMessage("go depth 10");
 
     engine.onmessage = function(e) {
         if (e.data.startsWith("bestmove")) {
-            let move = e.data.split(" ")[1];
+            const move = e.data.split(" ")[1];
 
             game.move({
                 from: move.substring(0,2),
@@ -89,24 +83,24 @@ function botMove() {
     };
 }
 
-/* Helpers */
+/* HELPERS */
 
-function coordsToSquare(r,c){
+function coordToSquare(r,c){
     return String.fromCharCode(97+c) + (8-r);
 }
 
-function pieceToUnicode(p){
+function pieceUnicode(p){
     const map = {
-        'p':'♟','r':'♜','n':'♞','b':'♝','q':'♛','k':'♚',
-        'P':'♙','R':'♖','N':'♘','B':'♗','Q':'♕','K':'♔'
+        p:'♟', r:'♜', n:'♞', b:'♝', q:'♛', k:'♚',
+        P:'♙', R:'♖', N:'♘', B:'♗', Q:'♕', K:'♔'
     };
-    return map[p.color === 'w' ? p.type.toUpperCase() : p.type];
+    return p.color === 'w' ? map[p.type.toUpperCase()] : map[p.type];
 }
 
 function resetGame(){
     game.reset();
     selected = null;
-    document.getElementById("status").innerText='';
+    document.getElementById("status").innerText = "";
     renderBoard();
 }
 
