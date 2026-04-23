@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snakes & Ladders</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="game-container">
+        <h1>🐍 Snakes & Ladders 🪜</h1>
+        <div class="game-info">
+            <div class="players">
+                <div class="player1">Player 1 (Red) <span id="player1Pos">1</span></div>
+                <div class="player2">Player 2 (Blue) <span id="player2Pos">1</span></div>
+            </div>
+            <div class="turn-indicator" id="turnIndicator">Player 1's Turn</div>
+            <div class="dice-container">
+                <div class="dice" id="dice">🎲</div>
+                <button id="rollBtn">Roll Dice</button>
+            </div>
+        </div>
+        <div class="board" id="board"></div>
+        <div class="controls">
+            <button id="resetBtn">New Game</button>
+            <button id="backBtn">⬅ Back to Hub</button>
+        </div>
+        <div class="message" id="message"></div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
