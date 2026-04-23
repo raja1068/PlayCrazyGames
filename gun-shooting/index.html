@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Gun Shooting Game with 10 exciting levels! Shoot targets, increase difficulty, become a sharpshooter!">
-    <meta name="keywords" content="shooting game, gun game, target shooting, 10 levels, action game">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="description" content="Gun Shooting Game - 10 exciting levels! Shoot targets with your gun, aim carefully, become a sharpshooter!">
+    <meta name="keywords" content="shooting game, gun game, target shooting, 10 levels, action game, 3D effect">
     <title>Gun Shooting Game - 10 Levels | PlayCrazyGames</title>
     <link rel="stylesheet" href="style.css">
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9770610643444805" crossorigin="anonymous"></script>
@@ -17,26 +17,68 @@
     </div>
 
     <div class="game-container">
-        <a href="../index.html" class="back-home">← Back to All Games</a>
-        <h1>🔫 Gun Shooting Game</h1>
+        <a href="../index.html" class="back-home">← Back to Games Hub</a>
+        
+        <div class="game-header">
+            <h1>🔫 Gun Shooting Game</h1>
+            <p class="subtitle">10 Thrilling Levels | Become a Sharpshooter!</p>
+        </div>
+        
         <div class="game-stats">
-            <div>Level: <span id="level">1</span>/10</div>
-            <div>Score: <span id="score">0</span></div>
-            <div>Shots Left: <span id="shotsLeft">10</span></div>
-            <div>Targets Hit: <span id="targetsHit">0</span>/<span id="targetsNeeded">5</span></div>
+            <div class="stat-card">
+                <span class="stat-icon">🎯</span>
+                <span class="stat-label">Level</span>
+                <span class="stat-value" id="level">1</span>
+                <span class="stat-max">/10</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-icon">⭐</span>
+                <span class="stat-label">Score</span>
+                <span class="stat-value" id="score">0</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-icon">💥</span>
+                <span class="stat-label">Shots Left</span>
+                <span class="stat-value" id="shotsLeft">10</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-icon">🎯</span>
+                <span class="stat-label">Targets Hit</span>
+                <span class="stat-value" id="targetsHit">0</span>
+                <span class="stat-max" id="targetsNeeded">/5</span>
+            </div>
         </div>
-        <canvas id="gameCanvas" width="800" height="500"></canvas>
-        <div class="controls">
-            <button id="resetBtn">🔄 Restart Game</button>
-            <button id="backBtn">🏠 Games Hub</button>
+        
+        <div class="game-play-area">
+            <canvas id="gameCanvas" width="900" height="500"></canvas>
+            <div class="gun-platform" id="gunPlatform">
+                <div class="gun-base"></div>
+                <div class="gun-body" id="gunBody">
+                    <div class="gun-barrel"></div>
+                    <div class="gun-handle"></div>
+                    <div class="gun-trigger"></div>
+                </div>
+                <div class="muzzle-flash" id="muzzleFlash"></div>
+            </div>
         </div>
-        <div class="instructions">
-            🎯 Click on targets to shoot them!<br>
-            ⭐ Hit required targets to advance levels<br>
-            🔫 Each level gets harder with faster targets<br>
-            💥 Complete all 10 levels to win!
+        
+        <div class="controls-panel">
+            <div class="aim-control">
+                <label>🎯 Aim with Mouse</label>
+                <div class="crosshair-custom" id="crosshair"></div>
+            </div>
+            <button id="shootBtn" class="shoot-button">🔫 SHOOT!</button>
+            <button id="resetBtn" class="reset-button">🔄 Restart Game</button>
+            <button id="backBtn" class="back-button">🏠 Games Hub</button>
         </div>
+        
         <div class="level-message" id="levelMessage"></div>
+        
+        <div class="instructions">
+            <div class="instruction">🎯 <strong>How to Play:</strong> Move mouse to aim, click SHOOT or press SPACEBAR</div>
+            <div class="instruction">⭐ <strong>Goal:</strong> Hit all targets to advance to next level</div>
+            <div class="instruction">🔫 <strong>Tip:</strong> Each level gets faster and harder!</div>
+        </div>
     </div>
 
     <div class="ad-bottom">
