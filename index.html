@@ -1,0 +1,89 @@
+<div class="games-grid" id="gamesGrid">
+    <!-- Existing 6 games -->
+    <div class="game-card" data-game="snake" data-name="snake game">
+        <div class="game-icon">🐍</div>
+        <h2>Snake Game</h2>
+        <p>Classic snake eating game. Eat food, grow longer!</p>
+        <button class="play-btn">Play Now →</button>
+    </div>
+    
+    <div class="game-card" data-game="tictactoe" data-name="tic tac toe">
+        <div class="game-icon">❌⭕</div>
+        <h2>Tic-Tac-Toe</h2>
+        <p>Classic 3x3 grid game. Get 3 in a row to win!</p>
+        <button class="play-btn">Play Now →</button>
+    </div>
+    
+    <div class="game-card" data-game="memory" data-name="memory match">
+        <div class="game-icon">🎴</div>
+        <h2>Memory Match</h2>
+        <p>Test your memory! Match all pairs to win.</p>
+        <button class="play-btn">Play Now →</button>
+    </div>
+    
+    <div class="game-card" data-game="chess" data-name="chess">
+        <div class="game-icon">♜</div>
+        <h2>Chess Game</h2>
+        <p>Classic strategy board game. Play chess with a friend!</p>
+        <button class="play-btn">Play Now →</button>
+    </div>
+    
+    <div class="game-card" data-game="snakesladders" data-name="snakes and ladders">
+        <div class="game-icon">🐍🪜</div>
+        <h2>Snakes & Ladders</h2>
+        <p>Classic board game. Climb ladders, avoid snakes!</p>
+        <button class="play-btn">Play Now →</button>
+    </div>
+    
+    <div class="game-card" data-game="carrom" data-name="carrom">
+        <div class="game-icon">🎯</div>
+        <h2>Carrom Board</h2>
+        <p>Aim and shoot! Pocket all your coins to win!</p>
+        <button class="play-btn">Play Now →</button>
+    </div>
+    
+    <!-- NEW GAMES -->
+    <div class="game-card" data-game="gunshooting" data-name="gun shooting">
+        <div class="game-icon">🔫</div>
+        <h2>Gun Shooting</h2>
+        <p>10 levels of target shooting! Increasing difficulty!</p>
+        <button class="play-btn">Play Now →</button>
+    </div>
+    
+    <div class="game-card" data-game="ludo" data-name="ludo">
+        <div class="game-icon">🎲</div>
+        <h2>Classic Ludo</h2>
+        <p>4-player board game. Roll dice and race home!</p>
+        <button class="play-btn">Play Now →</button>
+    </div>
+    
+    <div class="game-card" data-game="checkers" data-name="checkers">
+        <div class="game-icon">⬛</div>
+        <h2>Checkers</h2>
+        <p>Jump and capture! Classic strategy board game.</p>
+        <button class="play-btn">Play Now →</button>
+    </div>
+</div>
+
+<script>
+    document.querySelectorAll('.play-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const card = e.target.closest('.game-card');
+            const game = card.dataset.game;
+            
+            const gameUrls = {
+                snake: 'snake-game/index.html',
+                tictactoe: 'tic-tac-toe/index.html',
+                memory: 'memory-match/index.html',
+                chess: 'chess-game/index.html',
+                snakesladders: 'snakes-ladders/index.html',
+                carrom: 'carrom-game/index.html',
+                gunshooting: 'gun-shooting/index.html',
+                ludo: 'ludo-game/index.html',
+                checkers: 'checkers-game/index.html'
+            };
+            
+            window.location.href = gameUrls[game];
+        });
+    });
+</script>
