@@ -1,6 +1,6 @@
 // ========================================
-// GUN SHOOTING GAME - COMPLETE VERSION
-// 10 WORKING LEVELS | GUN ON PLATFORM | BULLETS
+// GUN SHOOTING GAME - COMPLETE FIXED VERSION
+// NO HANGING | ALL 10 LEVELS WORKING
 // ========================================
 
 const canvas = document.getElementById('gameCanvas');
@@ -20,6 +20,7 @@ let targets = [];
 let bullets = [];
 let mouseX = canvas.width / 2;
 let mouseY = canvas.height / 2;
+let levelTransition = false;  // NEW: Prevents multiple level triggers
 
 // Level Configurations
 const levelConfig = {
@@ -46,12 +47,15 @@ class Target {
         this.dx = (Math.random() - 0.5) * speed * 2;
         this.dy = (Math.random() - 0.5) * speed * 2;
         this.hit = false;
+        
+        // Ensure speed is never zero
+        if (Math.abs(this.dx) < 0.5) this.dx = this.dx > 0 ? 0.8 : -0.8;
+        if (Math.abs(this.dy) < 0.5) this.dy = this.dy > 0 ? 0.8 : -0.8;
     }
 
     draw() {
         if (this.hit) return;
         
-        // 3D Shadow effect
         ctx.shadowBlur = 10;
         ctx.shadowColor = 'rgba(0,0,0,0.5)';
         
@@ -91,14 +95,22 @@ class Target {
         this.x += this.dx;
         this.y += this.dy;
         
-        // Bounce off walls
-        if (this.x - this.size < 20 || this.x + this.size > canvas.width - 20) {
-            this.dx = -this.dx;
-            this.x = Math.max(this.size + 20, Math.min(canvas.width - this.size - 20, this.x));
+        // Bounce off walls with boundary limits
+        if (this.x - this.size < 20) {
+            this.x = 20 + this.size;
+            this.dx = Math.abs(this.dx);
         }
-        if (this.y - this.size < 20 || this.y + this.size > canvas.height - 60) {
-            this.dy = -this.dy;
-            this.y = Math.max(this.size + 20, Math.min(canvas.height - this.size - 60, this.y));
+        if (this.x + this.size > canvas.width - 20) {
+            this.x = canvas.width - 20 - this.size;
+            this.dx = -Math.abs(this.dx);
+        }
+        if (this.y - this.size < 20) {
+            this.y = 20 + this.size;
+            this.dy = Math.abs(this.dy);
+        }
+        if (this.y + this.size > canvas.height - 80) {
+            this.y = canvas.height - 80 - this.size;
+            this.dy = -Math.abs(this.dy);
         }
     }
 
@@ -114,33 +126,43 @@ class Bullet {
     constructor(x, y, targetX, targetY) {
         this.x = x;
         this.y = y;
-        this.startX = x;
-        this.startY = y;
         this.targetX = targetX;
         this.targetY = targetY;
-        this.progress = 0;
         this.active = true;
         
         const dx = targetX - x;
         const dy = targetY - y;
         const distance = Math.sqrt(dx * dx + dy * dy);
-        this.speed = 15;
-        this.vx = (dx / distance) * this.speed;
-        this.vy = (dy / distance) * this.speed;
+        this.speed = 12;
+        
+        if (distance > 0) {
+            this.vx = (dx / distance) * this.speed;
+            this.vy = (dy / distance) * this.speed;
+        } else {
+            this.vx = 0;
+            this.vy = -this.speed;
+        }
     }
 
     update() {
-        if (!this.active) return;
+        if (!this.active) return false;
         
         this.x += this.vx;
         this.y += this.vy;
+        
+        // Check if bullet out of bounds
+        if (this.x < -50 || this.x > canvas.width + 50 || 
+            this.y < -50 || this.y > canvas.height + 50) {
+            this.active = false;
+            return false;
+        }
         
         // Check if bullet reached target area
         const dx = this.x - this.targetX;
         const dy = this.y - this.targetY;
         const distance = Math.sqrt(dx * dx + dy * dy);
         
-        if (distance < 20 || this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) {
+        if (distance < 25) {
             this.active = false;
             return true; // Hit
         }
@@ -160,12 +182,12 @@ class Bullet {
         
         // Draw bullet
         ctx.beginPath();
-        ctx.arc(this.x, this.y, 4, 0, Math.PI * 2);
-        ctx.fillStyle = '#ffff00';
+        ctx.arc(this.x, this.y, 5, 0, Math.PI * 2);
+        ctx.fillStyle = '#ff6600';
         ctx.fill();
         ctx.beginPath();
-        ctx.arc(this.x, this.y, 2, 0, Math.PI * 2);
-        ctx.fillStyle = '#ff6600';
+        ctx.arc(this.x, this.y, 3, 0, Math.PI * 2);
+        ctx.fillStyle = '#ffff00';
         ctx.fill();
     }
 }
@@ -173,16 +195,23 @@ class Bullet {
 // Initialize Level
 function initLevel() {
     const config = levelConfig[level];
+    if (!config) {
+        console.error('Level config not found for level:', level);
+        return;
+    }
+    
     targetsNeeded = config.targetCount;
     shotsLeft = config.shots;
     targets = [];
     bullets = [];
     targetsHit = 0;
+    levelTransition = false;
     
     for (let i = 0; i < config.targetCount; i++) {
         const size = config.size;
-        const x = Math.random() * (canvas.width - size * 2 - 40) + size + 20;
-        const y = Math.random() * (canvas.height - size * 2 - 100) + size + 30;
+        const margin = size + 30;
+        const x = Math.random() * (canvas.width - margin * 2) + margin;
+        const y = Math.random() * (canvas.height - margin * 2 - 80) + margin;
         targets.push(new Target(x, y, size, config.speed, config.color));
     }
     
@@ -192,42 +221,54 @@ function initLevel() {
 
 // Update UI
 function updateUI() {
-    document.getElementById('level').textContent = level;
-    document.getElementById('score').textContent = score;
-    document.getElementById('shotsLeft').textContent = shotsLeft;
-    document.getElementById('targetsHit').textContent = targetsHit;
-    document.getElementById('targetsNeeded').textContent = targetsNeeded;
+    const levelEl = document.getElementById('level');
+    const scoreEl = document.getElementById('score');
+    const shotsLeftEl = document.getElementById('shotsLeft');
+    const targetsHitEl = document.getElementById('targetsHit');
+    const targetsNeededEl = document.getElementById('targetsNeeded');
+    
+    if (levelEl) levelEl.textContent = level;
+    if (scoreEl) scoreEl.textContent = score;
+    if (shotsLeftEl) shotsLeftEl.textContent = shotsLeft;
+    if (targetsHitEl) targetsHitEl.textContent = targetsHit;
+    if (targetsNeededEl) targetsNeededEl.textContent = targetsNeeded;
 }
 
 // Show Message
 function showLevelMessage(msg) {
     const msgDiv = document.getElementById('levelMessage');
-    msgDiv.textContent = msg;
-    setTimeout(() => {
-        if (msgDiv.textContent === msg) {
-            msgDiv.textContent = '';
-        }
-    }, 2000);
+    if (msgDiv) {
+        msgDiv.textContent = msg;
+        setTimeout(() => {
+            if (msgDiv.textContent === msg) {
+                msgDiv.textContent = '';
+            }
+        }, 2000);
+    }
 }
 
-// Shoot Function
+// Shoot Function - FIXED
 function shoot() {
     if (!gameActive) return false;
+    if (levelTransition) return false;
     if (shotsLeft <= 0) {
         showLevelMessage('❌ OUT OF AMMO! Game Over!');
         gameOver();
         return false;
     }
     
-    // Animate gun
+    // Animate gun (if elements exist)
     const gunBody = document.getElementById('gunBody');
-    gunBody.classList.add('recoil');
-    setTimeout(() => gunBody.classList.remove('recoil'), 100);
+    if (gunBody) {
+        gunBody.classList.add('recoil');
+        setTimeout(() => gunBody.classList.remove('recoil'), 100);
+    }
     
-    // Muzzle flash
     const muzzleFlash = document.getElementById('muzzleFlash');
-    muzzleFlash.classList.add('active');
-    setTimeout(() => muzzleFlash.classList.remove('active'), 100);
+    if (muzzleFlash) {
+        muzzleFlash.classList.add('active');
+        setTimeout(() => muzzleFlash.classList.remove('active'), 100);
+    }
     
     shotsLeft--;
     
@@ -247,18 +288,17 @@ function shoot() {
         }
     }
     
-    if (closestTarget && closestDistance < 100) {
+    const gunX = canvas.width / 2;
+    const gunY = canvas.height - 60;
+    
+    if (closestTarget && closestDistance < 120) {
         // Create bullet aimed at target
-        const gunX = canvas.width / 2;
-        const gunY = canvas.height - 60;
         bullets.push(new Bullet(gunX, gunY, closestTarget.x, closestTarget.y));
         
         // Check hit after bullet travel
-        setTimeout(() => checkHit(closestTarget), 50);
+        setTimeout(() => checkHit(closestTarget), 80);
     } else {
-        // Miss - shoot random direction
-        const gunX = canvas.width / 2;
-        const gunY = canvas.height - 60;
+        // Miss - shoot in direction of mouse
         bullets.push(new Bullet(gunX, gunY, mouseX, mouseY));
     }
     
@@ -271,55 +311,73 @@ function shoot() {
     return true;
 }
 
-// Check Hit
+// Check Hit - FIXED
 function checkHit(target) {
-    if (!target.hit && targets.includes(target)) {
-        target.hit = true;
-        targetsHit++;
-        score += levelConfig[level].points;
-        
-        // Remove from array
-        const index = targets.indexOf(target);
-        if (index > -1) targets.splice(index, 1);
-        
-        updateUI();
-        
-        // Hit effect on canvas
-        createHitEffect(target.x, target.y);
-        
-        showLevelMessage(`💥 HIT! +${levelConfig[level].points} points!`);
-        
-        // Check level complete
-        if (targetsHit >= targetsNeeded) {
-            levelComplete();
-        }
+    if (!gameActive) return;
+    if (levelTransition) return;
+    if (!target || target.hit) return;
+    
+    // Check if target still exists in array
+    const targetIndex = targets.findIndex(t => t === target);
+    if (targetIndex === -1) return;
+    
+    target.hit = true;
+    targetsHit++;
+    score += levelConfig[level].points;
+    
+    // Remove from array
+    targets.splice(targetIndex, 1);
+    
+    updateUI();
+    
+    // Hit effect
+    createHitEffect(target.x, target.y);
+    showLevelMessage(`💥 HIT! +${levelConfig[level].points} points!`);
+    
+    // Check level complete
+    if (targetsHit >= targetsNeeded && !levelTransition) {
+        levelComplete();
     }
 }
 
 // Create Hit Effect
 function createHitEffect(x, y) {
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 15; i++) {
         setTimeout(() => {
-            ctx.beginPath();
-            ctx.arc(x + (Math.random() - 0.5) * 20, y + (Math.random() - 0.5) * 20, 5, 0, Math.PI * 2);
-            ctx.fillStyle = `rgba(255, ${100 + Math.random() * 155}, 0, 0.8)`;
-            ctx.fill();
-        }, i * 10);
+            if (ctx) {
+                ctx.beginPath();
+                ctx.arc(x + (Math.random() - 0.5) * 25, y + (Math.random() - 0.5) * 25, 4, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(255, ${80 + Math.random() * 175}, 0, 0.9)`;
+                ctx.fill();
+            }
+        }, i * 15);
     }
 }
 
-// Level Complete
+// Level Complete - FIXED
 function levelComplete() {
+    if (levelTransition) return;
+    levelTransition = true;
+    
     if (level < 10) {
         level++;
-        showLevelMessage(`🎉 LEVEL COMPLETE! Moving to Level ${level} 🎉`);
+        showLevelMessage(`🎉 LEVEL ${level-1} COMPLETE! Moving to Level ${level} 🎉`);
         
         // Celebration effect
         const container = document.querySelector('.game-container');
-        container.classList.add('level-complete');
-        setTimeout(() => container.classList.remove('level-complete'), 500);
+        if (container) {
+            container.classList.add('level-complete');
+            setTimeout(() => container.classList.remove('level-complete'), 500);
+        }
         
-        initLevel();
+        // Clear bullets and reset
+        bullets = [];
+        
+        // Small delay before next level
+        setTimeout(() => {
+            initLevel();
+            levelTransition = false;
+        }, 1500);
     } else {
         gameWin();
     }
@@ -328,16 +386,21 @@ function levelComplete() {
 // Game Win
 function gameWin() {
     gameActive = false;
-    cancelAnimationFrame(animationId);
+    levelTransition = true;
+    if (animationId) cancelAnimationFrame(animationId);
     showLevelMessage(`🏆 CONGRATULATIONS! YOU COMPLETED ALL 10 LEVELS! Score: ${score} 🏆`);
-    document.getElementById('levelMessage').style.color = '#4CAF50';
-    document.getElementById('levelMessage').style.fontSize = '1.3rem';
+    const msgDiv = document.getElementById('levelMessage');
+    if (msgDiv) {
+        msgDiv.style.color = '#4CAF50';
+        msgDiv.style.fontSize = '1.3rem';
+    }
 }
 
 // Game Over
 function gameOver() {
     gameActive = false;
-    cancelAnimationFrame(animationId);
+    levelTransition = true;
+    if (animationId) cancelAnimationFrame(animationId);
     showLevelMessage(`💀 GAME OVER! You reached Level ${level} with ${score} points! 💀`);
 }
 
@@ -346,15 +409,21 @@ function resetGame() {
     level = 1;
     score = 0;
     gameActive = true;
+    levelTransition = false;
     targets = [];
     bullets = [];
     
+    if (animationId) cancelAnimationFrame(animationId);
+    
     initLevel();
     updateUI();
-    document.getElementById('levelMessage').style.color = '#ff9800';
-    document.getElementById('levelMessage').style.fontSize = '1.2rem';
     
-    if (animationId) cancelAnimationFrame(animationId);
+    const msgDiv = document.getElementById('levelMessage');
+    if (msgDiv) {
+        msgDiv.style.color = '#ff9800';
+        msgDiv.style.fontSize = '1.2rem';
+    }
+    
     animate();
 }
 
@@ -374,7 +443,7 @@ function drawBackground() {
     ctx.fillStyle = '#34495e';
     ctx.fillRect(0, canvas.height - 85, canvas.width, 10);
     
-    // Draw grass on ground
+    // Draw grass
     ctx.fillStyle = '#27ae60';
     for (let i = 0; i < canvas.width; i += 20) {
         ctx.fillRect(i, canvas.height - 85, 5, 15);
@@ -397,16 +466,15 @@ function drawCrosshair() {
     ctx.stroke();
     
     ctx.beginPath();
-    ctx.arc(mouseX, mouseY, 10, 0, Math.PI * 2);
+    ctx.arc(mouseX, mouseY, 12, 0, Math.PI * 2);
     ctx.stroke();
 }
 
-// Draw Gun on Canvas (additional visual)
+// Draw Gun on Canvas
 function drawGunOnCanvas() {
     const gunX = canvas.width / 2;
     const gunY = canvas.height - 60;
     
-    // Gun shadow
     ctx.shadowBlur = 5;
     ctx.shadowColor = 'rgba(0,0,0,0.5)';
     
@@ -433,25 +501,27 @@ function drawGunOnCanvas() {
     ctx.shadowBlur = 0;
 }
 
-// Animation Loop
+// Animation Loop - FIXED
 function animate() {
     if (!gameActive) {
         drawBackground();
         drawGunOnCanvas();
         drawCrosshair();
-        requestAnimationFrame(animate);
+        animationId = requestAnimationFrame(animate);
         return;
     }
     
     // Update targets
-    for (const target of targets) {
-        target.update();
+    for (let i = 0; i < targets.length; i++) {
+        targets[i].update();
     }
     
     // Update bullets
     for (let i = bullets.length - 1; i >= 0; i--) {
         const hit = bullets[i].update();
         if (hit) {
+            bullets.splice(i, 1);
+        } else if (!bullets[i].active) {
             bullets.splice(i, 1);
         }
     }
@@ -484,13 +554,6 @@ canvas.addEventListener('mousemove', (e) => {
     // Limit to canvas bounds
     mouseX = Math.max(20, Math.min(canvas.width - 20, mouseX));
     mouseY = Math.max(20, Math.min(canvas.height - 20, mouseY));
-    
-    // Move crosshair div
-    const crosshair = document.getElementById('crosshair');
-    if (crosshair) {
-        crosshair.style.left = e.clientX + 'px';
-        crosshair.style.top = e.clientY + 'px';
-    }
 });
 
 // Shoot on click
@@ -499,7 +562,7 @@ canvas.addEventListener('click', (e) => {
     shoot();
 });
 
-// Keyboard shoot (spacebar)
+// Keyboard shoot
 document.addEventListener('keydown', (e) => {
     if (e.code === 'Space' || e.code === 'KeyF') {
         e.preventDefault();
@@ -508,9 +571,13 @@ document.addEventListener('keydown', (e) => {
 });
 
 // Button events
-document.getElementById('shootBtn').addEventListener('click', () => shoot());
-document.getElementById('resetBtn').addEventListener('click', () => resetGame());
-document.getElementById('backBtn').addEventListener('click', () => {
+const shootBtn = document.getElementById('shootBtn');
+const resetBtn = document.getElementById('resetBtn');
+const backBtn = document.getElementById('backBtn');
+
+if (shootBtn) shootBtn.addEventListener('click', () => shoot());
+if (resetBtn) resetBtn.addEventListener('click', () => resetGame());
+if (backBtn) backBtn.addEventListener('click', () => {
     window.location.href = '../index.html';
 });
 
@@ -521,4 +588,4 @@ canvas.style.cursor = 'none';
 initLevel();
 animate();
 
-console.log('🔫 Gun Shooting Game Loaded! 10 Levels Ready!');
+console.log('🔫 Gun Shooting Game Loaded! All 10 Levels Working! No Hanging!');
