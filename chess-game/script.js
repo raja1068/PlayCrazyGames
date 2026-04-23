@@ -1,9 +1,14 @@
-const game = new Chess();
+// SAFE INIT
+let game;
+
+try {
+    game = new Chess();
+} catch (e) {
+    alert("Chess engine failed to load. Check internet/CDN.");
+}
 
 let selected = null;
 let mode = 'offline';
-
-let engine = new Worker("https://cdn.jsdelivr.net/npm/stockfish/stockfish.js");
 
 function setMode(m) {
     mode = m;
@@ -11,6 +16,8 @@ function setMode(m) {
 }
 
 function renderBoard() {
+    if (!game) return;
+
     const boardDiv = document.getElementById("board");
     boardDiv.innerHTML = '';
 
@@ -18,38 +25,32 @@ function renderBoard() {
 
     for (let i = 0; i < 8; i++) {
         for (let j = 0; j < 8; j++) {
-            const square = document.createElement("div");
-            square.className = "square " + ((i+j)%2===0 ? "light":"dark");
+            const sq = document.createElement("div");
+            sq.className = "square " + ((i+j)%2===0 ? "light":"dark");
 
             const piece = board[i][j];
             if (piece) {
-                square.textContent = pieceUnicode(piece);
+                sq.textContent = getPiece(piece);
             }
 
-            if (selected && selected.row === i && selected.col === j) {
-                square.classList.add("selected");
-            }
-
-            square.addEventListener("click", () => handleClick(i, j));
-            boardDiv.appendChild(square);
+            sq.onclick = () => handleClick(i,j);
+            boardDiv.appendChild(sq);
         }
     }
 
     document.getElementById("turn").innerText =
         game.turn() === 'w' ? "White's Turn" : "Black's Turn";
-
-    if (game.in_checkmate()) {
-        document.getElementById("status").innerText = "Checkmate!";
-    }
 }
 
-function handleClick(i, j) {
+function handleClick(i,j) {
+    if (!game) return;
+
     if (!selected) {
-        selected = {row: i, col: j};
+        selected = {row:i,col:j};
     } else {
         const move = {
-            from: coordToSquare(selected.row, selected.col),
-            to: coordToSquare(i, j),
+            from: toSquare(selected.row, selected.col),
+            to: toSquare(i, j),
             promotion: 'q'
         };
 
@@ -57,39 +58,30 @@ function handleClick(i, j) {
         selected = null;
 
         if (result && mode === 'bot' && game.turn() === 'b') {
-            setTimeout(botMove, 300);
+            setTimeout(randomBot, 300);
         }
 
         renderBoard();
     }
 }
 
-function botMove() {
-    engine.postMessage("position fen " + game.fen());
-    engine.postMessage("go depth 10");
+/* SIMPLE BOT (NO STOCKFISH → avoids crash) */
+function randomBot() {
+    const moves = game.moves();
+    if (moves.length === 0) return;
 
-    engine.onmessage = function(e) {
-        if (e.data.startsWith("bestmove")) {
-            const move = e.data.split(" ")[1];
-
-            game.move({
-                from: move.substring(0,2),
-                to: move.substring(2,4),
-                promotion: 'q'
-            });
-
-            renderBoard();
-        }
-    };
+    const move = moves[Math.floor(Math.random() * moves.length)];
+    game.move(move);
+    renderBoard();
 }
 
 /* HELPERS */
 
-function coordToSquare(r,c){
+function toSquare(r,c){
     return String.fromCharCode(97+c) + (8-r);
 }
 
-function pieceUnicode(p){
+function getPiece(p){
     const map = {
         p:'♟', r:'♜', n:'♞', b:'♝', q:'♛', k:'♚',
         P:'♙', R:'♖', N:'♘', B:'♗', Q:'♕', K:'♔'
@@ -100,8 +92,11 @@ function pieceUnicode(p){
 function resetGame(){
     game.reset();
     selected = null;
-    document.getElementById("status").innerText = "";
+    document.getElementById("status").innerText='';
     renderBoard();
 }
 
-renderBoard();
+/* INIT */
+setTimeout(() => {
+    if (game) renderBoard();
+}, 200);
