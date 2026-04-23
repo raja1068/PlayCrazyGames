@@ -1,28 +1,64 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chess Game</title>
-    <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chess Game</title>
+
+<link rel="stylesheet" href="style.css">
+
+<!-- Google AdSense (Replace IDs) -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXX"
+crossorigin="anonymous"></script>
+
+<!-- Stockfish AI -->
+<script src="https://cdn.jsdelivr.net/npm/stockfish/stockfish.js"></script>
+
 </head>
+
 <body>
-    <div class="game-container">
-        <h1>♜ Chess Game ♞</h1>
-        <div class="game-info">
-            <div class="turn-indicator" id="turnIndicator">White's Turn</div>
-            <div class="captured-pieces">
-                <div>Captured by White: <span id="whiteCaptured"></span></div>
-                <div>Captured by Black: <span id="blackCaptured"></span></div>
-            </div>
-        </div>
-        <div class="chessboard" id="chessboard"></div>
-        <div class="controls">
-            <button id="resetBtn">New Game</button>
-            <button id="backBtn">⬅ Back to Hub</button>
-        </div>
-        <div class="status" id="status"></div>
+
+<!-- Top Ad -->
+<div class="ad">
+    <ins class="adsbygoogle"
+        style="display:block"
+        data-ad-client="ca-pub-XXXXXXXX"
+        data-ad-slot="1111111111"
+        data-ad-format="auto"></ins>
+</div>
+
+<div class="container">
+    <h1>♜ Chess Game ♞</h1>
+
+    <div class="modes">
+        <button onclick="setMode('offline')">2 Player</button>
+        <button onclick="setMode('bot')">Play vs AI</button>
+        <button onclick="setMode('online')">Online</button>
     </div>
-    <script src="script.js"></script>
+
+    <h3 id="turn">White's Turn</h3>
+
+    <div id="board" class="board"></div>
+
+    <button onclick="resetGame()">New Game</button>
+
+    <p id="status"></p>
+</div>
+
+<!-- Bottom Ad -->
+<div class="ad">
+    <ins class="adsbygoogle"
+        style="display:block"
+        data-ad-client="ca-pub-XXXXXXXX"
+        data-ad-slot="2222222222"
+        data-ad-format="auto"></ins>
+</div>
+
+<script src="script.js"></script>
+
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
 </body>
 </html>
