@@ -1,6 +1,7 @@
 // ========================================
-// GUN SHOOTING GAME - COMPLETELY REWRITTEN
-// NO HANGING | MOUSE ALWAYS VISIBLE | ALL LEVELS WORK
+// GUN SHOOTING GAME - FINAL FIXED VERSION
+// MORE SHOTS THAN TARGETS | MULTI-TARGET HITS
+// NO HANGING AT ANY LEVEL
 // ========================================
 
 // Get canvas
@@ -15,11 +16,12 @@ canvas.height = 500;
 let gameState = {
     level: 1,
     score: 0,
-    shotsLeft: 10,
+    shotsLeft: 0,
     targetsHit: 0,
-    targetsNeeded: 5,
+    targetsNeeded: 0,
     gameActive: true,
-    levelTransition: false
+    levelTransition: false,
+    totalShotsFired: 0
 };
 
 // Arrays for game objects
@@ -32,26 +34,28 @@ let mouseY = canvas.height / 2;
 
 // Animation ID
 let animationId = null;
+let hitEffects = [];
 
-// Level configurations
+// Level configurations - MORE SHOTS THAN TARGETS
 const levels = {
-    1: { targetCount: 5, speed: 1.2, size: 42, points: 10, shots: 10, color: '#ff4444' },
-    2: { targetCount: 6, speed: 1.5, size: 40, points: 10, shots: 10, color: '#ff5555' },
-    3: { targetCount: 7, speed: 1.8, size: 38, points: 15, shots: 10, color: '#ff6666' },
-    4: { targetCount: 8, speed: 2.1, size: 36, points: 15, shots: 9, color: '#ff7777' },
-    5: { targetCount: 9, speed: 2.5, size: 34, points: 20, shots: 9, color: '#ff8888' },
-    6: { targetCount: 10, speed: 2.8, size: 32, points: 20, shots: 8, color: '#ff9999' },
-    7: { targetCount: 11, speed: 3.2, size: 30, points: 25, shots: 8, color: '#ffaaaa' },
-    8: { targetCount: 12, speed: 3.6, size: 28, points: 25, shots: 7, color: '#ffbbbb' },
-    9: { targetCount: 13, speed: 4.0, size: 26, points: 30, shots: 7, color: '#ffcccc' },
-    10: { targetCount: 15, speed: 4.5, size: 24, points: 50, shots: 6, color: '#ff0000' }
+    1: { targetCount: 5, speed: 1.2, size: 42, points: 10, shots: 12, color: '#ff4444' },
+    2: { targetCount: 6, speed: 1.5, size: 40, points: 10, shots: 14, color: '#ff5555' },
+    3: { targetCount: 7, speed: 1.8, size: 38, points: 15, shots: 16, color: '#ff6666' },
+    4: { targetCount: 8, speed: 2.1, size: 36, points: 15, shots: 18, color: '#ff7777' },
+    5: { targetCount: 9, speed: 2.5, size: 34, points: 20, shots: 20, color: '#ff8888' },
+    6: { targetCount: 10, speed: 2.8, size: 32, points: 20, shots: 22, color: '#ff9999' },
+    7: { targetCount: 11, speed: 3.2, size: 30, points: 25, shots: 24, color: '#ffaaaa' },
+    8: { targetCount: 12, speed: 3.6, size: 28, points: 25, shots: 26, color: '#ffbbbb' },
+    9: { targetCount: 13, speed: 4.0, size: 26, points: 30, shots: 28, color: '#ffcccc' },
+    10: { targetCount: 15, speed: 4.5, size: 24, points: 50, shots: 32, color: '#ff0000' }
 };
 
 // ========================================
 // TARGET CLASS
 // ========================================
 class Target {
-    constructor(x, y, size, speed, color) {
+    constructor(x, y, size, speed, color, id) {
+        this.id = id;
         this.x = x;
         this.y = y;
         this.size = size;
@@ -136,21 +140,25 @@ class Target {
 // BULLET CLASS
 // ========================================
 class Bullet {
-    constructor(fromX, fromY, toX, toY) {
+    constructor(fromX, fromY, toX, toY, bulletId) {
+        this.id = bulletId;
         this.x = fromX;
         this.y = fromY;
         this.active = true;
+        this.hitTargets = []; // Track already hit targets
+        this.startX = fromX;
+        this.startY = fromY;
         
         const dx = toX - fromX;
         const dy = toY - fromY;
         const length = Math.sqrt(dx * dx + dy * dy);
         
         if (length > 0) {
-            this.vx = (dx / length) * 12;
-            this.vy = (dy / length) * 12;
+            this.vx = (dx / length) * 14;
+            this.vy = (dy / length) * 14;
         } else {
             this.vx = 0;
-            this.vy = -12;
+            this.vy = -14;
         }
     }
 
@@ -183,15 +191,81 @@ class Bullet {
         
         // Bullet
         ctx.beginPath();
-        ctx.arc(this.x, this.y, 4, 0, Math.PI * 2);
+        ctx.arc(this.x, this.y, 5, 0, Math.PI * 2);
         ctx.fillStyle = '#ffaa00';
         ctx.fill();
+        
+        // Inner core
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, 2, 0, Math.PI * 2);
+        ctx.fillStyle = '#ffffff';
+        ctx.fill();
+    }
+    
+    hasHitTarget(targetId) {
+        return this.hitTargets.includes(targetId);
+    }
+    
+    addHitTarget(targetId) {
+        this.hitTargets.push(targetId);
+    }
+}
+
+// ========================================
+// HIT EFFECT CLASS
+// ========================================
+class HitEffect {
+    constructor(x, y) {
+        this.x = x;
+        this.y = y;
+        this.particles = [];
+        this.active = true;
+        this.life = 20;
+        
+        for (let i = 0; i < 15; i++) {
+            this.particles.push({
+                x: x,
+                y: y,
+                vx: (Math.random() - 0.5) * 8,
+                vy: (Math.random() - 0.5) * 8,
+                life: 20,
+                size: Math.random() * 4 + 2
+            });
+        }
+    }
+    
+    update() {
+        this.life--;
+        if (this.life <= 0) {
+            this.active = false;
+            return;
+        }
+        
+        for (let p of this.particles) {
+            p.x += p.vx;
+            p.y += p.vy;
+            p.life--;
+        }
+    }
+    
+    draw() {
+        for (let p of this.particles) {
+            if (p.life > 0) {
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(255, ${100 + Math.random() * 155}, 0, ${p.life / 20})`;
+                ctx.fill();
+            }
+        }
     }
 }
 
 // ========================================
 // GAME FUNCTIONS
 // ========================================
+
+let nextTargetId = 1;
+let nextBulletId = 1;
 
 function initLevel() {
     const config = levels[gameState.level];
@@ -201,21 +275,58 @@ function initLevel() {
     gameState.shotsLeft = config.shots;
     gameState.targetsHit = 0;
     gameState.levelTransition = false;
+    gameState.gameActive = true;
     
     // Clear arrays
     targets = [];
     bullets = [];
+    hitEffects = [];
     
-    // Create targets
-    const margin = config.size + 40;
+    // Reset IDs
+    nextTargetId = 1;
+    nextBulletId = 1;
+    
+    // Create targets - spread them out to avoid too much overlap
+    const margin = config.size + 50;
+    const attempts = 100;
+    
     for (let i = 0; i < config.targetCount; i++) {
-        const x = Math.random() * (canvas.width - margin * 2) + margin;
-        const y = Math.random() * (canvas.height - margin * 2 - 100) + margin;
-        targets.push(new Target(x, y, config.size, config.speed, config.color));
+        let placed = false;
+        let tryCount = 0;
+        
+        while (!placed && tryCount < attempts) {
+            const x = Math.random() * (canvas.width - margin * 2) + margin;
+            const y = Math.random() * (canvas.height - margin * 2 - 100) + margin;
+            
+            // Check overlap with existing targets (minimum distance between centers)
+            let overlap = false;
+            for (const existing of targets) {
+                const dx = existing.x - x;
+                const dy = existing.y - y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                if (distance < config.size * 1.5) {
+                    overlap = true;
+                    break;
+                }
+            }
+            
+            if (!overlap) {
+                targets.push(new Target(x, y, config.size, config.speed, config.color, nextTargetId++));
+                placed = true;
+            }
+            tryCount++;
+        }
+        
+        // If can't place without overlap, place anyway
+        if (!placed) {
+            const x = Math.random() * (canvas.width - margin * 2) + margin;
+            const y = Math.random() * (canvas.height - margin * 2 - 100) + margin;
+            targets.push(new Target(x, y, config.size, config.speed, config.color, nextTargetId++));
+        }
     }
     
     updateUI();
-    showMessage(`🔫 LEVEL ${gameState.level}! Hit ${gameState.targetsNeeded} targets!`);
+    showMessage(`🔫 LEVEL ${gameState.level}! ${gameState.targetsNeeded} targets | ${gameState.shotsLeft} bullets!`);
 }
 
 function updateUI() {
@@ -253,81 +364,89 @@ function shoot() {
     
     // Reduce shots
     gameState.shotsLeft--;
-    
-    // Find closest active target
-    let closestTarget = null;
-    let closestDist = 200;
-    
-    for (const target of targets) {
-        if (target.active) {
-            const dx = target.x - mouseX;
-            const dy = target.y - mouseY;
-            const dist = Math.sqrt(dx * dx + dy * dy);
-            if (dist < closestDist) {
-                closestDist = dist;
-                closestTarget = target;
-            }
-        }
-    }
+    gameState.totalShotsFired++;
     
     // Gun position
     const gunX = canvas.width / 2;
     const gunY = canvas.height - 60;
     
-    // Create bullet
-    if (closestTarget && closestDist < 120) {
-        bullets.push(new Bullet(gunX, gunY, closestTarget.x, closestTarget.y));
-        // Check hit after delay
-        setTimeout(() => checkHit(closestTarget), 50);
-    } else {
-        bullets.push(new Bullet(gunX, gunY, mouseX, mouseY));
-    }
+    // Create bullet aimed at mouse position
+    const bullet = new Bullet(gunX, gunY, mouseX, mouseY, nextBulletId++);
+    bullets.push(bullet);
     
     updateUI();
+    
+    // Check for hits after bullet travels
+    setTimeout(() => checkBulletHits(bullet.id), 30);
     
     // Check game over
     if (gameState.shotsLeft === 0 && gameState.targetsHit < gameState.targetsNeeded) {
-        gameOver();
+        setTimeout(() => {
+            if (gameState.targetsHit < gameState.targetsNeeded && !gameState.levelTransition) {
+                gameOver();
+            }
+        }, 500);
     }
 }
 
-function checkHit(target) {
+function checkBulletHits(bulletId) {
     if (!gameState.gameActive) return;
     if (gameState.levelTransition) return;
-    if (!target.active) return;
     
-    // Check if target still exists
-    if (!targets.includes(target)) return;
+    // Find the bullet
+    const bullet = bullets.find(b => b.id === bulletId);
+    if (!bullet || !bullet.active) return;
     
-    // Mark as hit
-    target.active = false;
-    gameState.targetsHit++;
-    gameState.score += levels[gameState.level].points;
+    // Find all targets hit by this bullet
+    let hitCount = 0;
+    const hitTargets = [];
     
-    // Remove from array
-    const index = targets.indexOf(target);
-    if (index > -1) targets.splice(index, 1);
-    
-    updateUI();
-    
-    // Hit effect
-    createHitEffect(target.x, target.y);
-    showMessage(`💥 HIT! +${levels[gameState.level].points} points!`);
-    
-    // Check level complete
-    if (gameState.targetsHit >= gameState.targetsNeeded && !gameState.levelTransition) {
-        levelComplete();
+    for (const target of targets) {
+        if (target.active && !bullet.hasHitTarget(target.id)) {
+            if (target.isHit(bullet.x, bullet.y)) {
+                hitTargets.push(target);
+                bullet.addHitTarget(target.id);
+                hitCount++;
+            }
+        }
     }
-}
-
-function createHitEffect(x, y) {
-    for (let i = 0; i < 12; i++) {
-        setTimeout(() => {
-            ctx.beginPath();
-            ctx.arc(x + (Math.random() - 0.5) * 30, y + (Math.random() - 0.5) * 30, 3, 0, Math.PI * 2);
-            ctx.fillStyle = `rgba(255, ${100 + Math.random() * 155}, 0, 0.8)`;
-            ctx.fill();
-        }, i * 20);
+    
+    // Process hits
+    if (hitCount > 0) {
+        let totalPoints = 0;
+        
+        for (const target of hitTargets) {
+            target.active = false;
+            gameState.targetsHit++;
+            const points = levels[gameState.level].points;
+            totalPoints += points;
+            gameState.score += points;
+            
+            // Add hit effect
+            hitEffects.push(new HitEffect(target.x, target.y));
+            
+            // Remove from array
+            const index = targets.indexOf(target);
+            if (index > -1) targets.splice(index, 1);
+        }
+        
+        updateUI();
+        
+        if (hitCount === 1) {
+            showMessage(`💥 HIT! +${totalPoints} points!`);
+        } else {
+            showMessage(`💥💥 MULTI-HIT! ${hitCount} targets destroyed! +${totalPoints} points! 💥💥`);
+        }
+        
+        // Check level complete
+        if (gameState.targetsHit >= gameState.targetsNeeded && !gameState.levelTransition) {
+            levelComplete();
+        }
+    }
+    
+    // Continue checking while bullet is active
+    if (bullet.active && gameState.gameActive && !gameState.levelTransition) {
+        setTimeout(() => checkBulletHits(bulletId), 30);
     }
 }
 
@@ -339,12 +458,13 @@ function levelComplete() {
         gameState.level++;
         showMessage(`🎉 LEVEL COMPLETE! Moving to Level ${gameState.level} 🎉`);
         
-        // Clear bullets
+        // Clear bullets and effects
         bullets = [];
+        hitEffects = [];
         
         setTimeout(() => {
             initLevel();
-        }, 1200);
+        }, 1500);
     } else {
         gameWin();
     }
@@ -353,16 +473,15 @@ function levelComplete() {
 function gameWin() {
     gameState.gameActive = false;
     gameState.levelTransition = true;
-    if (animationId) cancelAnimationFrame(animationId);
     showMessage(`🏆 YOU WIN! Completed all 10 levels! Score: ${gameState.score} 🏆`);
     document.getElementById('levelMessage').style.color = '#4CAF50';
     document.getElementById('levelMessage').style.fontSize = '1.3rem';
 }
 
 function gameOver() {
+    if (!gameState.gameActive) return;
     gameState.gameActive = false;
     gameState.levelTransition = true;
-    if (animationId) cancelAnimationFrame(animationId);
     showMessage(`💀 GAME OVER! Level ${gameState.level} | Score: ${gameState.score} 💀`, true);
 }
 
@@ -371,16 +490,22 @@ function resetGame() {
     gameState = {
         level: 1,
         score: 0,
-        shotsLeft: 10,
+        shotsLeft: 0,
         targetsHit: 0,
-        targetsNeeded: 5,
+        targetsNeeded: 0,
         gameActive: true,
-        levelTransition: false
+        levelTransition: false,
+        totalShotsFired: 0
     };
     
     // Clear arrays
     targets = [];
     bullets = [];
+    hitEffects = [];
+    
+    // Reset IDs
+    nextTargetId = 1;
+    nextBulletId = 1;
     
     // Reinitialize
     initLevel();
@@ -389,10 +514,6 @@ function resetGame() {
     const msgDiv = document.getElementById('levelMessage');
     msgDiv.style.color = '#ff9800';
     msgDiv.style.fontSize = '1.2rem';
-    
-    // Restart animation if needed
-    if (animationId) cancelAnimationFrame(animationId);
-    animate();
 }
 
 // ========================================
@@ -470,6 +591,14 @@ function animate() {
         }
     }
     
+    // Update hit effects
+    for (let i = hitEffects.length - 1; i >= 0; i--) {
+        hitEffects[i].update();
+        if (!hitEffects[i].active) {
+            hitEffects.splice(i, 1);
+        }
+    }
+    
     // Draw everything
     drawBackground();
     
@@ -479,6 +608,10 @@ function animate() {
     
     for (const bullet of bullets) {
         bullet.draw();
+    }
+    
+    for (const effect of hitEffects) {
+        effect.draw();
     }
     
     drawCrosshair();
@@ -518,9 +651,13 @@ document.addEventListener('keydown', (e) => {
 });
 
 // Button events
-document.getElementById('shootBtn').addEventListener('click', () => shoot());
-document.getElementById('resetBtn').addEventListener('click', () => resetGame());
-document.getElementById('backBtn').addEventListener('click', () => {
+const shootBtn = document.getElementById('shootBtn');
+const resetBtn = document.getElementById('resetBtn');
+const backBtn = document.getElementById('backBtn');
+
+if (shootBtn) shootBtn.addEventListener('click', () => shoot());
+if (resetBtn) resetBtn.addEventListener('click', () => resetGame());
+if (backBtn) backBtn.addEventListener('click', () => {
     window.location.href = '../index.html';
 });
 
@@ -531,4 +668,4 @@ canvas.style.cursor = 'none';
 initLevel();
 animate();
 
-console.log('🔫 Gun Shooting Game Ready! No Hanging! All 10 Levels Working!');
+console.log('🔫 Gun Shooting Game Ready! More shots than targets | Multi-hit enabled!');
