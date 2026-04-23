@@ -2,12 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Play Chess online free! Realistic chess pieces, light green board, classic strategy game.">
-    <meta name="keywords" content="chess, online chess, realistic chess, strategy game, board game">
-    <title>Chess Game - Realistic Pieces | PlayCrazyGames</title>
-    <link rel="stylesheet" href="style.css">
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9770610643444805" crossorigin="anonymous"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="description" content="Play Chess online free! Large realistic chess pieces, classic strategy game.">
+    <title>Chess Game - Bigger Pieces | PlayCrazyGames</title>
     <style>
         * {
             margin: 0;
@@ -17,7 +14,7 @@
         }
 
         body {
-            font-family: 'Segoe UI', 'Poppins', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 50%, #a5d6a7 100%);
             min-height: 100vh;
             display: flex;
@@ -29,7 +26,7 @@
 
         .ad-top, .ad-bottom {
             width: 100%;
-            max-width: 800px;
+            max-width: 850px;
             background: rgba(255,255,255,0.95);
             text-align: center;
             padding: 10px;
@@ -44,7 +41,7 @@
         }
 
         .game-wrapper {
-            max-width: 750px;
+            max-width: 850px;
             width: 100%;
             margin: 0 auto;
         }
@@ -55,10 +52,11 @@
             color: #2e7d32;
             text-decoration: none;
             font-weight: 600;
-            padding: 8px 20px;
+            padding: 10px 25px;
             background: white;
             border-radius: 30px;
             transition: all 0.3s;
+            font-size: 1rem;
         }
 
         .back-home:hover {
@@ -80,14 +78,14 @@
         }
 
         .game-header h1 {
-            font-size: 2rem;
+            font-size: 2.2rem;
             color: #ff9800;
             margin-bottom: 5px;
         }
 
         .subtitle {
             color: #ffcc80;
-            font-size: 0.85rem;
+            font-size: 0.9rem;
         }
 
         .game-info {
@@ -95,7 +93,7 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 20px;
-            padding: 15px;
+            padding: 15px 20px;
             background: rgba(255,255,255,0.1);
             border-radius: 15px;
             flex-wrap: wrap;
@@ -103,9 +101,9 @@
         }
 
         .turn-indicator {
-            font-size: 1.2rem;
+            font-size: 1.3rem;
             font-weight: bold;
-            padding: 8px 20px;
+            padding: 10px 25px;
             border-radius: 30px;
             background: #ff9800;
             color: #1a237e;
@@ -116,14 +114,15 @@
 
         .captured-pieces {
             display: flex;
-            gap: 20px;
+            gap: 25px;
             color: #ffcc80;
-            font-size: 0.85rem;
+            font-size: 0.9rem;
         }
 
         .captured-pieces span {
             color: white;
             font-weight: bold;
+            font-size: 1.1rem;
         }
 
         .chessboard-container {
@@ -132,12 +131,69 @@
             margin-bottom: 20px;
         }
 
-        #chessCanvas {
-            width: 100%;
-            height: auto;
-            border-radius: 10px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        #chessboard {
+            display: grid;
+            grid-template-columns: repeat(8, 85px);
+            border: 3px solid #2e7d32;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+        }
+
+        .square {
+            width: 85px;
+            height: 85px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3.8rem;
             cursor: pointer;
+            transition: all 0.2s ease;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .square.light {
+            background-color: #f0d9b5;
+        }
+
+        .square.dark {
+            background-color: #b58863;
+        }
+
+        .square.selected {
+            background-color: #7b9c6e;
+            box-shadow: inset 0 0 0 3px gold;
+            transform: scale(0.98);
+        }
+
+        .square.valid-move {
+            position: relative;
+            background-color: #90ee90;
+        }
+
+        .square.valid-move::after {
+            content: '●';
+            position: absolute;
+            font-size: 2rem;
+            color: rgba(0, 100, 0, 0.6);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .square.check {
+            background-color: #ff6b6b;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { background-color: #ff6b6b; }
+            50% { background-color: #ff4444; }
+        }
+
+        .square:hover {
+            transform: scale(0.97);
+            filter: brightness(0.95);
         }
 
         .controls {
@@ -149,7 +205,7 @@
         }
 
         .controls button {
-            padding: 10px 25px;
+            padding: 12px 30px;
             border: none;
             border-radius: 40px;
             font-size: 1rem;
@@ -177,13 +233,14 @@
             margin-bottom: 15px;
             font-weight: bold;
             color: #ffcc80;
-            min-height: 40px;
+            min-height: 45px;
+            font-size: 1rem;
         }
 
         .instructions {
             display: flex;
             justify-content: center;
-            gap: 20px;
+            gap: 25px;
             flex-wrap: wrap;
             padding: 15px;
             background: rgba(255,255,255,0.1);
@@ -192,15 +249,36 @@
 
         .instruction {
             color: #ffcc80;
-            font-size: 0.8rem;
+            font-size: 0.85rem;
         }
 
-        @media (max-width: 600px) {
-            .game-container { padding: 15px; }
+        @media (max-width: 750px) {
+            #chessboard {
+                grid-template-columns: repeat(8, 55px);
+            }
+            .square {
+                width: 55px;
+                height: 55px;
+                font-size: 2.2rem;
+            }
+            .square.valid-move::after {
+                font-size: 1.2rem;
+            }
             .game-header h1 { font-size: 1.5rem; }
-            .turn-indicator { font-size: 0.9rem; padding: 5px 15px; }
-            .controls button { padding: 6px 15px; font-size: 0.8rem; }
+            .turn-indicator { font-size: 1rem; padding: 6px 15px; }
+            .controls button { padding: 8px 18px; font-size: 0.85rem; }
             .instruction { font-size: 0.7rem; }
+        }
+
+        @media (max-width: 500px) {
+            #chessboard {
+                grid-template-columns: repeat(8, 42px);
+            }
+            .square {
+                width: 42px;
+                height: 42px;
+                font-size: 1.6rem;
+            }
         }
     </style>
 </head>
@@ -216,8 +294,8 @@
         
         <div class="game-container">
             <div class="game-header">
-                <h1>♜ Realistic Chess</h1>
-                <p class="subtitle">Classic Strategy Board Game</p>
+                <h1>♜ Classic Chess</h1>
+                <p class="subtitle">Bigger Pieces | Strategy Board Game</p>
             </div>
             
             <div class="game-info">
@@ -225,13 +303,13 @@
                     <span>⚪</span> White's Turn
                 </div>
                 <div class="captured-pieces">
-                    <div>⚪ White Captured: <span id="whiteCaptured">0</span></div>
-                    <div>⚫ Black Captured: <span id="blackCaptured">0</span></div>
+                    <div>⚪ White: <span id="whiteCaptured">0</span> pieces</div>
+                    <div>⚫ Black: <span id="blackCaptured">0</span> pieces</div>
                 </div>
             </div>
             
             <div class="chessboard-container">
-                <canvas id="chessCanvas" width="640" height="640"></canvas>
+                <div id="chessboard"></div>
             </div>
             
             <div class="controls">
@@ -242,8 +320,8 @@
             <div class="status" id="status"></div>
             
             <div class="instructions">
-                <div class="instruction">👑 Click a piece, then click a highlighted square to move</div>
-                <div class="instruction">⭐ Protect your king and checkmate to win!</div>
+                <div class="instruction">👑 Click a piece → Click highlighted square to move</div>
+                <div class="instruction">⭐ Protect your king | Checkmate to win!</div>
             </div>
         </div>
     </div>
