@@ -30,4 +30,84 @@ body {
     background: white;
     padding: 30px;
     border-radius: 20px;
-    box-shadow: 0 10px
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+.back-home {
+    display: inline-block;
+    margin-bottom: 15px;
+    color: #667eea;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+h1 {
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.game-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding: 15px;
+    background: #f0f0f0;
+    border-radius: 10px;
+}
+
+.turn-indicator {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #667eea;
+}
+
+.scores {
+    display: flex;
+    gap: 20px;
+    font-weight: bold;
+}
+
+#checkersCanvas {
+    border: 3px solid #333;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    cursor: pointer;
+}
+
+.controls {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-bottom: 15px;
+}
+
+.controls button {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+.message {
+    margin-bottom: 15px;
+    font-weight: bold;
+    color: #ff4444;
+}
+
+.instructions {
+    background: #f9f9f9;
+    padding: 15px;
+    border-radius: 10px;
+    color: #666;
+    font-size: 0.9rem;
+    line-height: 1.6;
+}
+
+@media (max-width: 650px) {
+    #checkersCanvas { width: 100%; height: auto; }
+    .game-info { flex-direction: column; gap: 10px; }
+}
