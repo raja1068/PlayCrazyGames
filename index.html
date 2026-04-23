@@ -1,131 +1,773 @@
-<header>
-    <h1>🎮 PlayCrazyGames</h1>
-    <p class="tagline">9 Classic Games - Play Online FREE or Offline with Our App!</p>
-    <div class="nav-links" style="margin-top: 15px;">
-        <a href="index.html" style="color: white; margin: 0 10px;">🏠 Home</a>
-        <a href="games-play.html" style="color: white; margin: 0 10px;">📖 About</a>
-        <a href="privacy-policy.html" style="color: white; margin: 0 10px;">🔒 Privacy</a>
-    </div>
-    <div class="search-box">
-        <input type="text" id="gameSearch" placeholder="🔍 Search games...">
-    </div>
-</header>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <meta name="description" content="PlayCrazyGames - 9 Classic Games Online Free! Snake, Chess, Ludo, Gun Shooting, Tic-Tac-Toe, Memory Match, Carrom, Checkers, Snakes & Ladders. Play offline with PWA app!">
+    <meta name="keywords" content="free games, online games, snake game, chess, ludo, gun shooting, carrom, checkers, tic tac toe, memory match, snakes and ladders">
+    <meta name="author" content="Masoom India">
+    <meta name="robots" content="index, follow">
+    
+    <!-- Open Graph Tags -->
+    <meta property="og:title" content="PlayCrazyGames - 9 Classic Games Free">
+    <meta property="og:description" content="Play Snake, Chess, Ludo, Gun Shooting & more! Install app for offline play.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://raja1068.github.io/playcrazygames">
+    
+    <title>PlayCrazyGames - 9 Classic Games | Play Free Online & Offline</title>
+    
+    <!-- Google AdSense -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9770610643444805" crossorigin="anonymous"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-<div class="games-grid" id="gamesGrid">
-    
-    <div class="game-card" data-game="snake" data-name="snake game">
-        <div class="game-icon">🐍</div>
-        <h2>Snake Game</h2>
-        <p>Classic snake eating game. Eat food, grow longer!</p>
-        <button class="play-btn">Play Now →</button>
-    </div>
-    
-    <div class="game-card" data-game="tictactoe" data-name="tic tac toe">
-        <div class="game-icon">❌⭕</div>
-        <h2>Tic-Tac-Toe</h2>
-        <p>Classic 3x3 grid game. Get 3 in a row to win!</p>
-        <button class="play-btn">Play Now →</button>
-    </div>
-    
-    <div class="game-card" data-game="memory" data-name="memory match">
-        <div class="game-icon">🎴</div>
-        <h2>Memory Match</h2>
-        <p>Test your memory! Match all pairs to win.</p>
-        <button class="play-btn">Play Now →</button>
-    </div>
-    
-    <div class="game-card" data-game="chess" data-name="chess">
-        <div class="game-icon">♜</div>
-        <h2>Chess Game</h2>
-        <p>Classic strategy board game. Play chess with a friend!</p>
-        <button class="play-btn">Play Now →</button>
-    </div>
-    
-    <div class="game-card" data-game="snakesladders" data-name="snakes and ladders">
-        <div class="game-icon">🐍🪜</div>
-        <h2>Snakes & Ladders</h2>
-        <p>Classic board game. Climb ladders, avoid snakes!</p>
-        <button class="play-btn">Play Now →</button>
-    </div>
-    
-    <div class="game-card" data-game="carrom" data-name="carrom">
-        <div class="game-icon">🎯</div>
-        <h2>Carrom Board</h2>
-        <p>Aim and shoot! Pocket all your coins to win!</p>
-        <button class="play-btn">Play Now →</button>
-    </div>
-    
-    <div class="game-card" data-game="gunshooting" data-name="gun shooting">
-        <div class="game-icon">🔫</div>
-        <h2>Gun Shooting</h2>
-        <p>10 levels of target shooting! Increasing difficulty!</p>
-        <button class="play-btn">Play Now →</button>
-    </div>
-    
-    <div class="game-card" data-game="ludo" data-name="ludo">
-        <div class="game-icon">🎲</div>
-        <h2>Classic Ludo</h2>
-        <p>4-player board game. Roll dice and race home!</p>
-        <button class="play-btn">Play Now →</button>
-    </div>
-    
-    <div class="game-card" data-game="checkers" data-name="checkers">
-        <div class="game-icon">⬛</div>
-        <h2>Checkers</h2>
-        <p>Jump and capture! Classic strategy board game.</p>
-        <button class="play-btn">Play Now →</button>
-    </div>
-</div>
+        body {
+            font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 50%, #a5d6a7 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
 
-<!-- Cookie Consent Banner -->
-<div id="cookieConsent" style="position: fixed; bottom: 0; left: 0; right: 0; background: #333; color: white; padding: 15px; text-align: center; z-index: 9999; display: none;">
-    <p>🍪 We use cookies to improve your experience. By using our site, you accept our 
-        <a href="privacy-policy.html" style="color: #667eea;">Privacy Policy</a>.
-        <button id="acceptCookies" style="background: #667eea; color: white; border: none; padding: 8px 20px; margin-left: 15px; border-radius: 5px; cursor: pointer;">Accept</button>
-    </p>
-</div>
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #c8e6c9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #2e7d32, #1b5e20);
+            border-radius: 10px;
+        }
 
-<script>
-    // Cookie consent
-    if (!localStorage.getItem('cookiesAccepted')) {
-        document.getElementById('cookieConsent').style.display = 'block';
-    }
-    
-    document.getElementById('acceptCookies').addEventListener('click', () => {
-        localStorage.setItem('cookiesAccepted', 'true');
-        document.getElementById('cookieConsent').style.display = 'none';
-    });
-</script>
+        /* Ad Containers */
+        .ad-container {
+            background: rgba(255,255,255,0.95);
+            text-align: center;
+            padding: 12px;
+            margin: 10px auto;
+            border-radius: 12px;
+            max-width: 1200px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .ad-label {
+            font-size: 10px;
+            color: #999;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
 
-<script>
-    document.querySelectorAll('.play-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            const card = e.target.closest('.game-card');
-            const game = card.dataset.game;
+        /* Main Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px 30px;
+        }
+
+        /* Header Styles */
+        .main-header {
+            text-align: center;
+            margin-bottom: 40px;
+            animation: fadeInDown 0.8s ease;
+        }
+        .main-header h1 {
+            font-size: 3.5rem;
+            background: linear-gradient(135deg, #1b5e20, #2e7d32, #4caf50);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+        }
+        .tagline {
+            color: #2e7d32;
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+        
+        /* Navigation Bar */
+        .nav-bar {
+            background: rgba(46, 125, 50, 0.9);
+            backdrop-filter: blur(10px);
+            border-radius: 50px;
+            padding: 12px 25px;
+            display: inline-flex;
+            gap: 25px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            justify-content: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .nav-bar a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s;
+            padding: 5px 15px;
+            border-radius: 25px;
+        }
+        .nav-bar a:hover {
+            background: rgba(255,255,255,0.2);
+            transform: translateY(-2px);
+        }
+        
+        /* Search Box */
+        .search-wrapper {
+            max-width: 400px;
+            margin: 20px auto 0;
+        }
+        .search-box {
+            display: flex;
+            align-items: center;
+            background: white;
+            border-radius: 50px;
+            padding: 5px 20px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+        .search-box input {
+            flex: 1;
+            padding: 14px 10px;
+            border: none;
+            outline: none;
+            font-size: 1rem;
+            border-radius: 50px;
+            background: transparent;
+        }
+        .search-box .search-icon {
+            font-size: 1.2rem;
+            color: #999;
+        }
+
+        /* Category Section */
+        .category {
+            margin-bottom: 50px;
+        }
+        .category-title {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 25px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid rgba(46, 125, 50, 0.3);
+        }
+        .category-icon {
+            font-size: 2rem;
+            background: #2e7d32;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 15px;
+            color: white;
+        }
+        .category-title h2 {
+            color: #1b5e20;
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+        .category-title span {
+            color: #2e7d32;
+            font-size: 0.9rem;
+        }
+
+        /* Games Grid */
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 30px;
+        }
+
+        /* Game Card - Navy Blue Background */
+        .game-card {
+            background: linear-gradient(135deg, #1a237e 0%, #0d1b4a 100%);
+            border-radius: 25px;
+            text-align: center;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+            border: 1px solid rgba(255,255,255,0.15);
+            animation: fadeInUp 0.6s ease backwards;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+        .game-card:hover {
+            transform: translateY(-12px) scale(1.02);
+            border-color: rgba(255,255,255,0.3);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+        
+        /* Orange Background Space around Logo */
+        .game-logo-container {
+            background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+            padding: 25px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-bottom: 3px solid rgba(255,255,255,0.2);
+        }
+        
+        /* Game Logo */
+        .game-logo {
+            width: 120px;
+            height: 120px;
+            background: white;
+            border-radius: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+            font-size: 3.5rem;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            transition: transform 0.3s;
+            overflow: hidden;
+        }
+        .game-card:hover .game-logo {
+            transform: scale(1.1) rotate(5deg);
+        }
+        
+        /* Real Image Logos */
+        .game-logo img {
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+        }
+        
+        /* Revolver SVG */
+        .revolver-svg {
+            width: 80px;
+            height: 80px;
+        }
+        
+        /* Text Content Area */
+        .game-content {
+            padding: 20px;
+        }
+        
+        .game-card h3 {
+            color: white;
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .game-card p {
+            color: rgba(255,255,255,0.7);
+            font-size: 0.9rem;
+            line-height: 1.5;
+            margin-bottom: 15px;
+        }
+        
+        .game-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            margin-bottom: 15px;
+        }
+        .badge-single { background: #4CAF50; color: white; }
+        .badge-multi { background: #ff9800; color: white; }
+        .badge-action { background: #f44336; color: white; }
+        .badge-strategy { background: #9c27b0; color: white; }
+        
+        .play-btn {
+            background: linear-gradient(135deg, #ff9800, #f57c00);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 40px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+        }
+        .play-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(255, 152, 0, 0.4);
+        }
+
+        /* Stats Bar */
+        .stats-bar {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin: 40px 0;
+            flex-wrap: wrap;
+        }
+        .stat-item {
+            text-align: center;
+            background: white;
+            padding: 15px 30px;
+            border-radius: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #2e7d32;
+        }
+        .stat-label {
+            color: #555;
+            font-size: 0.8rem;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 30px;
+            margin-top: 40px;
+            background: #2e7d32;
+            border-radius: 20px;
+        }
+        footer p {
+            color: rgba(255,255,255,0.9);
+            margin: 8px 0;
+        }
+        .footer-links a {
+            color: white;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+        .footer-links a:hover {
+            text-decoration: underline;
+        }
+
+        /* Cookie Consent */
+        #cookieConsent {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0,0,0,0.95);
+            backdrop-filter: blur(10px);
+            color: white;
+            padding: 15px;
+            text-align: center;
+            z-index: 9999;
+            display: none;
+        }
+        #acceptCookies {
+            background: linear-gradient(135deg, #ff9800, #f57c00);
+            color: white;
+            border: none;
+            padding: 8px 25px;
+            margin-left: 15px;
+            border-radius: 25px;
+            cursor: pointer;
+        }
+
+        /* Offline Promotion */
+        .offline-promo {
+            background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+            border-radius: 25px;
+            padding: 30px;
+            text-align: center;
+            margin: 40px 0;
+            border: 2px solid #2e7d32;
+        }
+        .offline-promo h3 {
+            color: #1b5e20;
+            margin-bottom: 10px;
+        }
+        .offline-promo p {
+            color: #2e7d32;
+            margin-bottom: 20px;
+        }
+        .install-steps {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .install-step {
+            background: #2e7d32;
+            padding: 8px 20px;
+            border-radius: 25px;
+            color: white;
+            font-size: 0.85rem;
+        }
+
+        /* Animations */
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container { padding: 15px; }
+            .main-header h1 { font-size: 2rem; }
+            .nav-bar { gap: 10px; padding: 10px 15px; }
+            .nav-bar a { font-size: 0.8rem; padding: 5px 10px; }
+            .category-title h2 { font-size: 1.3rem; }
+            .games-grid { gap: 20px; }
+            .stats-bar { gap: 15px; }
+            .stat-item { padding: 10px 20px; }
+            .stat-number { font-size: 1.3rem; }
+            .game-logo { width: 90px; height: 90px; font-size: 2.5rem; }
+            .game-logo img { width: 60px; height: 60px; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Ad -->
+    <div class="ad-container ad-top">
+        <div class="ad-label">Advertisement</div>
+        <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-9770610643444805" data-ad-slot="4587389292" data-ad-format="auto" data-full-width-responsive="true"></ins>
+        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </div>
+
+    <div class="container">
+        <!-- Header -->
+        <div class="main-header">
+            <h1>🎮 PlayCrazyGames</h1>
+            <p class="tagline">9 Classic Games - Play Online FREE or Install for Offline Play!</p>
             
-            const gameUrls = {
-                snake: 'snake-game/index.html',
-                tictactoe: 'tic-tac-toe/index.html',
-                memory: 'memory-match/index.html',
-                chess: 'chess-game/index.html',
-                snakesladders: 'snakes-ladders/index.html',
-                carrom: 'carrom-game/index.html',
-                gunshooting: 'gun-shooting/index.html',
-                ludo: 'ludo-game/index.html',
-                checkers: 'checkers-game/index.html'
-            };
+            <div class="nav-bar">
+                <a href="index.html">🏠 Home</a>
+                <a href="about.html">📖 About Us</a>
+                <a href="privacy-policy.html">🔒 Privacy</a>
+                <a href="terms-of-service.html">📜 Terms</a>
+            </div>
             
-            window.location.href = gameUrls[game];
+            <div class="search-wrapper">
+                <div class="search-box">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" id="gameSearch" placeholder="Search games by name...">
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Bar -->
+        <div class="stats-bar">
+            <div class="stat-item">
+                <div class="stat-number">9</div>
+                <div class="stat-label">Classic Games</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">10K+</div>
+                <div class="stat-label">Monthly Players</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">📱</div>
+                <div class="stat-label">Offline Ready</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">100%</div>
+                <div class="stat-label">Free Forever</div>
+            </div>
+        </div>
+
+        <!-- Category 1: Arcade & Action Games -->
+        <div class="category">
+            <div class="category-title">
+                <div class="category-icon">🎯</div>
+                <h2>Arcade & Action <span>Fast-paced fun</span></h2>
+            </div>
+            <div class="games-grid">
+                <!-- Snake Game -->
+                <div class="game-card" data-game="snake" data-name="snake game">
+                    <div class="game-logo-container">
+                        <div class="game-logo">🐍</div>
+                    </div>
+                    <div class="game-content">
+                        <h3>Snake Game</h3>
+                        <span class="game-badge badge-single">Single Player</span>
+                        <p>Classic snake eating game. Eat food, grow longer, don't hit walls!</p>
+                        <button class="play-btn">▶ Play Now</button>
+                    </div>
+                </div>
+                
+                <!-- Gun Shooting with Real Revolver SVG -->
+                <div class="game-card" data-game="gunshooting" data-name="gun shooting">
+                    <div class="game-logo-container">
+                        <div class="game-logo">
+                            <svg class="revolver-svg" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <!-- Revolver Body -->
+                                <rect x="35" y="40" width="45" height="25" rx="5" fill="#555" stroke="#333" stroke-width="2"/>
+                                <!-- Revolver Cylinder -->
+                                <circle cx="42" cy="52" r="14" fill="#666" stroke="#333" stroke-width="2"/>
+                                <circle cx="42" cy="52" r="8" fill="#888"/>
+                                <circle cx="42" cy="45" r="2" fill="#333"/>
+                                <circle cx="48" cy="48" r="2" fill="#333"/>
+                                <circle cx="48" cy="56" r="2" fill="#333"/>
+                                <circle cx="42" cy="59" r="2" fill="#333"/>
+                                <circle cx="36" cy="56" r="2" fill="#333"/>
+                                <circle cx="36" cy="48" r="2" fill="#333"/>
+                                <!-- Barrel -->
+                                <rect x="75" y="45" width="20" height="10" rx="2" fill="#555" stroke="#333" stroke-width="2"/>
+                                <!-- Handle/Grip -->
+                                <path d="M38 65 L35 85 L55 85 L52 65 Z" fill="#8B4513" stroke="#5D3A1A" stroke-width="2"/>
+                                <!-- Trigger Guard -->
+                                <path d="M38 55 Q35 62 40 65" fill="none" stroke="#555" stroke-width="2"/>
+                                <!-- Hammer -->
+                                <rect x="35" y="35" width="8" height="8" rx="2" fill="#555" stroke="#333" stroke-width="1"/>
+                                <!-- Front Sight -->
+                                <rect x="90" y="42" width="3" height="6" fill="#555"/>
+                                <!-- Rear Sight -->
+                                <rect x="42" y="38" width="10" height="3" fill="#555"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="game-content">
+                        <h3>Gun Shooting</h3>
+                        <span class="game-badge badge-action">10 Levels</span>
+                        <p>Test your aim! 10 challenging levels with increasing difficulty.</p>
+                        <button class="play-btn">▶ Play Now</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Category 2: Board & Strategy Games -->
+        <div class="category">
+            <div class="category-title">
+                <div class="category-icon">♟️</div>
+                <h2>Board & Strategy <span>Think and win</span></h2>
+            </div>
+            <div class="games-grid">
+                <!-- Chess with King Logo -->
+                <div class="game-card" data-game="chess" data-name="chess">
+                    <div class="game-logo-container">
+                        <div class="game-logo">👑</div>
+                    </div>
+                    <div class="game-content">
+                        <h3>Chess Game</h3>
+                        <span class="game-badge badge-strategy">2 Players</span>
+                        <p>Classic strategy board game. Checkmate your opponent!</p>
+                        <button class="play-btn">▶ Play Now</button>
+                    </div>
+                </div>
+                
+                <!-- Checkers with Checker Board Image -->
+                <div class="game-card" data-game="checkers" data-name="checkers">
+                    <div class="game-logo-container">
+                        <div class="game-logo">
+                            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23333'/%3E%3Crect x='0' y='0' width='25' height='25' fill='%23fff'/%3E%3Crect x='50' y='0' width='25' height='25' fill='%23fff'/%3E%3Crect x='25' y='25' width='25' height='25' fill='%23fff'/%3E%3Crect x='75' y='25' width='25' height='25' fill='%23fff'/%3E%3Crect x='0' y='50' width='25' height='25' fill='%23fff'/%3E%3Crect x='50' y='50' width='25' height='25' fill='%23fff'/%3E%3Crect x='25' y='75' width='25' height='25' fill='%23fff'/%3E%3Crect x='75' y='75' width='25' height='25' fill='%23fff'/%3E%3Ccircle cx='25' cy='25' r='10' fill='%23ff4444'/%3E%3Ccircle cx='75' cy='25' r='10' fill='%23ff4444'/%3E%3Ccircle cx='25' cy='75' r='10' fill='%23333'/%3E%3Ccircle cx='75' cy='75' r='10' fill='%23333'/%3E%3C/svg%3E" alt="Checker Board">
+                        </div>
+                    </div>
+                    <div class="game-content">
+                        <h3>Checkers</h3>
+                        <span class="game-badge badge-strategy">2 Players</span>
+                        <p>Jump and capture! Classic strategy board game.</p>
+                        <button class="play-btn">▶ Play Now</button>
+                    </div>
+                </div>
+                
+                <!-- Carrom with Carrom Board Image -->
+                <div class="game-card" data-game="carrom" data-name="carrom">
+                    <div class="game-logo-container">
+                        <div class="game-logo">
+                            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%238B4513' rx='10'/%3E%3Crect x='10' y='10' width='80' height='80' fill='%23DEB887' rx='5'/%3E%3Ccircle cx='50' cy='50' r='25' fill='none' stroke='%238B4513' stroke-width='2'/%3E%3Ccircle cx='50' cy='50' r='8' fill='%23ff4444'/%3E%3Ccircle cx='30' cy='30' r='6' fill='%2344ff44'/%3E%3Ccircle cx='70' cy='30' r='6' fill='%2344ff44'/%3E%3Ccircle cx='30' cy='70' r='6' fill='%234444ff'/%3E%3Ccircle cx='70' cy='70' r='6' fill='%234444ff'/%3E%3Ccircle cx='50' cy='50' r='4' fill='%23ffff44'/%3E%3C/svg%3E" alt="Carrom Board">
+                        </div>
+                    </div>
+                    <div class="game-content">
+                        <h3>Carrom Board</h3>
+                        <span class="game-badge badge-strategy">2 Players</span>
+                        <p>Aim and shoot! Pocket all your coins to win!</p>
+                        <button class="play-btn">▶ Play Now</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Category 3: Family & Party Games -->
+        <div class="category">
+            <div class="category-title">
+                <div class="category-icon">👨‍👩‍👧‍👦</div>
+                <h2>Family & Party <span>Fun for everyone</span></h2>
+            </div>
+            <div class="games-grid">
+                <!-- Ludo -->
+                <div class="game-card" data-game="ludo" data-name="ludo">
+                    <div class="game-logo-container">
+                        <div class="game-logo">🎲</div>
+                    </div>
+                    <div class="game-content">
+                        <h3>Classic Ludo</h3>
+                        <span class="game-badge badge-multi">2-4 Players</span>
+                        <p>Roll dice and race your tokens home! Family favorite.</p>
+                        <button class="play-btn">▶ Play Now</button>
+                    </div>
+                </div>
+                
+                <!-- Snakes & Ladders -->
+                <div class="game-card" data-game="snakesladders" data-name="snakes and ladders">
+                    <div class="game-logo-container">
+                        <div class="game-logo">🐍🪜</div>
+                    </div>
+                    <div class="game-content">
+                        <h3>Snakes & Ladders</h3>
+                        <span class="game-badge badge-multi">2-4 Players</span>
+                        <p>Climb ladders, avoid snakes! Classic board game fun.</p>
+                        <button class="play-btn">▶ Play Now</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Category 4: Puzzle & Brain Games -->
+        <div class="category">
+            <div class="category-title">
+                <div class="category-icon">🧠</div>
+                <h2>Puzzle & Brain <span>Train your mind</span></h2>
+            </div>
+            <div class="games-grid">
+                <!-- Tic-Tac-Toe -->
+                <div class="game-card" data-game="tictactoe" data-name="tic tac toe">
+                    <div class="game-logo-container">
+                        <div class="game-logo">❌⭕</div>
+                    </div>
+                    <div class="game-content">
+                        <h3>Tic-Tac-Toe</h3>
+                        <span class="game-badge badge-single">2 Players</span>
+                        <p>Classic 3x3 grid game. Get 3 in a row to win!</p>
+                        <button class="play-btn">▶ Play Now</button>
+                    </div>
+                </div>
+                
+                <!-- Memory Match -->
+                <div class="game-card" data-game="memory" data-name="memory match">
+                    <div class="game-logo-container">
+                        <div class="game-logo">🎴</div>
+                    </div>
+                    <div class="game-content">
+                        <h3>Memory Match</h3>
+                        <span class="game-badge badge-single">1-2 Players</span>
+                        <p>Test your memory! Match all pairs to win.</p>
+                        <button class="play-btn">▶ Play Now</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Offline App Promotion -->
+        <div class="offline-promo">
+            <div style="font-size: 3rem; margin-bottom: 10px;">📱</div>
+            <h3>Install Our App - Play Offline!</h3>
+            <p>Install PlayCrazyGames as PWA and play all games without internet! No data needed!</p>
+            <div class="install-steps">
+                <span class="install-step">📱 Chrome: Install App</span>
+                <span class="install-step">🍎 Safari: Add to Home Screen</span>
+                <span class="install-step">🔥 Firefox: Install PWA</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Ad -->
+    <div class="ad-container ad-bottom">
+        <div class="ad-label">Advertisement</div>
+        <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-9770610643444805" data-ad-slot="4587389292" data-ad-format="auto" data-full-width-responsive="true"></ins>
+        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p>© 2024 PlayCrazyGames - A Division of Masoom India</p>
+        <div class="footer-links">
+            <a href="index.html">🏠 Home</a> |
+            <a href="about.html">📖 About Us</a> |
+            <a href="privacy-policy.html">🔒 Privacy Policy</a> |
+            <a href="terms-of-service.html">📜 Terms of Service</a>
+        </div>
+        <p>📍 PurbaPara, KK Abasan, Krishnapur, Kolkata - 700102, WB, India</p>
+        <p>📧 masoomindia7@gmail.com | 💬 WhatsApp: 9874234631 (WhatsApp Only)</p>
+        <p>Made with ❤️ for gamers worldwide | Play Crazy, Anytime, Anywhere!</p>
+    </footer>
+
+    <!-- Cookie Consent -->
+    <div id="cookieConsent">
+        <p>🍪 We use cookies to improve your experience. By using our site, you accept our 
+            <a href="privacy-policy.html" style="color: #ff9800;">Privacy Policy</a>.
+            <button id="acceptCookies">Accept</button>
+        </p>
+    </div>
+
+    <script>
+        // ========================================
+        // GAME NAVIGATION
+        // ========================================
+        const gameUrls = {
+            snake: 'snake-game/index.html',
+            tictactoe: 'tic-tac-toe/index.html',
+            memory: 'memory-match/index.html',
+            chess: 'chess-game/index.html',
+            snakesladders: 'snakes-ladders/index.html',
+            carrom: 'carrom-game/index.html',
+            gunshooting: 'gun-shooting/index.html',
+            ludo: 'ludo-game/index.html',
+            checkers: 'checkers-game/index.html'
+        };
+        
+        document.querySelectorAll('.play-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const card = e.target.closest('.game-card');
+                const game = card.dataset.game;
+                if (gameUrls[game]) {
+                    window.location.href = gameUrls[game];
+                }
+            });
         });
-    });
-</script>
+        
+        // Make entire card clickable
+        document.querySelectorAll('.game-card').forEach(card => {
+            card.addEventListener('click', (e) => {
+                if (!e.target.classList.contains('play-btn')) {
+                    const game = card.dataset.game;
+                    if (gameUrls[game]) {
+                        window.location.href = gameUrls[game];
+                    }
+                }
+            });
+        });
 
-<footer>
-    <p>© 2024 PlayCrazyGames - Free Online Games</p>
-    <div class="footer-links">
-        <a href="privacy-policy.html">Privacy Policy</a> |
-        <a href="terms-of-service.html">Terms of Service</a> |
-        <a href="mailto:masoomindia7@gmail.com">Contact</a>
-    </div>
-    <p>Made with ❤️ for gamers worldwide</p>
-</footer>
+        // ========================================
+        // SEARCH FUNCTIONALITY
+        // ========================================
+        const searchInput = document.getElementById('gameSearch');
+        if (searchInput) {
+            searchInput.addEventListener('input', function(e) {
+                const searchTerm = e.target.value.toLowerCase().trim();
+                const allCards = document.querySelectorAll('.game-card');
+                
+                allCards.forEach(card => {
+                    const gameName = card.dataset.name;
+                    const gameTitle = card.querySelector('h3').innerText.toLowerCase();
+                    
+                    if (searchTerm === '' || gameName.includes(searchTerm) || gameTitle.includes(searchTerm)) {
+                        card.style.display = 'block';
+                        card.style.animation = 'fadeInUp 0.4s ease';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            });
+        }
+
+        // ========================================
+        // COOKIE CONSENT
+        // ========================================
+        if (!localStorage.getItem('cookiesAccepted')) {
+            document.getElementById('cookieConsent').style.display = 'block';
+        }
+        
+        document.getElementById('acceptCookies').addEventListener('click', () => {
+            localStorage.setItem('cookiesAccepted', 'true');
+            document.getElementById('cookieConsent').style.display = 'none';
+        });
+
+        console.log('🎮 PlayCrazyGames Loaded! 9 Games Ready for Fun!');
+    </script>
+</body>
+</html>
