@@ -3,11 +3,198 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <meta name="description" content="Gun Shooting Game - 10 exciting levels! Shoot targets with your gun, aim carefully, become a sharpshooter!">
-    <meta name="keywords" content="shooting game, gun game, target shooting, 10 levels, action game, 3D effect">
     <title>Gun Shooting Game - 10 Levels | PlayCrazyGames</title>
-    <link rel="stylesheet" href="style.css">
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9770610643444805" crossorigin="anonymous"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 50%, #a5d6a7 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .ad-top, .ad-bottom {
+            width: 100%;
+            max-width: 1000px;
+            background: rgba(255,255,255,0.95);
+            text-align: center;
+            padding: 10px;
+            margin: 10px auto;
+            border-radius: 12px;
+        }
+
+        .ad-label {
+            font-size: 10px;
+            color: #999;
+            margin-bottom: 5px;
+        }
+
+        .game-container {
+            max-width: 1000px;
+            width: 100%;
+            background: linear-gradient(135deg, #1a237e, #0d1b4a);
+            border-radius: 30px;
+            padding: 25px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+
+        .back-home {
+            display: inline-block;
+            margin-bottom: 15px;
+            color: #ff9800;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .game-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .game-header h1 {
+            font-size: 2rem;
+            color: #ff9800;
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            color: #ffcc80;
+            font-size: 0.85rem;
+        }
+
+        .game-stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: rgba(255,255,255,0.1);
+            padding: 12px;
+            border-radius: 15px;
+            text-align: center;
+        }
+
+        .stat-icon {
+            font-size: 1.5rem;
+            display: block;
+        }
+
+        .stat-label {
+            display: block;
+            color: #ffcc80;
+            font-size: 0.7rem;
+            margin: 5px 0;
+        }
+
+        .stat-value {
+            display: inline-block;
+            color: #ff9800;
+            font-size: 2rem;
+            font-weight: bold;
+        }
+
+        .stat-max {
+            color: #ffcc80;
+            font-size: 1rem;
+        }
+
+        .game-play-area {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        #gameCanvas {
+            width: 100%;
+            height: auto;
+            background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
+            border-radius: 20px;
+            border: 3px solid #ff9800;
+            cursor: crosshair;
+            display: block;
+        }
+
+        .controls-panel {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .shoot-button {
+            background: linear-gradient(135deg, #ff9800, #f57c00);
+            color: white;
+            border: none;
+            padding: 12px 35px;
+            border-radius: 40px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .shoot-button:hover {
+            transform: scale(1.05);
+        }
+
+        .reset-button, .back-button {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .reset-button:hover, .back-button:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .level-message {
+            text-align: center;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #ff9800;
+            min-height: 50px;
+        }
+
+        .instructions {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            padding: 15px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+        }
+
+        .instruction {
+            color: #ffcc80;
+            font-size: 0.8rem;
+        }
+
+        @media (max-width: 700px) {
+            .game-container { padding: 15px; }
+            .game-header h1 { font-size: 1.5rem; }
+            .stat-value { font-size: 1.3rem; }
+            .controls-panel { gap: 8px; }
+            button { padding: 8px 15px; font-size: 0.8rem; }
+        }
+    </style>
 </head>
 <body>
     <div class="ad-top">
@@ -26,24 +213,24 @@
         
         <div class="game-stats">
             <div class="stat-card">
-                <span class="stat-icon">🎯</span>
-                <span class="stat-label">Level</span>
+                <div class="stat-icon">🎯</div>
+                <div class="stat-label">Level</div>
                 <span class="stat-value" id="level">1</span>
                 <span class="stat-max">/10</span>
             </div>
             <div class="stat-card">
-                <span class="stat-icon">⭐</span>
-                <span class="stat-label">Score</span>
-                <span class="stat-value" id="score">0</span>
+                <div class="stat-icon">⭐</div>
+                <div class="stat-label">Score</div>
+                <div class="stat-value" id="score">0</div>
             </div>
             <div class="stat-card">
-                <span class="stat-icon">💥</span>
-                <span class="stat-label">Shots Left</span>
-                <span class="stat-value" id="shotsLeft">10</span>
+                <div class="stat-icon">💥</div>
+                <div class="stat-label">Shots Left</div>
+                <div class="stat-value" id="shotsLeft">10</div>
             </div>
             <div class="stat-card">
-                <span class="stat-icon">🎯</span>
-                <span class="stat-label">Targets Hit</span>
+                <div class="stat-icon">🎯</div>
+                <div class="stat-label">Targets Hit</div>
                 <span class="stat-value" id="targetsHit">0</span>
                 <span class="stat-max" id="targetsNeeded">/5</span>
             </div>
@@ -51,22 +238,9 @@
         
         <div class="game-play-area">
             <canvas id="gameCanvas" width="900" height="500"></canvas>
-            <div class="gun-platform" id="gunPlatform">
-                <div class="gun-base"></div>
-                <div class="gun-body" id="gunBody">
-                    <div class="gun-barrel"></div>
-                    <div class="gun-handle"></div>
-                    <div class="gun-trigger"></div>
-                </div>
-                <div class="muzzle-flash" id="muzzleFlash"></div>
-            </div>
         </div>
         
         <div class="controls-panel">
-            <div class="aim-control">
-                <label>🎯 Aim with Mouse</label>
-                <div class="crosshair-custom" id="crosshair"></div>
-            </div>
             <button id="shootBtn" class="shoot-button">🔫 SHOOT!</button>
             <button id="resetBtn" class="reset-button">🔄 Restart Game</button>
             <button id="backBtn" class="back-button">🏠 Games Hub</button>
@@ -75,9 +249,9 @@
         <div class="level-message" id="levelMessage"></div>
         
         <div class="instructions">
-            <div class="instruction">🎯 <strong>How to Play:</strong> Move mouse to aim, click SHOOT or press SPACEBAR</div>
-            <div class="instruction">⭐ <strong>Goal:</strong> Hit all targets to advance to next level</div>
-            <div class="instruction">🔫 <strong>Tip:</strong> Each level gets faster and harder!</div>
+            <div class="instruction">🎯 Move mouse to aim</div>
+            <div class="instruction">🔫 Click or press SPACEBAR to shoot</div>
+            <div class="instruction">⭐ Hit all targets to advance level</div>
         </div>
     </div>
 
