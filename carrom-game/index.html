@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carrom Board Game</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="game-container">
+        <h1>🎯 Carrom Board Game</h1>
+        <div class="score-board">
+            <div>Player 1: <span id="score1">0</span></div>
+            <div>Player 2: <span id="score2">0</span></div>
+            <div>Current Turn: <span id="turn">Player 1</span></div>
+        </div>
+        <canvas id="carromCanvas" width="600" height="600"></canvas>
+        <div class="controls">
+            <div class="power-control">
+                <label>Power: <span id="powerValue">0</span>%</label>
+                <input type="range" id="power" min="0" max="100" value="0">
+            </div>
+            <button id="shootBtn">Shoot!</button>
+            <button id="resetBtn">Reset Game</button>
+            <button id="backBtn">⬅ Back to Hub</button>
+        </div>
+        <div class="instructions">
+            Click and drag on the striker to aim, adjust power, then click Shoot!
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
