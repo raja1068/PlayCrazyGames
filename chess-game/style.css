@@ -1,0 +1,121 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.game-container {
+    text-align: center;
+    background: white;
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+h1 {
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.game-info {
+    margin-bottom: 20px;
+    padding: 10px;
+    background: #f0f0f0;
+    border-radius: 10px;
+}
+
+.turn-indicator {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #667eea;
+    margin-bottom: 10px;
+}
+
+.captured-pieces {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.chessboard {
+    display: grid;
+    grid-template-columns: repeat(8, 60px);
+    border: 2px solid #333;
+    margin-bottom: 20px;
+}
+
+.square {
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.square.light {
+    background-color: #f0d9b5;
+}
+
+.square.dark {
+    background-color: #b58863;
+}
+
+.square.selected {
+    background-color: #7b9c6e;
+    box-shadow: inset 0 0 0 2px gold;
+}
+
+.square.valid-move {
+    background-color: #90ee90;
+    position: relative;
+}
+
+.square.valid-move::after {
+    content: '●';
+    position: absolute;
+    font-size: 1.5rem;
+    color: rgba(0,0,0,0.3);
+}
+
+.square.check {
+    background-color: #ff6b6b;
+}
+
+.controls button {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    margin: 0 10px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: opacity 0.3s;
+}
+
+.controls button:hover {
+    opacity: 0.9;
+}
+
+.status {
+    margin-top: 15px;
+    font-weight: bold;
+    color: #ff4444;
+}
+
+@media (max-width: 600px) {
+    .chessboard { grid-template-columns: repeat(8, 40px); }
+    .square { width: 40px; height: 40px; font-size: 1.2rem; }
+}
