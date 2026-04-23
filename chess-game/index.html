@@ -1,34 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Chess Game</title>
-
-<link rel="stylesheet" href="./style.css">
-
-<!-- FIX: use reliable CDN -->
-<script src="https://unpkg.com/chess.js@1.0.0-beta.6/dist/chess.min.js"></script>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chess Game</title>
+    <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
-
-<h1>♜ Chess Game ♞</h1>
-
-<div class="controls">
-    <button onclick="setMode('offline')">2 Player</button>
-    <button onclick="setMode('bot')">Play vs AI</button>
-    <button onclick="resetGame()">New Game</button>
-</div>
-
-<h3 id="turn">Loading...</h3>
-
-<div id="board" class="board"></div>
-
-<p id="status"></p>
-
-<script src="./script.js"></script>
-
+    <div class="game-container">
+        <h1>♜ Chess Game ♞</h1>
+        <div class="game-info">
+            <div class="turn-indicator" id="turnIndicator">White's Turn</div>
+            <div class="captured-pieces">
+                <div>Captured by White: <span id="whiteCaptured"></span></div>
+                <div>Captured by Black: <span id="blackCaptured"></span></div>
+            </div>
+        </div>
+        <div class="chessboard" id="chessboard"></div>
+        <div class="controls">
+            <button id="resetBtn">New Game</button>
+            <button id="backBtn">⬅ Back to Hub</button>
+        </div>
+        <div class="status" id="status"></div>
+    </div>
+    <script src="script.js"></script>
 </body>
 </html>
