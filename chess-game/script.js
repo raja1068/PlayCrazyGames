@@ -1,6 +1,6 @@
 // ========================================
-// REALISTIC CHESS GAME
-// Light Green Board | Detailed Chess Pieces
+// ULTRA-REALISTIC CHESS GAME
+// Stunning 3D Chess Pieces | Light Green Board
 // ========================================
 
 const canvas = document.getElementById('chessCanvas');
@@ -9,9 +9,9 @@ const squareSize = 80; // 640/8 = 80
 
 // Board colors - Light green theme
 const lightSquareColor = '#c8e6c9';
-const darkSquareColor = '#66bb6a';
-const highlightColor = 'rgba(255, 193, 7, 0.6)';
-const checkColor = 'rgba(244, 67, 54, 0.6)';
+const darkSquareColor = '#4caf50';
+const highlightColor = 'rgba(255, 193, 7, 0.5)';
+const checkColor = 'rgba(244, 67, 54, 0.5)';
 
 // Initial board setup
 let board = [
@@ -25,33 +25,559 @@ let board = [
     ['♖', '♘', '♗', '♕', '♔', '♗', '♘', '♖']
 ];
 
-let currentPlayer = 'white'; // white moves first
+let currentPlayer = 'white';
 let selectedSquare = null;
 let validMoves = [];
 let gameActive = true;
 let whiteCaptured = [];
 let blackCaptured = [];
-let moveHistory = [];
 
-// Unicode chess symbols with 3D effect
-const pieceSymbols = {
-    // White pieces
-    '♔': '♔', '♕': '♕', '♖': '♖', '♗': '♗', '♘': '♘', '♙': '♙',
-    // Black pieces
-    '♚': '♚', '♛': '♛', '♜': '♜', '♝': '♝', '♞': '♞', '♟': '♟'
-};
+// ========================================
+// ULTRA-REALISTIC 3D PIECE DRAWING
+// ========================================
 
-// Helper function to check if a piece is white
-function isWhitePiece(piece) {
-    return '♔♕♖♗♘♙'.includes(piece);
+// Create 3D gradient for pieces
+function createPieceGradient(x, y, size, isWhite, isTop = false) {
+    const centerX = x + size/2;
+    const centerY = y + size/2;
+    
+    if (isWhite) {
+        if (isTop) {
+            return ctx.createLinearGradient(centerX - size*0.15, centerY - size*0.3, centerX + size*0.15, centerY - size*0.1);
+        }
+        return ctx.createLinearGradient(centerX - size*0.2, centerY - size*0.2, centerX + size*0.2, centerY + size*0.3);
+    } else {
+        if (isTop) {
+            return ctx.createLinearGradient(centerX - size*0.15, centerY - size*0.3, centerX + size*0.15, centerY - size*0.1);
+        }
+        return ctx.createLinearGradient(centerX - size*0.2, centerY - size*0.2, centerX + size*0.2, centerY + size*0.3);
+    }
 }
 
-// Helper function to check if a piece is black
-function isBlackPiece(piece) {
-    return '♚♛♜♝♞♟'.includes(piece);
+// Draw King - Majestic with ornate cross
+function drawKing(x, y, size, isWhite) {
+    const cx = x + size/2;
+    const cy = y + size/2;
+    
+    ctx.save();
+    ctx.shadowBlur = 5;
+    ctx.shadowColor = 'rgba(0,0,0,0.4)';
+    ctx.shadowOffsetX = 2;
+    ctx.shadowOffsetY = 2;
+    
+    // Base
+    const baseGrad = createPieceGradient(x, y, size, isWhite);
+    baseGrad.addColorStop(0, isWhite ? '#f0f0f0' : '#3a3a3a');
+    baseGrad.addColorStop(1, isWhite ? '#c0c0c0' : '#1a1a1a');
+    ctx.fillStyle = baseGrad;
+    ctx.beginPath();
+    ctx.ellipse(cx, cy + size*0.32, size*0.28, size*0.1, 0, 0, Math.PI*2);
+    ctx.fill();
+    ctx.strokeStyle = isWhite ? '#999' : '#555';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    
+    // Body (tapered column)
+    const bodyGrad = createPieceGradient(x, y, size, isWhite);
+    bodyGrad.addColorStop(0, isWhite ? '#e8e8e8' : '#333');
+    bodyGrad.addColorStop(1, isWhite ? '#b0b0b0' : '#1a1a1a');
+    ctx.fillStyle = bodyGrad;
+    ctx.beginPath();
+    ctx.moveTo(cx - size*0.18, cy - size*0.05);
+    ctx.lineTo(cx - size*0.22, cy + size*0.3);
+    ctx.lineTo(cx + size*0.22, cy + size*0.3);
+    ctx.lineTo(cx + size*0.18, cy - size*0.05);
+    ctx.fill();
+    ctx.stroke();
+    
+    // Neck
+    ctx.beginPath();
+    ctx.rect(cx - size*0.12, cy - size*0.22, size*0.24, size*0.2);
+    ctx.fill();
+    ctx.stroke();
+    
+    // Head (round)
+    const headGrad = createPieceGradient(x, y, size, isWhite);
+    headGrad.addColorStop(0, isWhite ? '#f5f5f5' : '#444');
+    headGrad.addColorStop(1, isWhite ? '#d0d0d0' : '#2a2a2a');
+    ctx.fillStyle = headGrad;
+    ctx.beginPath();
+    ctx.arc(cx, cy - size*0.25, size*0.16, 0, Math.PI*2);
+    ctx.fill();
+    ctx.stroke();
+    
+    // Crown base
+    ctx.fillStyle = isWhite ? '#ffd700' : '#ffaa00';
+    ctx.beginPath();
+    ctx.rect(cx - size*0.1, cy - size*0.4, size*0.2, size*0.12);
+    ctx.fill();
+    ctx.strokeStyle = '#b8860b';
+    ctx.stroke();
+    
+    // Crown cross (vertical)
+    ctx.fillStyle = isWhite ? '#ffd700' : '#ffaa00';
+    ctx.beginPath();
+    ctx.rect(cx - size*0.04, cy - size*0.52, size*0.08, size*0.16);
+    ctx.fill();
+    ctx.stroke();
+    
+    // Crown cross (horizontal)
+    ctx.beginPath();
+    ctx.rect(cx - size*0.12, cy - size*0.48, size*0.24, size*0.08);
+    ctx.fill();
+    ctx.stroke();
+    
+    // Crown jewels
+    ctx.fillStyle = '#ff4444';
+    ctx.beginPath();
+    ctx.arc(cx, cy - size*0.48, size*0.05, 0, Math.PI*2);
+    ctx.fill();
+    
+    ctx.fillStyle = '#44ff44';
+    ctx.beginPath();
+    ctx.arc(cx - size*0.07, cy - size*0.44, size*0.03, 0, Math.PI*2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(cx + size*0.07, cy - size*0.44, size*0.03, 0, Math.PI*2);
+    ctx.fill();
+    
+    // Highlight
+    ctx.beginPath();
+    ctx.arc(cx - size*0.05, cy - size*0.28, size*0.04, 0, Math.PI*2);
+    ctx.fillStyle = isWhite ? 'rgba(255,255,255,0.6)' : 'rgba(255,255,255,0.2)';
+    ctx.fill();
+    
+    ctx.restore();
 }
 
-// Get piece type
+// Draw Queen - Elegant with crown
+function drawQueen(x, y, size, isWhite) {
+    const cx = x + size/2;
+    const cy = y + size/2;
+    
+    ctx.save();
+    ctx.shadowBlur = 5;
+    ctx.shadowColor = 'rgba(0,0,0,0.4)';
+    ctx.shadowOffsetX = 2;
+    ctx.shadowOffsetY = 2;
+    
+    // Base
+    const baseGrad = createPieceGradient(x, y, size, isWhite);
+    baseGrad.addColorStop(0, isWhite ? '#f0f0f0' : '#3a3a3a');
+    baseGrad.addColorStop(1, isWhite ? '#c0c0c0' : '#1a1a1a');
+    ctx.fillStyle = baseGrad;
+    ctx.beginPath();
+    ctx.ellipse(cx, cy + size*0.32, size*0.28, size*0.1, 0, 0, Math.PI*2);
+    ctx.fill();
+    ctx.stroke();
+    
+    // Body (elegant curve)
+    const bodyGrad = createPieceGradient(x, y, size, isWhite);
+    bodyGrad.addColorStop(0, isWhite ? '#e8e8e8' : '#333');
+    bodyGrad.addColorStop(1, isWhite ? '#b0b0b0' : '#1a1a1a');
+    ctx.fillStyle = bodyGrad;
+    ctx.beginPath();
+    ctx.moveTo(cx - size*0.16, cy - size*0.08);
+    ctx.quadraticCurveTo(cx - size*0.22, cy + size*0.15, cx - size*0.2, cy + size*0.3);
+    ctx.lineTo(cx + size*0.2, cy + size*0.3);
+    ctx.quadraticCurveTo(cx + size*0.22, cy + size*0.15, cx + size*0.16, cy - size*0.08);
+    ctx.fill();
+    ctx.stroke();
+    
+    // Neck
+    ctx.beginPath();
+    ctx.rect(cx - size*0.1, cy - size*0.22, size*0.2, size*0.16);
+    ctx.fill();
+    ctx.stroke();
+    
+    // Head
+    const headGrad = createPieceGradient(x, y, size, isWhite);
+    headGrad.addColorStop(0, isWhite ? '#f5f5f5' : '#444');
+    headGrad.addColorStop(1, isWhite ? '#d0d0d0' : '#2a2a2a');
+    ctx.fillStyle = headGrad;
+    ctx.beginPath();
+    ctx.arc(cx, cy - size*0.27, size*0.14, 0, Math.PI*2);
+    ctx.fill();
+    ctx.stroke();
+    
+    // Crown
+    ctx.fillStyle = isWhite ? '#ffd700' : '#ffaa00';
+    ctx.beginPath();
+    ctx.rect(cx - size*0.12, cy - size*0.42, size*0.24, size*0.1);
+    ctx.fill();
+    ctx.stroke();
+    
+    // Crown spikes
+    for (let i = -1; i <= 1; i++) {
+        ctx.beginPath();
+        ctx.moveTo(cx + i*size*0.08, cy - size*0.42);
+        ctx.lineTo(cx + i*size*0.12, cy - size*0.52);
+        ctx.lineTo(cx + i*size*0.04, cy - size*0.42);
+        ctx.fill();
+        ctx.stroke();
+    }
+    
+    // Center jewel
+    ctx.fillStyle = '#ff4444';
+    ctx.beginPath();
+    ctx.arc(cx, cy - size*0.46, size*0.06, 0, Math.PI*2);
+    ctx.fill();
+    
+    // Highlight
+    ctx.beginPath();
+    ctx.arc(cx - size*0.04, cy - size*0.3, size*0.03, 0, Math.PI*2);
+    ctx.fillStyle = isWhite ? 'rgba(255,255,255,0.6)' : 'rgba(255,255,255,0.2)';
+    ctx.fill();
+    
+    ctx.restore();
+}
+
+// Draw Rook - Castle with battlements
+function drawRook(x, y, size, isWhite) {
+    const cx = x + size/2;
+    const cy = y + size/2;
+    
+    ctx.save();
+    ctx.shadowBlur = 5;
+    ctx.shadowColor = 'rgba(0,0,0,0.4)';
+    ctx.shadowOffsetX = 2;
+    ctx.shadowOffsetY = 2;
+    
+    // Base
+    const baseGrad = createPieceGradient(x, y, size, isWhite);
+    baseGrad.addColorStop(0, isWhite ? '#f0f0f0' : '#3a3a3a');
+    baseGrad.addColorStop(1, isWhite ? '#c0c0c0' : '#1a1a1a');
+    ctx.fillStyle = baseGrad;
+    ctx.beginPath();
+    ctx.ellipse(cx, cy + size*0.32, size*0.28, size*0.1, 0, 0, Math.PI*2);
+    ctx.fill();
+    ctx.stroke();
+    
+    // Tower body
+    const bodyGrad = createPieceGradient(x, y, size, isWhite);
+    bodyGrad.addColorStop(0, isWhite ? '#e0e0e0' : '#333');
+    bodyGrad.addColorStop(1, isWhite ? '#a0a0a0' : '#1a1a1a');
+    ctx.fillStyle = bodyGrad;
+    ctx.beginPath();
+    ctx.rect(cx - size*0.2, cy - size*0.15, size*0.4, size*0.48);
+    ctx.fill();
+    ctx.stroke();
+    
+    // Top platform
+    ctx.fillStyle = isWhite ? '#d0d0d0' : '#2a2a2a';
+    ctx.beginPath();
+    ctx.rect(cx - size*0.22, cy - size*0.18, size*0.44, size*0.06);
+    ctx.fill();
+    ctx.stroke();
+    
+    // Battlements
+    for (let i = -1; i <= 1; i++) {
+        ctx.fillStyle = isWhite ? '#e0e0e0' : '#333';
+        ctx.beginPath();
+        ctx.rect(cx + i*size*0.12 - size*0.06, cy - size*0.32, size*0.12, size*0.16);
+        ctx.fill();
+        ctx.stroke();
+        
+        // Top of battlement
+        ctx.fillStyle = isWhite ? '#d0d0d0' : '#2a2a2a';
+        ctx.beginPath();
+        ctx.rect(cx + i*size*0.12 - size*0.07, cy - size*0.35, size*0.14, size*0.05);
+        ctx.fill();
+        ctx.stroke();
+    }
+    
+    // Center tower top
+    ctx.fillStyle = isWhite ? '#d5d5d5' : '#2e2e2e';
+    ctx.beginPath();
+    ctx.rect(cx - size*0.08, cy - size*0.38, size*0.16, size*0.1);
+    ctx.fill();
+    ctx.stroke();
+    
+    // Highlight
+    ctx.beginPath();
+    ctx.rect(cx - size*0.12, cy - size*0.05, size*0.06, size*0.2);
+    ctx.fillStyle = isWhite ? 'rgba(255,255,255,0.4)' : 'rgba(255,255,255,0.1)';
+    ctx.fill();
+    
+    ctx.restore();
+}
+
+// Draw Bishop - Pointed hat with slit
+function drawBishop(x, y, size, isWhite) {
+    const cx = x + size/2;
+    const cy = y + size/2;
+    
+    ctx.save();
+    ctx.shadowBlur = 5;
+    ctx.shadowColor = 'rgba(0,0,0,0.4)';
+    ctx.shadowOffsetX = 2;
+    ctx.shadowOffsetY = 2;
+    
+    // Base
+    const baseGrad = createPieceGradient(x, y, size, isWhite);
+    baseGrad.addColorStop(0, isWhite ? '#f0f0f0' : '#3a3a3a');
+    baseGrad.addColorStop(1, isWhite ? '#c0c0c0' : '#1a1a1a');
+    ctx.fillStyle = baseGrad;
+    ctx.beginPath();
+    ctx.ellipse(cx, cy + size*0.32, size*0.28, size*0.1, 0, 0, Math.PI*2);
+    ctx.fill();
+    ctx.stroke();
+    
+    // Body
+    const bodyGrad = createPieceGradient(x, y, size, isWhite);
+    bodyGrad.addColorStop(0, isWhite ? '#e8e8e8' : '#333');
+    bodyGrad.addColorStop(1, isWhite ? '#b0b0b0' : '#1a1a1a');
+    ctx.fillStyle = bodyGrad;
+    ctx.beginPath();
+    ctx.moveTo(cx - size*0.18, cy - size*0.05);
+    ctx.lineTo(cx - size*0.22, cy + size*0.3);
+    ctx.lineTo(cx + size*0.22, cy + size*0.3);
+    ctx.lineTo(cx + size*0.18, cy - size*0.05);
+    ctx.fill();
+    ctx.stroke();
+    
+    // Neck
+    ctx.beginPath();
+    ctx.rect(cx - size*0.1, cy - size*0.2, size*0.2, size*0.18);
+    ctx.fill();
+    ctx.stroke();
+    
+    // Hat (cone shaped)
+    const hatGrad = createPieceGradient(x, y, size, isWhite);
+    hatGrad.addColorStop(0, isWhite ? '#e0e0e0' : '#3a3a3a');
+    hatGrad.addColorStop(1, isWhite ? '#c0c0c0' : '#2a2a2a');
+    ctx.fillStyle = hatGrad;
+    ctx.beginPath();
+    ctx.moveTo(cx - size*0.14, cy - size*0.22);
+    ctx.lineTo(cx, cy - size*0.52);
+    ctx.lineTo(cx + size*0.14, cy - size*0.22);
+    ctx.fill();
+    ctx.stroke();
+    
+    // Hat brim
+    ctx.fillStyle = isWhite ? '#d0d0d0' : '#2a2a2a';
+    ctx.beginPath();
+    ctx.ellipse(cx, cy - size*0.24, size*0.18, size*0.06, 0, 0, Math.PI*2);
+    ctx.fill();
+    ctx.stroke();
+    
+    // Slit in hat
+    ctx.fillStyle = isWhite ? '#8B4513' : '#5a3a1a';
+    ctx.beginPath();
+    ctx.ellipse(cx, cy - size*0.32, size*0.05, size*0.12, 0, 0, Math.PI*2);
+    ctx.fill();
+    
+    // Cross on top
+    ctx.fillStyle = '#ffd700';
+    ctx.beginPath();
+    ctx.rect(cx - size*0.03, cy - size*0.55, size*0.06, size*0.08);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.rect(cx - size*0.1, cy - size*0.52, size*0.2, size*0.05);
+    ctx.fill();
+    
+    // Highlight
+    ctx.beginPath();
+    ctx.arc(cx - size*0.05, cy - size*0.1, size*0.04, 0, Math.PI*2);
+    ctx.fillStyle = isWhite ? 'rgba(255,255,255,0.5)' : 'rgba(255,255,255,0.15)';
+    ctx.fill();
+    
+    ctx.restore();
+}
+
+// Draw Knight - Horse head with mane
+function drawKnight(x, y, size, isWhite) {
+    const cx = x + size/2;
+    const cy = y + size/2;
+    
+    ctx.save();
+    ctx.shadowBlur = 5;
+    ctx.shadowColor = 'rgba(0,0,0,0.4)';
+    ctx.shadowOffsetX = 2;
+    ctx.shadowOffsetY = 2;
+    
+    // Base
+    const baseGrad = createPieceGradient(x, y, size, isWhite);
+    baseGrad.addColorStop(0, isWhite ? '#f0f0f0' : '#3a3a3a');
+    baseGrad.addColorStop(1, isWhite ? '#c0c0c0' : '#1a1a1a');
+    ctx.fillStyle = baseGrad;
+    ctx.beginPath();
+    ctx.ellipse(cx, cy + size*0.32, size*0.28, size*0.1, 0, 0, Math.PI*2);
+    ctx.fill();
+    ctx.stroke();
+    
+    // Body/Neck
+    const bodyGrad = createPieceGradient(x, y, size, isWhite);
+    bodyGrad.addColorStop(0, isWhite ? '#e0e0e0' : '#333');
+    bodyGrad.addColorStop(1, isWhite ? '#a0a0a0' : '#1a1a1a');
+    ctx.fillStyle = bodyGrad;
+    ctx.beginPath();
+    ctx.moveTo(cx - size*0.18, cy - size*0.05);
+    ctx.lineTo(cx - size*0.22, cy + size*0.3);
+    ctx.lineTo(cx + size*0.22, cy + size*0.3);
+    ctx.lineTo(cx + size*0.18, cy - size*0.05);
+    ctx.fill();
+    ctx.stroke();
+    
+    // Horse head
+    const headGrad = createPieceGradient(x, y, size, isWhite);
+    headGrad.addColorStop(0, isWhite ? '#e8e8e8' : '#3a3a3a');
+    headGrad.addColorStop(1, isWhite ? '#c8c8c8' : '#2a2a2a');
+    ctx.fillStyle = headGrad;
+    ctx.beginPath();
+    ctx.moveTo(cx - size*0.05, cy - size*0.45);
+    ctx.quadraticCurveTo(cx + size*0.15, cy - size*0.4, cx + size*0.12, cy - size*0.2);
+    ctx.quadraticCurveTo(cx + size*0.08, cy - size*0.05, cx, cy - size*0.05);
+    ctx.fill();
+    ctx.stroke();
+    
+    // Snout
+    ctx.fillStyle = isWhite ? '#d0d0d0' : '#2a2a2a';
+    ctx.beginPath();
+    ctx.ellipse(cx + size*0.1, cy - size*0.32, size*0.08, size*0.06, 0.2, 0, Math.PI*2);
+    ctx.fill();
+    ctx.stroke();
+    
+    // Eye
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.arc(cx + size*0.08, cy - size*0.38, size*0.04, 0, Math.PI*2);
+    ctx.fill();
+    ctx.fillStyle = '#1a1a1a';
+    ctx.beginPath();
+    ctx.arc(cx + size*0.09, cy - size*0.38, size*0.02, 0, Math.PI*2);
+    ctx.fill();
+    
+    // Ear
+    ctx.fillStyle = isWhite ? '#d8d8d8' : '#323232';
+    ctx.beginPath();
+    ctx.moveTo(cx + size*0.05, cy - size*0.48);
+    ctx.lineTo(cx, cy - size*0.56);
+    ctx.lineTo(cx + size*0.1, cy - size*0.52);
+    ctx.fill();
+    ctx.stroke();
+    
+    // Mane
+    for (let i = 0; i < 5; i++) {
+        ctx.fillStyle = isWhite ? '#b0b0b0' : '#1a1a1a';
+        ctx.beginPath();
+        ctx.moveTo(cx - size*0.02 - i*size*0.02, cy - size*0.42 + i*size*0.04);
+        ctx.lineTo(cx - size*0.12 - i*size*0.015, cy - size*0.38 + i*size*0.05);
+        ctx.lineTo(cx - size*0.05 - i*size*0.01, cy - size*0.35 + i*size*0.04);
+        ctx.fill();
+    }
+    
+    // Nostril
+    ctx.fillStyle = '#5a3a1a';
+    ctx.beginPath();
+    ctx.arc(cx + size*0.13, cy - size*0.3, size*0.02, 0, Math.PI*2);
+    ctx.fill();
+    
+    // Highlight
+    ctx.beginPath();
+    ctx.rect(cx - size*0.12, cy - size*0.02, size*0.06, size*0.15);
+    ctx.fillStyle = isWhite ? 'rgba(255,255,255,0.4)' : 'rgba(255,255,255,0.1)';
+    ctx.fill();
+    
+    ctx.restore();
+}
+
+// Draw Pawn - Simple but elegant
+function drawPawn(x, y, size, isWhite) {
+    const cx = x + size/2;
+    const cy = y + size/2;
+    
+    ctx.save();
+    ctx.shadowBlur = 5;
+    ctx.shadowColor = 'rgba(0,0,0,0.4)';
+    ctx.shadowOffsetX = 2;
+    ctx.shadowOffsetY = 2;
+    
+    // Base
+    const baseGrad = createPieceGradient(x, y, size, isWhite);
+    baseGrad.addColorStop(0, isWhite ? '#f0f0f0' : '#3a3a3a');
+    baseGrad.addColorStop(1, isWhite ? '#c0c0c0' : '#1a1a1a');
+    ctx.fillStyle = baseGrad;
+    ctx.beginPath();
+    ctx.ellipse(cx, cy + size*0.32, size*0.24, size*0.09, 0, 0, Math.PI*2);
+    ctx.fill();
+    ctx.stroke();
+    
+    // Body (tapered)
+    const bodyGrad = createPieceGradient(x, y, size, isWhite);
+    bodyGrad.addColorStop(0, isWhite ? '#e8e8e8' : '#333');
+    bodyGrad.addColorStop(1, isWhite ? '#b0b0b0' : '#1a1a1a');
+    ctx.fillStyle = bodyGrad;
+    ctx.beginPath();
+    ctx.moveTo(cx - size*0.14, cy - size*0.08);
+    ctx.lineTo(cx - size*0.18, cy + size*0.28);
+    ctx.lineTo(cx + size*0.18, cy + size*0.28);
+    ctx.lineTo(cx + size*0.14, cy - size*0.08);
+    ctx.fill();
+    ctx.stroke();
+    
+    // Neck
+    ctx.beginPath();
+    ctx.rect(cx - size*0.08, cy - size*0.2, size*0.16, size*0.14);
+    ctx.fill();
+    ctx.stroke();
+    
+    // Head (ball)
+    const headGrad = createPieceGradient(x, y, size, isWhite);
+    headGrad.addColorStop(0, isWhite ? '#f5f5f5' : '#444');
+    headGrad.addColorStop(1, isWhite ? '#d0d0d0' : '#2a2a2a');
+    ctx.fillStyle = headGrad;
+    ctx.beginPath();
+    ctx.arc(cx, cy - size*0.28, size*0.12, 0, Math.PI*2);
+    ctx.fill();
+    ctx.stroke();
+    
+    // Collar
+    ctx.fillStyle = isWhite ? '#d0d0d0' : '#2a2a2a';
+    ctx.beginPath();
+    ctx.ellipse(cx, cy - size*0.16, size*0.12, size*0.04, 0, 0, Math.PI*2);
+    ctx.fill();
+    ctx.stroke();
+    
+    // Highlight on head
+    ctx.beginPath();
+    ctx.arc(cx - size*0.04, cy - size*0.32, size*0.04, 0, Math.PI*2);
+    ctx.fillStyle = isWhite ? 'rgba(255,255,255,0.6)' : 'rgba(255,255,255,0.2)';
+    ctx.fill();
+    
+    ctx.restore();
+}
+
+// Main draw piece function
+function drawPiece(piece, x, y, size) {
+    if (!piece) return;
+    
+    const isWhite = '♔♕♖♗♘♙'.includes(piece);
+    const pieceType = getPieceType(piece);
+    
+    switch(pieceType) {
+        case 'king':
+            drawKing(x, y, size, isWhite);
+            break;
+        case 'queen':
+            drawQueen(x, y, size, isWhite);
+            break;
+        case 'rook':
+            drawRook(x, y, size, isWhite);
+            break;
+        case 'bishop':
+            drawBishop(x, y, size, isWhite);
+            break;
+        case 'knight':
+            drawKnight(x, y, size, isWhite);
+            break;
+        case 'pawn':
+            drawPawn(x, y, size, isWhite);
+            break;
+    }
+}
+
+// Helper functions
 function getPieceType(piece) {
     if (!piece) return null;
     const typeMap = {
@@ -65,279 +591,18 @@ function getPieceType(piece) {
     return typeMap[piece];
 }
 
-// Draw realistic chess piece with 3D effect
-function drawPiece(piece, x, y, size) {
-    if (!piece) return;
-    
-    const isWhite = isWhitePiece(piece);
-    const pieceType = getPieceType(piece);
-    const centerX = x + size/2;
-    const centerY = y + size/2;
-    
-    // Save context state
-    ctx.save();
-    
-    // Add shadow for 3D effect
-    ctx.shadowBlur = 4;
-    ctx.shadowColor = 'rgba(0,0,0,0.4)';
-    ctx.shadowOffsetX = 2;
-    ctx.shadowOffsetY = 2;
-    
-    // Set colors based on piece color
-    if (isWhite) {
-        ctx.fillStyle = '#f5f5f5';
-        ctx.strokeStyle = '#333';
-        ctx.shadowColor = 'rgba(0,0,0,0.3)';
-    } else {
-        ctx.fillStyle = '#2c2c2c';
-        ctx.strokeStyle = '#1a1a1a';
-        ctx.shadowColor = 'rgba(0,0,0,0.5)';
-    }
-    
-    ctx.lineWidth = 1.5;
-    
-    // Draw different piece shapes
-    switch(pieceType) {
-        case 'king':
-            // King - tallest piece with cross on top
-            ctx.beginPath();
-            // Base
-            ctx.ellipse(centerX, centerY + size*0.35, size*0.25, size*0.1, 0, 0, Math.PI*2);
-            ctx.fill();
-            ctx.stroke();
-            // Body
-            ctx.beginPath();
-            ctx.rect(centerX - size*0.2, centerY - size*0.15, size*0.4, size*0.5);
-            ctx.fill();
-            ctx.stroke();
-            // Head
-            ctx.beginPath();
-            ctx.arc(centerX, centerY - size*0.25, size*0.2, 0, Math.PI*2);
-            ctx.fill();
-            ctx.stroke();
-            // Cross on top
-            ctx.beginPath();
-            ctx.rect(centerX - size*0.05, centerY - size*0.45, size*0.1, size*0.25);
-            ctx.fill();
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.rect(centerX - size*0.15, centerY - size*0.38, size*0.3, size*0.08);
-            ctx.fill();
-            ctx.stroke();
-            break;
-            
-        case 'queen':
-            // Queen - elegant with crown
-            ctx.beginPath();
-            ctx.ellipse(centerX, centerY + size*0.35, size*0.25, size*0.1, 0, 0, Math.PI*2);
-            ctx.fill();
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.rect(centerX - size*0.18, centerY - size*0.1, size*0.36, size*0.45);
-            ctx.fill();
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.arc(centerX, centerY - size*0.2, size*0.18, 0, Math.PI*2);
-            ctx.fill();
-            ctx.stroke();
-            // Crown spikes
-            for(let i = -1; i <= 1; i++) {
-                ctx.beginPath();
-                ctx.rect(centerX + i*size*0.12, centerY - size*0.38, size*0.06, size*0.2);
-                ctx.fill();
-                ctx.stroke();
-            }
-            break;
-            
-        case 'rook':
-            // Rook - castle with battlements
-            ctx.beginPath();
-            ctx.ellipse(centerX, centerY + size*0.35, size*0.25, size*0.1, 0, 0, Math.PI*2);
-            ctx.fill();
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.rect(centerX - size*0.2, centerY - size*0.15, size*0.4, size*0.5);
-            ctx.fill();
-            ctx.stroke();
-            // Battlements
-            for(let i = -1; i <= 1; i++) {
-                ctx.beginPath();
-                ctx.rect(centerX + i*size*0.15, centerY - size*0.35, size*0.1, size*0.25);
-                ctx.fill();
-                ctx.stroke();
-            }
-            break;
-            
-        case 'bishop':
-            // Bishop - pointed hat with slit
-            ctx.beginPath();
-            ctx.ellipse(centerX, centerY + size*0.35, size*0.25, size*0.1, 0, 0, Math.PI*2);
-            ctx.fill();
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.rect(centerX - size*0.18, centerY - size*0.1, size*0.36, size*0.45);
-            ctx.fill();
-            ctx.stroke();
-            // Pointed top
-            ctx.beginPath();
-            ctx.moveTo(centerX, centerY - size*0.42);
-            ctx.lineTo(centerX - size*0.12, centerY - size*0.2);
-            ctx.lineTo(centerX + size*0.12, centerY - size*0.2);
-            ctx.fill();
-            ctx.stroke();
-            // Slit
-            ctx.beginPath();
-            ctx.ellipse(centerX, centerY - size*0.05, size*0.05, size*0.12, 0, 0, Math.PI*2);
-            ctx.fillStyle = isWhite ? '#ddd' : '#444';
-            ctx.fill();
-            ctx.stroke();
-            break;
-            
-        case 'knight':
-            // Knight - horse head
-            ctx.beginPath();
-            ctx.ellipse(centerX, centerY + size*0.35, size*0.25, size*0.1, 0, 0, Math.PI*2);
-            ctx.fill();
-            ctx.stroke();
-            // Neck
-            ctx.beginPath();
-            ctx.rect(centerX - size*0.15, centerY - size*0.1, size*0.3, size*0.45);
-            ctx.fill();
-            ctx.stroke();
-            // Horse head
-            ctx.beginPath();
-            ctx.arc(centerX + size*0.08, centerY - size*0.25, size*0.16, 0, Math.PI*2);
-            ctx.fill();
-            ctx.stroke();
-            // Mane
-            ctx.beginPath();
-            ctx.moveTo(centerX - size*0.05, centerY - size*0.38);
-            ctx.lineTo(centerX - size*0.15, centerY - size*0.28);
-            ctx.lineTo(centerX - size*0.08, centerY - size*0.22);
-            ctx.fill();
-            ctx.stroke();
-            // Ear
-            ctx.beginPath();
-            ctx.moveTo(centerX + size*0.12, centerY - size*0.4);
-            ctx.lineTo(centerX + size*0.08, centerY - size*0.48);
-            ctx.lineTo(centerX + size*0.16, centerY - size*0.44);
-            ctx.fill();
-            ctx.stroke();
-            break;
-            
-        case 'pawn':
-            // Pawn - simple with ball on top
-            ctx.beginPath();
-            ctx.ellipse(centerX, centerY + size*0.3, size*0.22, size*0.09, 0, 0, Math.PI*2);
-            ctx.fill();
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.rect(centerX - size*0.14, centerY - size*0.05, size*0.28, size*0.35);
-            ctx.fill();
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.arc(centerX, centerY - size*0.2, size*0.12, 0, Math.PI*2);
-            ctx.fill();
-            ctx.stroke();
-            break;
-    }
-    
-    // Add highlight/gloss effect
-    ctx.shadowBlur = 0;
-    ctx.beginPath();
-    ctx.arc(centerX - size*0.08, centerY - size*0.1, size*0.05, 0, Math.PI*2);
-    ctx.fillStyle = isWhite ? 'rgba(255,255,255,0.5)' : 'rgba(150,150,150,0.3)';
-    ctx.fill();
-    
-    ctx.restore();
+function isWhitePiece(piece) {
+    return '♔♕♖♗♘♙'.includes(piece);
 }
 
-// Draw the chess board
-function drawBoard() {
-    for (let row = 0; row < 8; row++) {
-        for (let col = 0; col < 8; col++) {
-            const x = col * squareSize;
-            const y = row * squareSize;
-            
-            // Draw square
-            const isLight = (row + col) % 2 === 0;
-            ctx.fillStyle = isLight ? lightSquareColor : darkSquareColor;
-            ctx.fillRect(x, y, squareSize, squareSize);
-            
-            // Draw board border
-            ctx.strokeStyle = '#2e7d32';
-            ctx.lineWidth = 0.5;
-            ctx.strokeRect(x, y, squareSize, squareSize);
-        }
-    }
-    
-    // Draw coordinate labels
-    ctx.font = 'bold 14px Arial';
-    ctx.fillStyle = '#1b5e20';
-    for (let i = 0; i < 8; i++) {
-        ctx.fillText(String.fromCharCode(65 + i), i * squareSize + 5, squareSize - 5);
-        ctx.fillText(8 - i, 5, i * squareSize + 20);
-    }
+function isBlackPiece(piece) {
+    return '♚♛♜♝♞♟'.includes(piece);
 }
 
-// Highlight valid moves and selected piece
-function drawHighlights() {
-    if (selectedSquare) {
-        const { row, col } = selectedSquare;
-        const x = col * squareSize;
-        const y = row * squareSize;
-        ctx.fillStyle = highlightColor;
-        ctx.fillRect(x, y, squareSize, squareSize);
-    }
-    
-    for (const move of validMoves) {
-        const x = move.col * squareSize;
-        const y = move.row * squareSize;
-        ctx.fillStyle = highlightColor;
-        ctx.fillRect(x, y, squareSize, squareSize);
-        
-        // Draw dot in center for capture moves
-        if (board[move.row][move.col]) {
-            ctx.beginPath();
-            ctx.arc(x + squareSize/2, y + squareSize/2, squareSize/6, 0, Math.PI * 2);
-            ctx.fillStyle = 'rgba(255,0,0,0.5)';
-            ctx.fill();
-        }
-    }
-    
-    // Highlight king in check
-    for (let row = 0; row < 8; row++) {
-        for (let col = 0; col < 8; col++) {
-            const piece = board[row][col];
-            if (piece === '♔' && isKingInCheck('white')) {
-                const x = col * squareSize;
-                const y = row * squareSize;
-                ctx.fillStyle = checkColor;
-                ctx.fillRect(x, y, squareSize, squareSize);
-            }
-            if (piece === '♚' && isKingInCheck('black')) {
-                const x = col * squareSize;
-                const y = row * squareSize;
-                ctx.fillStyle = checkColor;
-                ctx.fillRect(x, y, squareSize, squareSize);
-            }
-        }
-    }
-}
+// ========================================
+// GAME LOGIC
+// ========================================
 
-// Draw all pieces
-function drawPieces() {
-    for (let row = 0; row < 8; row++) {
-        for (let col = 0; col < 8; col++) {
-            const piece = board[row][col];
-            if (piece) {
-                drawPiece(piece, col * squareSize, row * squareSize, squareSize);
-            }
-        }
-    }
-}
-
-// Check if path is clear for rook/bishop/queen
 function isClearPath(fromRow, fromCol, toRow, toCol) {
     const rowStep = Math.sign(toRow - fromRow);
     const colStep = Math.sign(toCol - fromCol);
@@ -352,11 +617,9 @@ function isClearPath(fromRow, fromCol, toRow, toCol) {
     return true;
 }
 
-// Check if move is valid
 function isValidMove(piece, fromRow, fromCol, toRow, toCol) {
     const targetPiece = board[toRow][toCol];
     
-    // Can't capture own piece
     if (targetPiece) {
         if ((isWhitePiece(piece) && isWhitePiece(targetPiece)) ||
             (isBlackPiece(piece) && isBlackPiece(targetPiece))) {
@@ -372,27 +635,19 @@ function isValidMove(piece, fromRow, fromCol, toRow, toCol) {
         case 'pawn':
             const direction = isWhitePiece(piece) ? -1 : 1;
             const startRow = isWhitePiece(piece) ? 6 : 1;
-            
-            // Move forward one
             if (colDiff === 0 && rowDiff === direction && !targetPiece) return true;
-            // Move forward two from start
             if (colDiff === 0 && rowDiff === 2 * direction && fromRow === startRow && !targetPiece && !board[fromRow + direction][fromCol]) return true;
-            // Capture diagonally
             if (Math.abs(colDiff) === 1 && rowDiff === direction && targetPiece) return true;
             return false;
-            
         case 'rook':
             if (fromRow !== toRow && fromCol !== toCol) return false;
             return isClearPath(fromRow, fromCol, toRow, toCol);
-            
         case 'knight':
             return (Math.abs(rowDiff) === 2 && Math.abs(colDiff) === 1) ||
                    (Math.abs(rowDiff) === 1 && Math.abs(colDiff) === 2);
-                   
         case 'bishop':
             if (Math.abs(rowDiff) !== Math.abs(colDiff)) return false;
             return isClearPath(fromRow, fromCol, toRow, toCol);
-            
         case 'queen':
             if (fromRow === toRow || fromCol === toCol) {
                 return isClearPath(fromRow, fromCol, toRow, toCol);
@@ -401,14 +656,12 @@ function isValidMove(piece, fromRow, fromCol, toRow, toCol) {
                 return isClearPath(fromRow, fromCol, toRow, toCol);
             }
             return false;
-            
         case 'king':
             return Math.abs(rowDiff) <= 1 && Math.abs(colDiff) <= 1;
     }
     return false;
 }
 
-// Get all valid moves for a piece
 function getValidMoves(row, col) {
     const piece = board[row][col];
     if (!piece) return [];
@@ -428,7 +681,6 @@ function getValidMoves(row, col) {
     return moves;
 }
 
-// Check if king is in check
 function isKingInCheck(color) {
     const king = color === 'white' ? '♔' : '♚';
     let kingRow = -1, kingCol = -1;
@@ -457,203 +709,14 @@ function isKingInCheck(color) {
     return false;
 }
 
-// Make a move
 function makeMove(fromRow, fromCol, toRow, toCol) {
     const piece = board[fromRow][fromCol];
     const capturedPiece = board[toRow][toCol];
     
-    // Save to history
-    moveHistory.push({
-        from: { row: fromRow, col: fromCol },
-        to: { row: toRow, col: toCol },
-        piece: piece,
-        captured: capturedPiece
-    });
-    
-    // Move piece
     board[toRow][toCol] = piece;
     board[fromRow][fromCol] = '';
     
-    // Update captured pieces
     if (capturedPiece) {
         if (isWhitePiece(capturedPiece)) {
             whiteCaptured.push(capturedPiece);
-        } else {
-            blackCaptured.push(capturedPiece);
-        }
-        updateCapturedDisplay();
-    }
-    
-    // Check if move puts own king in check - undo if so
-    if (isKingInCheck(currentPlayer)) {
-        board[fromRow][fromCol] = piece;
-        board[toRow][toCol] = capturedPiece;
-        if (capturedPiece) {
-            if (isWhitePiece(capturedPiece)) {
-                whiteCaptured.pop();
-            } else {
-                blackCaptured.pop();
-            }
-            updateCapturedDisplay();
-        }
-        moveHistory.pop();
-        return false;
-    }
-    
-    return true;
-}
-
-// Check for checkmate
-function isCheckmate() {
-    for (let i = 0; i < 8; i++) {
-        for (let j = 0; j < 8; j++) {
-            const piece = board[i][j];
-            if (piece && ((currentPlayer === 'white' && isWhitePiece(piece)) ||
-                         (currentPlayer === 'black' && isBlackPiece(piece)))) {
-                const moves = getValidMoves(i, j);
-                for (const move of moves) {
-                    // Test if move gets out of check
-                    const testPiece = board[i][j];
-                    const targetPiece = board[move.row][move.col];
-                    board[move.row][move.col] = testPiece;
-                    board[i][j] = '';
-                    const stillInCheck = isKingInCheck(currentPlayer);
-                    board[i][j] = testPiece;
-                    board[move.row][move.col] = targetPiece;
-                    
-                    if (!stillInCheck) return false;
-                }
-            }
-        }
-    }
-    return true;
-}
-
-// Update captured pieces display
-function updateCapturedDisplay() {
-    document.getElementById('whiteCaptured').textContent = whiteCaptured.length;
-    document.getElementById('blackCaptured').textContent = blackCaptured.length;
-}
-
-// Switch turns
-function switchTurn() {
-    currentPlayer = currentPlayer === 'white' ? 'black' : 'white';
-    const turnIndicator = document.getElementById('turnIndicator');
-    if (currentPlayer === 'white') {
-        turnIndicator.innerHTML = '<span>⚪</span> White\'s Turn';
-    } else {
-        turnIndicator.innerHTML = '<span>⚫</span> Black\'s Turn';
-    }
-    
-    if (isKingInCheck(currentPlayer)) {
-        if (isCheckmate()) {
-            const winner = currentPlayer === 'white' ? 'Black' : 'White';
-            document.getElementById('status').innerHTML = `🏆 CHECKMATE! ${winner} wins! 🏆`;
-            gameActive = false;
-        } else {
-            document.getElementById('status').innerHTML = '⚠️ CHECK! ⚠️';
-            setTimeout(() => {
-                if (document.getElementById('status').innerHTML === '⚠️ CHECK! ⚠️') {
-                    document.getElementById('status').innerHTML = '';
-                }
-            }, 1500);
-        }
-    }
-}
-
-// Handle square click
-function handleSquareClick(row, col) {
-    if (!gameActive) return;
-    
-    // Check if a move is selected
-    const move = validMoves.find(m => m.row === row && m.col === col);
-    if (move && selectedSquare) {
-        if (makeMove(selectedSquare.row, selectedSquare.col, row, col)) {
-            selectedSquare = null;
-            validMoves = [];
-            drawBoard();
-            drawHighlights();
-            drawPieces();
-            switchTurn();
-            drawBoard();
-            drawHighlights();
-            drawPieces();
-        }
-        return;
-    }
-    
-    // Select a piece
-    const piece = board[row][col];
-    if (piece && ((currentPlayer === 'white' && isWhitePiece(piece)) ||
-                 (currentPlayer === 'black' && isBlackPiece(piece)))) {
-        selectedSquare = { row, col };
-        validMoves = getValidMoves(row, col);
-    } else {
-        selectedSquare = null;
-        validMoves = [];
-    }
-    
-    drawBoard();
-    drawHighlights();
-    drawPieces();
-}
-
-// Reset game
-function resetGame() {
-    board = [
-        ['♜', '♞', '♝', '♛', '♚', '♝', '♞', '♜'],
-        ['♟', '♟', '♟', '♟', '♟', '♟', '♟', '♟'],
-        ['', '', '', '', '', '', '', ''],
-        ['', '', '', '', '', '', '', ''],
-        ['', '', '', '', '', '', '', ''],
-        ['', '', '', '', '', '', '', ''],
-        ['♙', '♙', '♙', '♙', '♙', '♙', '♙', '♙'],
-        ['♖', '♘', '♗', '♕', '♔', '♗', '♘', '♖']
-    ];
-    currentPlayer = 'white';
-    selectedSquare = null;
-    validMoves = [];
-    gameActive = true;
-    whiteCaptured = [];
-    blackCaptured = [];
-    moveHistory = [];
-    
-    document.getElementById('turnIndicator').innerHTML = '<span>⚪</span> White\'s Turn';
-    document.getElementById('status').innerHTML = '';
-    updateCapturedDisplay();
-    
-    drawBoard();
-    drawHighlights();
-    drawPieces();
-}
-
-// Canvas click handler
-canvas.addEventListener('click', (e) => {
-    const rect = canvas.getBoundingClientRect();
-    const scaleX = canvas.width / rect.width;
-    const scaleY = canvas.height / rect.height;
-    const x = (e.clientX - rect.left) * scaleX;
-    const y = (e.clientY - rect.top) * scaleY;
-    const col = Math.floor(x / squareSize);
-    const row = Math.floor(y / squareSize);
-    
-    if (row >= 0 && row < 8 && col >= 0 && col < 8) {
-        handleSquareClick(row, col);
-    }
-});
-
-// Button listeners
-document.getElementById('resetBtn').addEventListener('click', resetGame);
-document.getElementById('backBtn').addEventListener('click', () => {
-    window.location.href = '../index.html';
-});
-
-// Initialize game
-function init() {
-    drawBoard();
-    drawPieces();
-}
-
-init();
-
-console.log('♜ Realistic Chess Game Loaded! Light green board with 3D pieces!');
+        } else
