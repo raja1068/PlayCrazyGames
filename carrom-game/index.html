@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-  <title>Carrom Board Master – Power Slider & Precision Aim</title>
+  <title>Carrom · Precision Strike · No Rolling Physics</title>
   <style>
     * {
       box-sizing: border-box;
@@ -22,7 +22,6 @@
       padding: 20px;
     }
 
-    /* main game container */
     .game-container {
       max-width: 1350px;
       width: 100%;
@@ -230,7 +229,8 @@
       <div class="msg-area" id="gameMsg">
         🎯 Drag striker on your baseline to reposition.<br>
         👉 Then drag from striker → aim direction → release.<br>
-        ⚡ Power = slider value. Shoot with arrow guide!
+        ⚡ Power = slider value. Shoot with arrow guide!<br>
+        🔥 Crisp impact: coins stop quickly.
       </div>
       <div class="shortcut-help">
         ⌨️ <kbd>A/D</kbd> move striker · <kbd>Space</kbd> quick aim · <kbd>R</kbd> restart
@@ -241,12 +241,12 @@
 
 <script>
   (function(){
-    // ---- canvas & dimensions ----
+    // ---- canvas ----
     const canvas = document.getElementById('carromCanvas');
     const ctx = canvas.getContext('2d');
     const W = canvas.width = 860, H = canvas.height = 860;
 
-    // board geometry (light orange & black borders)
+    // board geometry (light orange board with black sidebars)
     const board = {
       x: 68, y: 68, w: 724, h: 724,
       pocketR: 32,
@@ -262,22 +262,18 @@
     let winner = null;
     let shotCounter = 0;
     
-    // pocket tracking for turn retention
     let pocketedThisShot = [];       // store colors that got pocketed during active shot
     let strikerFoulThisShot = false;
     let queenPocketed = false;       // queen currently pocketed but not covered
     let queenCovered = false;
     let queenCoveredBy = null;
     
-    // striker and coins arrays
     let coins = [];
     let striker = null;
     let particles = [];
     
     // aim guide data
     let aimDirection = { x: 0, y: 0, active: false };
-    let predictedHitCoin = null;    // first coin along ray
-    let predictedPocketLine = null;  // { toX, toY }
     
     // power slider
     const powerSlider = document.getElementById('powerSlider');
@@ -306,7 +302,7 @@
     function currentPlayersCount() { return mode === '4' ? 4 : 2; }
     function isBotTurn() { return mode === 'bot' && currentPlayer === 1 && !activeShot && !aimingMode && !winner; }
     
-    // baseline line: position & limits for striker placement
+    // baseline bounds for striker placement
     function getBaselineBounds() {
       const pIdx = currentPlayer;
       if(pIdx === 0) return { xMin: board.x + 48, xMax: board.x + board.w - 48, yFixed: board.y + board.h - 28, axis: 'x' };
@@ -328,7 +324,7 @@
       striker.static = true;
     }
     
-    // Reset full game
+    // reset game fully
     function resetGame() {
       winner = null;
       currentPlayer = 0;
@@ -347,7 +343,7 @@
       
       initCoinsAndStriker();
       updateUI();
-      setGameMessage("Game started! Place striker on baseline, use power slider & aim arrow!");
+      setGameMessage("Game started! Use power slider, aim, strike — no rolling, crisp hits!");
       if(isBotTurn()) setTimeout(botPlay, 600);
     }
     
@@ -371,14 +367,29 @@
       setStrikerOnBaseline();
     }
     
-    // =========== PHYSICS & REALISTIC COLLISION ==========
+    // =========== IMPROVED PHYSICS : NO ROLLING, CRISP STOP ==========
+    // High friction + immediate halt when near zero = coins stop without endless rolling
+    const STOP_VELOCITY_THRESHOLD = 0.45;   // any velocity below this becomes zero
+    const FRICTION_AIR = 0.96;             // strong deceleration
+    
+    function applyFrictionAndStop(obj) {
+      if(obj.static) return;
+      obj.vx *= FRICTION_AIR;
+      obj.vy *= FRICTION_AIR;
+      if (Math.abs(obj.vx) < STOP_VELOCITY_THRESHOLD) obj.vx = 0;
+      if (Math.abs(obj.vy) < STOP_VELOCITY_THRESHOLD) obj.vy = 0;
+      if (obj.vx === 0 && obj.vy === 0) obj.static = true;
+    }
+    
     function wallBoundary(c) {
       const minX = board.x + 20, maxX = board.x + board.w - 20;
       const minY = board.y + 20, maxY = board.y + board.h - 20;
-      if(c.x - c.r < minX) { c.x = minX + c.r; c.vx *= -0.88; }
-      if(c.x + c.r > maxX) { c.x = maxX - c.r; c.vx *= -0.88; }
-      if(c.y - c.r < minY) { c.y = minY + c.r; c.vy *= -0.88; }
-      if(c.y + c.r > maxY) { c.y = maxY - c.r; c.vy *= -0.88; }
+      let bounced = false;
+      if(c.x - c.r < minX) { c.x = minX + c.r; c.vx = -c.vx * 0.88; bounced = true; }
+      if(c.x + c.r > maxX) { c.x = maxX - c.r; c.vx = -c.vx * 0.88; bounced = true; }
+      if(c.y - c.r < minY) { c.y = minY + c.r; c.vy = -c.vy * 0.88; bounced = true; }
+      if(c.y + c.r > maxY) { c.y = maxY - c.r; c.vy = -c.vy * 0.88; bounced = true; }
+      if(bounced) applyFrictionAndStop(c);
     }
     
     function isPocketed(c) {
@@ -398,6 +409,7 @@
       }
     }
     
+    // collision with restitution = crisp impact (high bounciness but then friction kills rolling)
     function resolveCollision(a,b) {
       if(!a.alive || !b.alive) return;
       const dx = b.x - a.x, dy = b.y - a.y;
@@ -413,10 +425,13 @@
       const dvx = a.vx - b.vx, dvy = a.vy - b.vy;
       const reln = dvx*nx + dvy*ny;
       if(reln > 0) return;
-      const e = 0.92;
+      const e = 0.92;   // good bounce
       const imp = -reln * e;
       a.vx += imp * nx; a.vy += imp * ny;
       b.vx -= imp * nx; b.vy -= imp * ny;
+      // ensure they don't stay micro-moving
+      applyFrictionAndStop(a);
+      applyFrictionAndStop(b);
     }
     
     function handlePocket(coin) {
@@ -447,19 +462,18 @@
     
     function updatePhysicsAndCollisions() {
       if(!activeShot) return;
-      let allMoving = false;
+      let anyMotion = false;
       const allObjects = [striker, ...coins.filter(c=>c.alive)];
-      // move & apply friction
+      
+      // move & apply friction & pocket check
       for(let obj of allObjects) {
         if(!obj.static) {
           obj.x += obj.vx;
           obj.y += obj.vy;
-          obj.vx *= 0.992;
-          obj.vy *= 0.992;
-          if(Math.abs(obj.vx) < 0.02) obj.vx = 0;
-          if(Math.abs(obj.vy) < 0.02) obj.vy = 0;
-          if(Math.abs(obj.vx) > 0.01 || Math.abs(obj.vy) > 0.01) allMoving = true;
+          applyFrictionAndStop(obj);
+          if (obj.vx !== 0 || obj.vy !== 0) anyMotion = true;
           wallBoundary(obj);
+          // immediate pocket detection during movement
           if(isPocketed(obj)) {
             handlePocket(obj);
             if(obj.color === 'striker') {
@@ -470,13 +484,15 @@
           }
         }
       }
-      // collisions
+      
+      // collisions between all moving objects
       for(let i=0;i<allObjects.length;i++) {
         for(let j=i+1;j<allObjects.length;j++) {
           resolveCollision(allObjects[i], allObjects[j]);
         }
       }
-      // after pocketed queen, check cover condition (any pocketed coin after queen)
+      
+      // after pocket events, check queen cover condition (if any coin pocketed after queen)
       if(queenPocketed && !queenCovered && pocketedThisShot.length > 0 && !strikerFoulThisShot) {
         queenCovered = true;
         queenCoveredBy = currentPlayer;
@@ -484,28 +500,33 @@
         setGameMessage(`✨ Queen covered! +5 bonus points! ✨`);
       }
       
-      if(!allMoving && activeShot) {
+      // re-evaluate motion after collisions
+      let stillMoving = false;
+      for(let obj of allObjects) {
+        if(!obj.static && (Math.abs(obj.vx) > 0.08 || Math.abs(obj.vy) > 0.08)) {
+          stillMoving = true;
+          break;
+        }
+      }
+      
+      if(!stillMoving && activeShot) {
         activeShot = false;
         endOfShotTurn();
       }
     }
     
     function endOfShotTurn() {
-      // Determine if player gets another turn
       let hasPocket = pocketedThisShot.length > 0;
       let foul = strikerFoulThisShot;
       let retainTurn = (hasPocket && !foul);
-      // Queen cover not lost but additional turn already considered
       if(retainTurn) {
-        setGameMessage(`Nice! You pocketed a coin. Extra turn!`);
+        setGameMessage(`Nice! Pocketed a coin. Extra turn!`);
       } else {
-        // switch player
         const total = currentPlayersCount();
         if(mode === 'bot' && currentPlayer === 1) currentPlayer = 0;
         else currentPlayer = (currentPlayer + 1) % total;
         setGameMessage(`Turn passes to ${players[currentPlayer].name}`);
       }
-      // reset shot trackers
       pocketedThisShot = [];
       strikerFoulThisShot = false;
       aimingMode = false;
@@ -513,7 +534,7 @@
       striker.static = true;
       setStrikerOnBaseline();
       
-      // check win condition
+      // win condition
       const remainingCoins = coins.filter(c => c.alive && c.color !== 'red').length;
       if(remainingCoins === 0 && !winner) {
         winner = currentPlayer;
@@ -525,14 +546,15 @@
       if(!winner && isBotTurn()) setTimeout(botPlay, 400);
     }
     
-    // shoot with power slider & direction
+    // shoot with power slider & direction (crisp hit, no extra roll)
     function shootWithDirection(dirX, dirY, powerVal) {
       if(activeShot || aimingMode === false) return false;
       const len = Math.hypot(dirX, dirY);
       if(len < 0.01) return false;
       const normX = dirX / len;
       const normY = dirY / len;
-      const force = 8 + powerVal * 19;  // max around 27 force
+      // force: minimum 8, max around 29 (makes coins fly instantly)
+      const force = 8 + powerVal * 21;
       striker.vx = normX * force;
       striker.vy = normY * force;
       striker.static = false;
@@ -540,14 +562,13 @@
       aimingMode = false;
       shotCounter++;
       updateUI();
-      setGameMessage(`Shot with ${Math.round(powerVal*100)}% power!`);
+      setGameMessage(`Strike! Power ${Math.round(powerVal*100)}% — crisp impact!`);
       return true;
     }
     
-    // AI bot
+    // AI bot (uses same crisp physics)
     function botPlay() {
       if(winner || activeShot || aimingMode) return;
-      // reposition striker near center baseline
       setStrikerOnBaseline();
       let targets = coins.filter(c => c.alive && c.color !== 'red');
       if(targets.length === 0) targets = coins.filter(c => c.alive);
@@ -559,17 +580,17 @@
       if(length < 0.01) return;
       const powerVal = 0.65;
       const normX = dx/length, normY = dy/length;
-      const force = 8 + powerVal * 22;
+      const force = 8 + powerVal * 21;
       striker.vx = normX * force;
       striker.vy = normY * force;
       striker.static = false;
       activeShot = true;
       aimingMode = false;
-      setGameMessage(`🤖 Bot shoots!`);
+      setGameMessage(`🤖 Bot hits with sharp strike!`);
       updateUI();
     }
     
-    // ----- RAYCAST for guided arrow + pocket suggestion -----
+    // ----- Raycast for guided arrow and pocket suggestion (visual only) -----
     function raycastFirstCoin(fromX, fromY, dirX, dirY) {
       let closest = null;
       let minDist = Infinity;
@@ -604,12 +625,11 @@
     
     // Drawing ===============================================
     function drawBoard() {
-      // Light orange board background
-      ctx.fillStyle = '#e7b874';
+      ctx.fillStyle = '#e7b874'; // light orange
       ctx.fillRect(0,0,W,H);
       ctx.fillStyle = '#e2ac6c';
       ctx.fillRect(board.x, board.y, board.w, board.h);
-      // black border side bars (black border thickness)
+      // black sidebars (thick black border)
       ctx.strokeStyle = '#111';
       ctx.lineWidth = 8;
       ctx.strokeRect(board.x, board.y, board.w, board.h);
@@ -624,36 +644,30 @@
         ctx.beginPath(); ctx.arc(px, py, board.pocketR-8, 0, Math.PI*2); ctx.fillStyle = '#1a1a1a'; ctx.fill();
       });
       
-      // Draw all four baselines (two parallel lines each side)
+      // draw double baselines (always visible)
       ctx.save();
       ctx.strokeStyle = '#2b2118';
       ctx.lineWidth = 3;
-      // bottom baseline double line
       const yBottom = board.y + board.h - 26;
       ctx.beginPath(); ctx.moveTo(board.x+40, yBottom); ctx.lineTo(board.x+board.w-40, yBottom); ctx.stroke();
       ctx.beginPath(); ctx.moveTo(board.x+40, yBottom-12); ctx.lineTo(board.x+board.w-40, yBottom-12); ctx.stroke();
-      // top baseline
       const yTop = board.y + 26;
       ctx.beginPath(); ctx.moveTo(board.x+40, yTop); ctx.lineTo(board.x+board.w-40, yTop); ctx.stroke();
       ctx.beginPath(); ctx.moveTo(board.x+40, yTop+12); ctx.lineTo(board.x+board.w-40, yTop+12); ctx.stroke();
-      // left baseline
       const xLeft = board.x + 26;
       ctx.beginPath(); ctx.moveTo(xLeft, board.y+40); ctx.lineTo(xLeft, board.y+board.h-40); ctx.stroke();
       ctx.beginPath(); ctx.moveTo(xLeft+12, board.y+40); ctx.lineTo(xLeft+12, board.y+board.h-40); ctx.stroke();
-      // right baseline
       const xRight = board.x+board.w - 26;
       ctx.beginPath(); ctx.moveTo(xRight, board.y+40); ctx.lineTo(xRight, board.y+board.h-40); ctx.stroke();
       ctx.beginPath(); ctx.moveTo(xRight-12, board.y+40); ctx.lineTo(xRight-12, board.y+board.h-40); ctx.stroke();
       ctx.restore();
       
-      // center circle
       ctx.beginPath(); ctx.arc(center.x, center.y, 40, 0, Math.PI*2); ctx.strokeStyle = '#aa7c58'; ctx.stroke();
       ctx.beginPath(); ctx.arc(center.x, center.y, 12, 0, Math.PI*2); ctx.fillStyle = '#b0302a'; ctx.fill();
     }
     
     function drawCoin(c) {
       if(!c.alive) return;
-      ctx.shadowBlur = 0;
       ctx.beginPath(); ctx.arc(c.x, c.y, c.r, 0, Math.PI*2);
       let fillColor = '#e0b07f';
       if(c.color === 'white') fillColor = '#fcf9f2';
@@ -669,8 +683,6 @@
     }
     
     function drawStriker() {
-      if(!striker) return;
-      ctx.shadowBlur = 6;
       ctx.beginPath(); ctx.arc(striker.x, striker.y, striker.r, 0, Math.PI*2);
       ctx.fillStyle = '#f2e8cf';
       ctx.fill();
@@ -678,7 +690,6 @@
       ctx.lineWidth = 2;
       ctx.stroke();
       ctx.beginPath(); ctx.arc(striker.x, striker.y, 5, 0, Math.PI*2); ctx.fillStyle = '#ab8a5a'; ctx.fill();
-      ctx.shadowBlur = 0;
     }
     
     function drawAimAssist() {
@@ -696,16 +707,13 @@
       ctx.setLineDash([6, 8]);
       ctx.stroke();
       ctx.setLineDash([]);
-      // arrow head
       const angle = Math.atan2(dirY, dirX);
-      const arrX = arrowEndX, arrY = arrowEndY;
-      ctx.beginPath(); ctx.moveTo(arrX, arrY);
-      ctx.lineTo(arrX - 10*Math.cos(angle-0.6), arrY - 10*Math.sin(angle-0.6));
-      ctx.lineTo(arrX - 10*Math.cos(angle+0.6), arrY - 10*Math.sin(angle+0.6));
+      ctx.beginPath(); ctx.moveTo(arrowEndX, arrowEndY);
+      ctx.lineTo(arrowEndX - 10*Math.cos(angle-0.6), arrowEndY - 10*Math.sin(angle-0.6));
+      ctx.lineTo(arrowEndX - 10*Math.cos(angle+0.6), arrowEndY - 10*Math.sin(angle+0.6));
       ctx.fillStyle = '#ffb347';
       ctx.fill();
       
-      // prediction highlight on first coin
       const firstCoin = raycastFirstCoin(fromX, fromY, dirX, dirY);
       if(firstCoin) {
         ctx.beginPath(); ctx.arc(firstCoin.x, firstCoin.y, firstCoin.r+4, 0, Math.PI*2);
@@ -774,10 +782,9 @@
         draggingStrikerPos = true;
         return;
       }
-      // start aiming if near striker
       if(distance(x,y, striker.x, striker.y) < striker.r + 20 && !activeShot && !draggingStrikerPos) {
         aimingMode = true;
-        aimDirection = { x: striker.x+20, y: striker.y+20, active: true };
+        aimDirection = { x: striker.x+20, y: striker.y+20 };
       }
     }
     
@@ -794,9 +801,7 @@
         else striker.y = clamp(y, bounds.yMin, bounds.yMax);
         setStrikerOnBaseline();
       }
-      if(aimingMode && !activeShot) {
-        aimDirection = { x: x, y: y };
-      }
+      if(aimingMode && !activeShot) aimDirection = { x, y };
     }
     
     function handlePointerEnd(e) {
@@ -817,7 +822,6 @@
       }
     }
     
-    // keyboard controls
     window.addEventListener('keydown', e => {
       if(winner || activeShot) return;
       const key = e.key.toLowerCase();
@@ -839,7 +843,6 @@
       if(key === 'r') resetGame();
     });
     
-    // attach canvas events
     canvas.addEventListener('pointerdown', handlePointerStart);
     canvas.addEventListener('pointermove', handlePointerMove);
     canvas.addEventListener('pointerup', handlePointerEnd);
