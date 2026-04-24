@@ -2,99 +2,65 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Carrom Lite</title>
+  <title>Carrom Game</title>
   <style>
-    body {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      background: #eee;
-      margin: 0;
-    }
-    canvas {
-      background: #f5deb3;
-      border: 10px solid #8b4513;
-      border-radius: 10px;
-    }
+    body { font-family: Arial, sans-serif; background: #ddd; text-align: center; }
+    #menu { margin: 10px; }
+    button { margin: 5px; padding: 10px 20px; }
+    #settings { display: none; background: #fff; border: 1px solid #333; padding: 20px; margin: 20px auto; width: 300px; }
+    canvas { background: #f5deb3; border: 10px solid #8b4513; border-radius: 10px; }
   </style>
 </head>
 <body>
-  <canvas id="carromBoard" width="600" height="600"></canvas>
+  <h1>Carrom Lite Clone</h1>
+  <div id="menu">
+    <button onclick="startGame()">Start</button>
+    <button onclick="pauseGame()">Pause</button>
+    <button onclick="resetGame()">Reset</button>
+    <button onclick="toggleSettings()">Settings</button>
+  </div>
+  <div id="settings">
+    <h3>Game Settings</h3>
+    <label>Striker Power: <input type="range" id="power" min="1" max="10" value="5"></label><br>
+    <label>Coin Speed: <input type="range" id="speed" min="1" max="10" value="5"></label><br>
+    <button onclick="toggleSettings()">Close</button>
+  </div>
+  <canvas id="board" width="600" height="600"></canvas>
+
   <script>
-    const canvas = document.getElementById("carromBoard");
+    const canvas = document.getElementById("board");
     const ctx = canvas.getContext("2d");
+    let running = false;
 
-    class Coin {
-      constructor(x, y, radius, color) {
-        this.x = x;
-        this.y = y;
-        this.radius = radius;
-        this.color = color;
-        this.vx = 0;
-        this.vy = 0;
-      }
-      draw() {
+    function drawBoard() {
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      ctx.fillStyle = "#f5deb3";
+      ctx.fillRect(0,0,canvas.width,canvas.height);
+      // pockets
+      ctx.fillStyle = "black";
+      [0, canvas.width].forEach(x => [0, canvas.height].forEach(y => {
         ctx.beginPath();
-        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-        ctx.fillStyle = this.color;
+        ctx.arc(x, y, 20, 0, Math.PI*2);
         ctx.fill();
-        ctx.closePath();
-      }
-      update() {
-        this.x += this.vx;
-        this.y += this.vy;
-        this.vx *= 0.98; // friction
-        this.vy *= 0.98;
-      }
+      }));
     }
 
-    const striker = new Coin(300, 550, 15, "black");
-    const coins = [
-      new Coin(300, 300, 10, "white"),
-      new Coin(320, 300, 10, "red"),
-      new Coin(280, 300, 10, "white")
-    ];
-
-    let isDragging = false;
-    let dragStart = null;
-
-    canvas.addEventListener("mousedown", e => {
-      const rect = canvas.getBoundingClientRect();
-      const mouseX = e.clientX - rect.left;
-      const mouseY = e.clientY - rect.top;
-      if (Math.hypot(mouseX - striker.x, mouseY - striker.y) < striker.radius) {
-        isDragging = true;
-        dragStart = { x: mouseX, y: mouseY };
-      }
-    });
-
-    canvas.addEventListener("mouseup", e => {
-      if (isDragging) {
-        const rect = canvas.getBoundingClientRect();
-        const mouseX = e.clientX - rect.left;
-        const mouseY = e.clientY - rect.top;
-        striker.vx = (dragStart.x - mouseX) / 10;
-        striker.vy = (dragStart.y - mouseY) / 10;
-        isDragging = false;
-      }
-    });
-
-    function gameLoop() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      striker.update();
-      striker.draw();
-
-      coins.forEach(c => {
-        c.update();
-        c.draw();
-      });
-
-      requestAnimationFrame(gameLoop);
+    function startGame() { running = true; loop(); }
+    function pauseGame() { running = false; }
+    function resetGame() { drawBoard(); }
+    function toggleSettings() {
+      const s = document.getElementById("settings");
+      s.style.display = s.style.display === "none" ? "block" : "none";
     }
 
-    gameLoop();
+    function loop() {
+      if (!running) return;
+      drawBoard();
+      // TODO: add striker + coins + physics
+      requestAnimationFrame(loop);
+    }
+
+    drawBoard();
   </script>
 </body>
 </html>
