@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-  <title>Carrom · Powerful Striker · Realistic Impact</title>
+  <title>Carrom · Realistic Striking Force · Balanced Gameplay</title>
   <style>
     * {
       box-sizing: border-box;
@@ -222,13 +222,13 @@
       <div class="stat-row"><span>💥 Shot Power</span><span id="powerPercent">0%</span></div>
       <div class="power-slider-wrap" style="background:#2a1d10; justify-content:space-between">
         <span>🔋 Power Slider</span>
-        <input type="range" id="powerSlider" min="0" max="100" value="80">
+        <input type="range" id="powerSlider" min="0" max="100" value="75">
       </div>
       <div class="power-meter-bg"><div class="power-meter-fill" id="powerMeterFill"></div></div>
       <div class="stat-row"><span>🏆 Score (Red=5, Coin=1)</span><span id="scoreHint"></span></div>
       <div class="msg-area" id="gameMsg">
-        🎯 Drag striker → Aim direction → Release for POWERFUL STRIKE!<br>
-        🔥 Coins explode on impact – no rolling, real hit!
+        🎯 Drag striker → Aim direction → Release for PRECISE SHOT!<br>
+        ⚡ Realistic power: solid hit without overkill.
       </div>
       <div class="shortcut-help">
         ⌨️ <kbd>A/D</kbd> move striker · <kbd>Space</kbd> quick aim · <kbd>R</kbd> restart
@@ -327,13 +327,13 @@
       for(let i=0; i<players.length; i++) players[i].score = 0;
       initCoinsAndStriker();
       updateUI();
-      setGameMessage("Game ready! AIM with drag, adjust power, RELEASE for EXPLOSIVE HIT!");
+      setGameMessage("Realistic carrom! Adjust power, aim precisely, release for balanced strike.");
       if(isBotTurn()) setTimeout(botPlay, 600);
     }
     
     function initCoinsAndStriker() {
       coins = [];
-      const rCoin = 14;
+      const rCoin = 13.5;
       const offsets = [
         [0,0,'red'], [24,0,'black'], [-24,0,'white'], [12,21,'black'], [-12,21,'white'],
         [12,-21,'white'], [-12,-21,'black'], [0,30,'white'], [0,-30,'black'],
@@ -343,22 +343,21 @@
       offsets.forEach(([dx,dy,clr]) => {
         coins.push({ x: center.x + dx, y: center.y + dy, vx:0, vy:0, r: rCoin, color: clr, alive: true, static: false, mass: 1.0 });
       });
-      // striker - slightly heavier for crisp impact
       striker = {
-        x: center.x, y: board.y + board.h - 28, vx:0, vy:0, r: 17, color: 'striker', alive: true, static: true, mass: 1.4
+        x: center.x, y: board.y + board.h - 28, vx:0, vy:0, r: 16.5, color: 'striker', alive: true, static: true, mass: 1.2
       };
       setStrikerOnBaseline();
     }
     
-    // =========== REALISTIC COLLISION WITH HIGH IMPULSE ==========
-    const COLLISION_E = 0.98;        // almost perfect elastic (sharp hit)
-    const STOP_VEL = 0.3;            // only stop when extremely slow
+    // =========== REALISTIC PHYSICS (balanced force) ==========
+    const COLLISION_E = 0.86;        // good bounce but not too elastic
+    const STOP_VEL = 0.28;           // stop when very slow
     
     function applyFriction(obj) {
       if(obj.static) return;
-      // minimal air resistance to keep momentum, but stop when very low
-      obj.vx *= 0.996;
-      obj.vy *= 0.996;
+      // moderate air drag to stop naturally after a short slide
+      obj.vx *= 0.985;
+      obj.vy *= 0.985;
       if (Math.abs(obj.vx) < STOP_VEL && Math.abs(obj.vy) < STOP_VEL && !activeShot) {
         obj.vx = 0; obj.vy = 0;
         obj.static = true;
@@ -370,10 +369,10 @@
       const minX = board.x + 20, maxX = board.x + board.w - 20;
       const minY = board.y + 20, maxY = board.y + board.h - 20;
       let bounced = false;
-      if(c.x - c.r < minX) { c.x = minX + c.r; c.vx = -c.vx * 0.92; bounced = true; }
-      if(c.x + c.r > maxX) { c.x = maxX - c.r; c.vx = -c.vx * 0.92; bounced = true; }
-      if(c.y - c.r < minY) { c.y = minY + c.r; c.vy = -c.vy * 0.92; bounced = true; }
-      if(c.y + c.r > maxY) { c.y = maxY - c.r; c.vy = -c.vy * 0.92; bounced = true; }
+      if(c.x - c.r < minX) { c.x = minX + c.r; c.vx = -c.vx * 0.86; bounced = true; }
+      if(c.x + c.r > maxX) { c.x = maxX - c.r; c.vx = -c.vx * 0.86; bounced = true; }
+      if(c.y - c.r < minY) { c.y = minY + c.r; c.vy = -c.vy * 0.86; bounced = true; }
+      if(c.y + c.r > maxY) { c.y = maxY - c.r; c.vy = -c.vy * 0.86; bounced = true; }
       if(bounced) applyFriction(c);
     }
     
@@ -389,12 +388,11 @@
     }
     
     function addParticles(x,y,color) {
-      for(let i=0;i<14;i++) {
-        particles.push({ x, y, r: Math.random()*3+1, vx: (Math.random()-0.5)*6, vy: (Math.random()-0.5)*6, a: 1, color });
+      for(let i=0;i<10;i++) {
+        particles.push({ x, y, r: Math.random()*2.5+1, vx: (Math.random()-0.5)*4, vy: (Math.random()-0.5)*4, a: 1, color });
       }
     }
     
-    // New impulse-based collision with mass ratio for realistic HIT effect
     function resolveCollision(a, b) {
       if(!a.alive || !b.alive) return;
       const dx = b.x - a.x, dy = b.y - a.y;
@@ -402,7 +400,6 @@
       const minDist = a.r + b.r;
       if(dist === 0 || dist >= minDist) return;
       
-      // Separate
       const nx = dx/dist, ny = dy/dist;
       const overlap = minDist - dist;
       a.x -= nx * overlap/2;
@@ -410,25 +407,19 @@
       b.x += nx * overlap/2;
       b.y += ny * overlap/2;
       
-      // Relative velocity
       const vrelx = a.vx - b.vx, vrely = a.vy - b.vy;
       const velAlong = vrelx * nx + vrely * ny;
       if(velAlong > 0) return;
       
-      // Mass factors
-      const m1 = a.mass || 1.0;
-      const m2 = b.mass || 1.0;
+      const m1 = a.mass || 1.0, m2 = b.mass || 1.0;
       const restitution = COLLISION_E;
       const impulseMag = -(1 + restitution) * velAlong / ( (1/m1) + (1/m2) );
-      const impX = impulseMag * nx;
-      const impY = impulseMag * ny;
-      
+      const impX = impulseMag * nx, impY = impulseMag * ny;
       a.vx -= impX / m1;
       a.vy -= impY / m1;
       b.vx += impX / m2;
       b.vy += impY / m2;
       
-      // Ensure they never stay stuck
       applyFriction(a);
       applyFriction(b);
     }
@@ -462,12 +453,11 @@
       let anythingMoving = false;
       const allObjects = [striker, ...coins.filter(c=>c.alive)];
       
-      // Move and apply boundaries + pockets
       for(let obj of allObjects) {
         if(!obj.static) {
           obj.x += obj.vx;
           obj.y += obj.vy;
-          if (Math.abs(obj.vx) > 0.02 || Math.abs(obj.vy) > 0.02) anythingMoving = true;
+          if (Math.abs(obj.vx) > 0.03 || Math.abs(obj.vy) > 0.03) anythingMoving = true;
           applyFriction(obj);
           wallBoundary(obj);
           if(isPocketed(obj)) {
@@ -481,8 +471,8 @@
         }
       }
       
-      // Resolve collisions multiple times for stable stacking
-      for(let iter=0; iter<3; iter++) {
+      // collision iterations
+      for(let iter=0; iter<2; iter++) {
         for(let i=0;i<allObjects.length;i++) {
           for(let j=i+1;j<allObjects.length;j++) {
             resolveCollision(allObjects[i], allObjects[j]);
@@ -490,7 +480,6 @@
         }
       }
       
-      // After collisions check queen cover
       if(queenPocketed && !queenCovered && pocketedThisShot.length > 0 && !strikerFoulThisShot) {
         queenCovered = true;
         queenCoveredBy = currentPlayer;
@@ -498,7 +487,6 @@
         setGameMessage(`✨ QUEEN COVERED! +5 BONUS! ✨`);
       }
       
-      // Check if everything stopped
       let stillMoving = false;
       for(let obj of allObjects) {
         if(!obj.static && (Math.abs(obj.vx) > 0.1 || Math.abs(obj.vy) > 0.1)) {
@@ -516,12 +504,12 @@
       let hasPocket = pocketedThisShot.length > 0;
       let foul = strikerFoulThisShot;
       if(hasPocket && !foul) {
-        setGameMessage(`🔥 Great hit! You pocketed a coin. Extra turn!`);
+        setGameMessage(`Nice hit! You pocketed a coin. Extra turn!`);
       } else {
         const total = currentPlayersCount();
         if(mode === 'bot' && currentPlayer === 1) currentPlayer = 0;
         else currentPlayer = (currentPlayer + 1) % total;
-        setGameMessage(`Turn passed to ${players[currentPlayer].name}`);
+        setGameMessage(`Turn passes to ${players[currentPlayer].name}`);
       }
       pocketedThisShot = [];
       strikerFoulThisShot = false;
@@ -530,7 +518,6 @@
       striker.static = true;
       setStrikerOnBaseline();
       
-      // Win condition
       const remaining = coins.filter(c => c.alive && c.color !== 'red').length;
       if(remaining === 0 && !winner) {
         winner = currentPlayer;
@@ -541,14 +528,14 @@
       if(!winner && isBotTurn()) setTimeout(botPlay, 400);
     }
     
-    // Powerful shoot function: striker explodes forward
+    // REALISTIC FORCE: max around 12-13, base 5
     function shootWithDirection(dirX, dirY, powerVal) {
       if(activeShot || aimingMode === false) return false;
       const len = Math.hypot(dirX, dirY);
       if(len < 0.01) return false;
       const normX = dirX / len, normY = dirY / len;
-      // Base force: 12 minimum, max 35 -> coins fly fast, striker hits hard
-      const force = 12 + powerVal * 23;
+      // force range: min 5.0 (weak) to max 12.5 (strong but realistic)
+      const force = 5.0 + powerVal * 7.5;
       striker.vx = normX * force;
       striker.vy = normY * force;
       striker.static = false;
@@ -556,7 +543,7 @@
       aimingMode = false;
       shotCounter++;
       updateUI();
-      setGameMessage(`⚡ POWER SHOT! ⚡ (${Math.round(powerVal*100)}%) Coins will BURST!`);
+      setGameMessage(`Shot power: ${Math.round(powerVal*100)}%  —  crisp, realistic strike!`);
       return true;
     }
     
@@ -571,19 +558,19 @@
       const dy = target.y - striker.y;
       const length = Math.hypot(dx,dy);
       if(length < 0.01) return;
-      const powerVal = 0.7;
+      const powerVal = 0.65;        // medium power
       const normX = dx/length, normY = dy/length;
-      const force = 12 + powerVal * 23;
+      const force = 5.0 + powerVal * 7.5;
       striker.vx = normX * force;
       striker.vy = normY * force;
       striker.static = false;
       activeShot = true;
       aimingMode = false;
-      setGameMessage(`🤖 BOT launches a HEAVY STRIKE!`);
+      setGameMessage(`🤖 Bot shoots with moderate force.`);
       updateUI();
     }
     
-    // raycast and visual helpers
+    // raycast & visuals
     function raycastFirstCoin(fromX, fromY, dirX, dirY) {
       let closest = null, minDist = Infinity;
       for(let coin of coins) {
@@ -676,7 +663,7 @@
       ctx.strokeStyle = '#6b4c2c';
       ctx.lineWidth = 2.5;
       ctx.stroke();
-      ctx.beginPath(); ctx.arc(striker.x, striker.y, 6, 0, Math.PI*2); ctx.fillStyle = '#ab8a5a'; ctx.fill();
+      ctx.beginPath(); ctx.arc(striker.x, striker.y, 5, 0, Math.PI*2); ctx.fillStyle = '#ab8a5a'; ctx.fill();
     }
     
     function drawAimAssist() {
@@ -686,32 +673,32 @@
       const len = Math.hypot(toX-fromX, toY-fromY);
       if(len < 5) return;
       const dirX = (toX-fromX)/len, dirY = (toY-fromY)/len;
-      const arrowEndX = fromX + dirX * 110;
-      const arrowEndY = fromY + dirY * 110;
+      const arrowEndX = fromX + dirX * 95;
+      const arrowEndY = fromY + dirY * 95;
       ctx.beginPath(); ctx.moveTo(fromX, fromY); ctx.lineTo(arrowEndX, arrowEndY);
       ctx.strokeStyle = '#ffaa44';
-      ctx.lineWidth = 5;
+      ctx.lineWidth = 4;
       ctx.setLineDash([6, 8]);
       ctx.stroke();
       ctx.setLineDash([]);
       const angle = Math.atan2(dirY, dirX);
       ctx.beginPath(); ctx.moveTo(arrowEndX, arrowEndY);
-      ctx.lineTo(arrowEndX - 12*Math.cos(angle-0.6), arrowEndY - 12*Math.sin(angle-0.6));
-      ctx.lineTo(arrowEndX - 12*Math.cos(angle+0.6), arrowEndY - 12*Math.sin(angle+0.6));
+      ctx.lineTo(arrowEndX - 10*Math.cos(angle-0.6), arrowEndY - 10*Math.sin(angle-0.6));
+      ctx.lineTo(arrowEndX - 10*Math.cos(angle+0.6), arrowEndY - 10*Math.sin(angle+0.6));
       ctx.fillStyle = '#ff8800';
       ctx.fill();
       
       const first = raycastFirstCoin(fromX, fromY, dirX, dirY);
       if(first) {
-        ctx.beginPath(); ctx.arc(first.x, first.y, first.r+5, 0, Math.PI*2);
+        ctx.beginPath(); ctx.arc(first.x, first.y, first.r+4, 0, Math.PI*2);
         ctx.strokeStyle = '#ff3300';
-        ctx.lineWidth = 3;
+        ctx.lineWidth = 2.5;
         ctx.stroke();
         const pocket = nearestPocket(first);
         if(pocket) {
           ctx.beginPath(); ctx.moveTo(first.x, first.y); ctx.lineTo(pocket.x, pocket.y);
           ctx.strokeStyle = '#44ffaa';
-          ctx.lineWidth = 3;
+          ctx.lineWidth = 2.5;
           ctx.setLineDash([8,6]);
           ctx.stroke();
           ctx.fillStyle = '#ddffaa88';
@@ -751,7 +738,7 @@
     
     function setGameMessage(msg) { gameMsgSpan.innerHTML = msg; }
     
-    // Mouse/Touch
+    // Input events
     function handleStart(e) {
       if(winner || activeShot) return;
       const rect = canvas.getBoundingClientRect();
@@ -759,14 +746,14 @@
       let x = (e.clientX - rect.left) * scaleX;
       let y = (e.clientY - rect.top) * scaleY;
       const bounds = getBaselineBounds();
-      let onStriker = distance(x,y, striker.x, striker.y) < striker.r + 12;
+      let onStriker = distance(x,y, striker.x, striker.y) < striker.r + 10;
       let onBaseline = false;
-      if(bounds.axis === 'x') onBaseline = Math.abs(y - bounds.yFixed) < 25 && x > bounds.xMin-10 && x < bounds.xMax+10;
-      else onBaseline = Math.abs(x - bounds.xFixed) < 25 && y > bounds.yMin-10 && y < bounds.yMax+10;
+      if(bounds.axis === 'x') onBaseline = Math.abs(y - bounds.yFixed) < 22 && x > bounds.xMin-8 && x < bounds.xMax+8;
+      else onBaseline = Math.abs(x - bounds.xFixed) < 22 && y > bounds.yMin-8 && y < bounds.yMax+8;
       if(onStriker && onBaseline && !activeShot) { draggingStrikerPos = true; return; }
-      if(distance(x,y, striker.x, striker.y) < striker.r + 25 && !activeShot && !draggingStrikerPos) {
+      if(distance(x,y, striker.x, striker.y) < striker.r + 22 && !activeShot && !draggingStrikerPos) {
         aimingMode = true;
-        aimDirection = { x: striker.x+30, y: striker.y-20 };
+        aimDirection = { x: striker.x+25, y: striker.y-15 };
       }
     }
     
@@ -789,7 +776,7 @@
       if(draggingStrikerPos) { draggingStrikerPos = false; setStrikerOnBaseline(); return; }
       if(aimingMode && !activeShot && !winner) {
         const dx = aimDirection.x - striker.x, dy = aimDirection.y - striker.y;
-        if(Math.hypot(dx,dy) > 8) {
+        if(Math.hypot(dx,dy) > 6) {
           const powerVal = powerSlider.value / 100;
           shootWithDirection(dx, dy, powerVal);
         }
@@ -807,7 +794,7 @@
       const key = e.key.toLowerCase();
       if(key === 'a' || key === 'd') {
         const bounds = getBaselineBounds();
-        let step = key === 'a' ? -20 : 20;
+        let step = key === 'a' ? -18 : 18;
         if(bounds.axis === 'x') striker.x = clamp(striker.x + step, bounds.xMin, bounds.xMax);
         else striker.y = clamp(striker.y + step, bounds.yMin, bounds.yMax);
         setStrikerOnBaseline();
@@ -817,7 +804,7 @@
         e.preventDefault();
         if(!aimingMode && !activeShot) {
           aimingMode = true;
-          aimDirection = { x: striker.x+45, y: striker.y-25 };
+          aimDirection = { x: striker.x+35, y: striker.y-18 };
         }
       }
       if(key === 'r') resetGame();
