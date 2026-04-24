@@ -10,12 +10,6 @@
       --board:#f0d8a8;
       --board2:#e7c98d;
       --line:#6b5540;
-      --accent:#b30000;
-      --white:#f7f7f7;
-      --black:#111;
-      --red:#d81717;
-      --green:#1f8a3a;
-      --gold:#f0b400;
       --text:#222;
     }
     *{box-sizing:border-box;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
@@ -34,7 +28,7 @@
     }
     .pill.active{background:#ffd54a;color:#431900}
     .controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-    select,button,input{
+    select,button{
       border:none;border-radius:10px;padding:10px 12px;font-size:14px
     }
     button{
@@ -42,7 +36,6 @@
     }
     button:hover{opacity:.92}
     button.primary{background:#0f7a2a}
-    button.warn{background:#b30000}
     .main{
       display:grid;grid-template-columns:minmax(320px,1fr) 280px;gap:12px;align-items:start
     }
@@ -115,18 +108,13 @@
       <div class="stat"><span>Queen</span><span id="queenText">On board</span></div>
       <div class="stat"><span>Shots</span><span id="shotText">0</span></div>
       <div class="stat"><span>Power</span><span id="powerText">0%</span></div>
+      <div class="stat"><span>Selected Coin</span><span id="selectedText">Auto</span></div>
+      <div class="stat"><span>Target Pocket</span><span id="targetText">Auto</span></div>
       <div class="meter"><div id="meterFill"></div></div>
-      <div class="msg" id="msg">Drag the striker on your baseline, then drag on the board to aim and release to shoot.</div>
+      <div class="msg" id="msg">Drag the striker on your baseline, then choose a coin and pocket to aim and release.</div>
       <div class="help">
         <strong>How to play</strong><br>
-        Drag the striker horizontally in your baseline area. Release to position it, then drag from the striker to aim and shoot. Pocket your coins and cover the queen for bonus points. Avoid fouls like pocketing the striker or opponent coins. Use keyboard shortcuts for quick control.
-        <br><br>
-        <strong>Shortcuts</strong><br>
-        <span class="kbd">A</span>/<span class="kbd">D</span> move striker,
-        <span class="kbd">Space</span> shoot,
-        <span class="kbd">R</span> restart,
-        <span class="kbd">S</span> save,
-        <span class="kbd">L</span> load
+        Drag the striker on the baseline. Click a coin to select it, then click a pocket to set aim. Drag backward from striker to shoot with power. Use <span class="kbd">1-4</span> to select a pocket, <span class="kbd">C</span> to clear target, <span class="kbd">Space</span> to shoot, <span class="kbd">R</span> to restart.
       </div>
     </div>
   </div>
@@ -148,6 +136,8 @@
     queenText: document.getElementById('queenText'),
     shotText: document.getElementById('shotText'),
     powerText: document.getElementById('powerText'),
+    selectedText: document.getElementById('selectedText'),
+    targetText: document.getElementById('targetText'),
     meterFill: document.getElementById('meterFill'),
     msg: document.getElementById('msg'),
     mode: document.getElementById('mode'),
@@ -155,74 +145,82 @@
   };
 
   const W = canvas.width, H = canvas.height;
-  const board = {
-    x: 58, y: 58, w: 704, h: 704,
-    pocketR: 31, line: 2, baselineGap: 46
-  };
-  const center = {x: W/2, y: H/2};
+  const board = { x:58, y:58, w:704, h:704, pocketR:31 };
 
-  let theme = 'classic';
+  const pocketList = [
+    {id:1,x:board.x,y:board.y},
+    {id:2,x:board.x+board.w,y:board.y},
+    {id:3,x:board.x,y:board.y+board.h},
+    {id:4,x:board.x+board.w,y:board.y+board.h}
+  ];
+
   let mode = '2';
+  let theme = 'classic';
   let running = true;
   let currentPlayer = 0;
   let shotCount = 0;
   let active = false;
   let aiming = false;
   let draggingStriker = false;
-  let justShot = false;
-  let pointer = {x:0,y:0,startX:0,startY:0};
   let power = 0;
   let winner = null;
   let queenPocketed = false;
   let queenCovered = false;
   let queenCoverBy = null;
-  let strikerHeld = false;
+  let selectedCoin = null;
+  let targetPocket = pocketList[0];
 
   const players = [
-    {name:'Player 1', score:0, color:'red', side:'bottom', coins:['white','black']},
-    {name:'Player 2', score:0, color:'blue', side:'top', coins:['white','black']},
-    {name:'Player 3', score:0, color:'green', side:'left', coins:['white','black']},
-    {name:'Player 4', score:0, color:'orange', side:'right', coins:['white','black']}
+    {name:'Player 1', score:0},
+    {name:'Player 2', score:0},
+    {name:'Player 3', score:0},
+    {name:'Player 4', score:0}
   ];
 
   let coins = [];
   let striker = null;
   let particles = [];
   let guide = {show:true, x1:0,y1:0,x2:0,y2:0};
-  let botTimer = 0;
 
-  function setMsg(t){ ui.msg.textContent = t; }
   function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
   function dist(a,b,c,d){ return Math.hypot(c-a,d-b); }
 
   function currentPlayersCount(){ return mode === '4' ? 4 : 2; }
   function isBotTurn(){ return mode === 'bot' && currentPlayer === 1; }
 
+  function makeCoin(x,y,color,r){
+    return {x,y,vx:0,vy:0,r,color,alive:true,static:false,owner:null};
+  }
+
   function resetGame(){
-    running = true; winner = null; currentPlayer = 0; shotCount = 0;
-    queenPocketed = false; queenCovered = false; queenCoverBy = null;
+    running = true;
+    winner = null;
+    currentPlayer = 0;
+    shotCount = 0;
+    queenPocketed = false;
+    queenCovered = false;
+    queenCoverBy = null;
+    selectedCoin = null;
+    targetPocket = pocketList[0];
     particles = [];
     coins = [];
-    striker = null;
-    const r = 15;
-    const cx = center.x, cy = center.y;
+
+    const cx = W/2, cy = H/2;
     const arrangement = [
       [0,0,'red'], [24,0,'black'], [-24,0,'white'], [12,21,'black'], [-12,21,'white'],
       [12,-21,'white'], [-12,-21,'black'], [0,30,'white'], [0,-30,'black'],
       [31,18,'white'], [-31,18,'black'], [31,-18,'black'], [-31,-18,'white'],
       [43,0,'black'], [-43,0,'white']
     ];
-    arrangement.forEach(([dx,dy,c]) => coins.push(makeCoin(cx+dx, cy+dy, c, r)));
+    arrangement.forEach(([dx,dy,c]) => coins.push(makeCoin(cx+dx, cy+dy, c, 15)));
+
     striker = makeCoin(cx, board.y + board.h - 26, 'striker', 17);
     striker.static = true;
-    striker.owner = 0;
     updateUI();
-    setMsg('Game started. Drag striker on your baseline, aim, and release to strike.');
+    setMsg('Game started. Click a coin, choose a pocket, then aim and release.');
   }
 
-  function makeCoin(x,y,color,r){
-    return {x,y,vx:0,vy:0,r,color,alive:true,static:false,owner:null,scored:false};
-  }
+  function setMsg(t){ ui.msg.textContent = t; }
 
   function setTheme(t){
     theme = t;
@@ -242,8 +240,6 @@
     const count = currentPlayersCount();
     ui.p1.textContent = `Player 1: ${players[0].score}`;
     ui.p2.textContent = `Player 2: ${players[1].score}`;
-    ui.p1.style.display = '';
-    ui.p2.style.display = '';
     ui.p3.style.display = count >= 4 ? '' : 'none';
     ui.p4.style.display = count >= 4 ? '' : 'none';
     if(count >= 4){
@@ -251,30 +247,50 @@
       ui.p4.textContent = `Player 4: ${players[3].score}`;
     }
     ui.turn.textContent = `Current Player: ${currentPlayer + 1}`;
-    ui.turnText.textContent = `${players[currentPlayer].name}`;
-    ui.phaseText.textContent = active ? (aiming ? 'Aiming' : 'Shot in motion') : 'Ready';
+    ui.turnText.textContent = players[currentPlayer].name;
+    ui.phaseText.textContent = active ? 'Shot in motion' : 'Ready';
     ui.queenText.textContent = queenCovered ? `Covered by Player ${queenCoverBy + 1}` : (queenPocketed ? 'Pocketed, awaiting cover' : 'On board');
     ui.shotText.textContent = shotCount;
     ui.powerText.textContent = `${Math.round(power * 100)}%`;
+    ui.selectedText.textContent = selectedCoin ? selectedCoin.color : 'Auto';
+    ui.targetText.textContent = `Pocket ${targetPocket.id}`;
     ui.meterFill.style.width = `${Math.round(power * 100)}%`;
     [ui.p1,ui.p2,ui.p3,ui.p4].forEach((el,i)=>el.classList.toggle('active', i===currentPlayer && i < count));
-    ui.turn.classList.add('active');
   }
 
   function currentBaseline(){
-    const p = currentPlayer;
-    if(p===0) return {x1: board.x+board.baselineGap, y: board.y+board.h-22, x2: board.x+board.w-board.baselineGap, y2: board.y+board.h-22, dir:-1};
-    if(p===1) return {x1: board.x+board.baselineGap, y: board.y+22, x2: board.x+board.w-board.baselineGap, y2: board.y+22, dir:1};
-    if(p===2) return {x1: board.x+22, y: board.y+board.baselineGap, x2: board.x+22, y2: board.y+board.h-board.baselineGap, dir:1};
-    return {x1: board.x+board.w-22, y: board.y+board.baselineGap, x2: board.x+board.w-22, y2: board.y+board.h-board.baselineGap, dir:1};
+    const gap = 92;
+    if(currentPlayer===0) return {x1:board.x+gap,y1:board.y+board.h-64,x2:board.x+board.w-gap,y2:board.y+board.h-64,dir:'horizontal'};
+    if(currentPlayer===1) return {x1:board.x+gap,y1:board.y+64,x2:board.x+board.w-gap,y2:board.y+64,dir:'horizontal'};
+    if(currentPlayer===2) return {x1:board.x+64,y1:board.y+gap,x2:board.x+64,y2:board.y+board.h-gap,dir:'vertical'};
+    return {x1:board.x+board.w-64,y1:board.y+gap,x2:board.x+board.w-64,y2:board.y+board.h-gap,dir:'vertical'};
   }
 
   function strikerStartPos(){
+    if(currentPlayer===0) return {x:W/2, y:board.y+board.h-78};
+    if(currentPlayer===1) return {x:W/2, y:board.y+78};
+    if(currentPlayer===2) return {x:board.x+78, y:H/2};
+    return {x:board.x+board.w-78, y:H/2};
+  }
+
+  function drawBaseline(){
     const b = currentBaseline();
-    if(currentPlayer===0) return {x:center.x, y:board.y+board.h-26};
-    if(currentPlayer===1) return {x:center.x, y:board.y+26};
-    if(currentPlayer===2) return {x:board.x+26, y:center.y};
-    return {x:board.x+board.w-26, y:center.y};
+    ctx.save();
+    ctx.strokeStyle = 'rgba(20,20,20,.7)';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(b.x1,b.y1); ctx.lineTo(b.x2,b.y2);
+    ctx.stroke();
+    if(b.dir === 'horizontal'){
+      ctx.beginPath();
+      ctx.moveTo(b.x1,b.y1-14); ctx.lineTo(b.x2,b.y2-14);
+      ctx.stroke();
+    } else {
+      ctx.beginPath();
+      ctx.moveTo(b.x1-14,b.y1); ctx.lineTo(b.x2-14,b.y2);
+      ctx.stroke();
+    }
+    ctx.restore();
   }
 
   function drawBoard(){
@@ -284,122 +300,63 @@
     ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--board2').trim();
     ctx.fillRect(board.x, board.y, board.w, board.h);
     ctx.strokeStyle = '#6d553b'; ctx.lineWidth = 10; ctx.strokeRect(board.x, board.y, board.w, board.h);
-
     ctx.strokeStyle = '#1f1f1f'; ctx.lineWidth = 2;
     ctx.strokeRect(board.x+18, board.y+18, board.w-36, board.h-36);
 
-    const pockets = [
-      [board.x,board.y],[board.x+board.w,board.y],[board.x,board.y+board.h],[board.x+board.w,board.y+board.h]
-    ];
-    pockets.forEach(([x,y]) => {
+    [[board.x,board.y],[board.x+board.w,board.y],[board.x,board.y+board.h],[board.x+board.w,board.y+board.h]].forEach(([x,y])=>{
       ctx.beginPath(); ctx.arc(x,y,board.pocketR,0,Math.PI*2); ctx.fillStyle='#111'; ctx.fill();
       ctx.beginPath(); ctx.arc(x,y,board.pocketR-8,0,Math.PI*2); ctx.fillStyle='#222'; ctx.fill();
     });
 
     ctx.strokeStyle = '#6b5540'; ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.moveTo(board.x+42, board.y+42); ctx.lineTo(board.x+board.w-42, board.y+board.h-42); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(board.x+board.w-42, board.y+42); ctx.lineTo(board.x+42, board.y+board.h-42); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(board.x+42, board.y+90); ctx.lineTo(board.x+board.w-42, board.y+90); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(board.x+42, board.y+board.h-90); ctx.lineTo(board.x+board.w-42, board.y+board.h-90); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(board.x+90, board.y+42); ctx.lineTo(board.x+90, board.y+board.h-42); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(board.x+board.w-90, board.y+42); ctx.lineTo(board.x+board.w-90, board.y+board.h-42); ctx.stroke();
-
-    ctx.strokeStyle = '#6b5540'; ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.arc(center.x,center.y,35,0,Math.PI*2); ctx.stroke();
-    ctx.fillStyle = '#d11'; ctx.beginPath(); ctx.arc(center.x,center.y,10,0,Math.PI*2); ctx.fill();
-    ctx.strokeStyle = '#8c6c4f';
-    [[170,170],[650,170],[170,650],[650,650]].forEach(([x,y]) => {
-      ctx.beginPath(); ctx.arc(x,y,28,0,Math.PI*2); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(x-16,y); ctx.lineTo(x+16,y); ctx.stroke();
-    });
+    ctx.beginPath(); ctx.arc(W/2,H/2,35,0,Math.PI*2); ctx.stroke();
+    ctx.fillStyle = '#d11'; ctx.beginPath(); ctx.arc(W/2,H/2,10,0,Math.PI*2); ctx.fill();
 
     drawBaseline();
     drawGuide();
-  }
-
-  function drawBaseline(){
-    const b = currentBaseline();
-    ctx.save();
-    ctx.strokeStyle = 'rgba(0,0,0,.55)';
-    ctx.lineWidth = 3;
-    if(currentPlayer===0 || currentPlayer===1){
-      ctx.beginPath(); ctx.moveTo(board.x+34,b.y); ctx.lineTo(board.x+board.w-34,b.y); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(board.x+34,b.y-14); ctx.lineTo(board.x+board.w-34,b.y-14); ctx.stroke();
-    } else {
-      ctx.beginPath(); ctx.moveTo(b.x1,board.y+34); ctx.lineTo(b.x1,board.y+board.h-34); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(b.x1-14,board.y+34); ctx.lineTo(b.x1-14,board.y+board.h-34); ctx.stroke();
-    }
-    ctx.restore();
   }
 
   function drawCoin(c){
     if(!c.alive) return;
     ctx.save();
     ctx.translate(c.x,c.y);
-    ctx.beginPath(); ctx.arc(0,0,c.r+2,0,Math.PI*2); ctx.fillStyle='#d8b98e'; ctx.fill();
-    ctx.beginPath(); ctx.arc(0,0,c.r,0,Math.PI*2);
-    ctx.fillStyle = c.color==='white' ? '#f7f7f7' : c.color==='black' ? '#111' : c.color==='red' ? '#d81717' : '#eaeaea';
-    if(c.color==='striker') ctx.fillStyle = '#fff';
+    ctx.beginPath();
+    ctx.arc(0,0,c.r+2,0,Math.PI*2);
+    ctx.fillStyle = '#d8b98e';
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(0,0,c.r,0,Math.PI*2);
+    ctx.fillStyle = c.color==='white' ? '#f7f7f7' : c.color==='black' ? '#111' : c.color==='red' ? '#d81717' : '#fff';
     ctx.fill();
     ctx.strokeStyle = c.color==='white' ? '#bdbdbd' : '#666';
-    ctx.lineWidth = 1.5; ctx.stroke();
-    ctx.beginPath(); ctx.arc(0,0,c.r*0.35,0,Math.PI*2);
-    ctx.strokeStyle = c.color==='striker' ? '#888' : (c.color==='white' ? '#ccc' : '#444');
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(0,0,c.r*0.35,0,Math.PI*2);
+    ctx.strokeStyle = c.color==='white' ? '#ccc' : '#444';
     ctx.stroke();
     ctx.restore();
   }
 
   function drawGuide(){
-    if(!guide.show || active || running===false) return;
+    if(!guide.show || active || !selectedCoin || !targetPocket) return;
     ctx.save();
-    ctx.strokeStyle = 'rgba(30,30,30,.55)';
-    ctx.lineWidth = 2;
+    ctx.strokeStyle = 'rgba(15,15,15,.65)';
+    ctx.lineWidth = 2.5;
     ctx.setLineDash([8,8]);
     ctx.beginPath();
-    ctx.moveTo(guide.x1, guide.y1);
-    ctx.lineTo(guide.x2, guide.y2);
+    ctx.moveTo(striker.x, striker.y);
+    ctx.lineTo(selectedCoin.x, selectedCoin.y);
+    ctx.lineTo(targetPocket.x, targetPocket.y);
     ctx.stroke();
     ctx.setLineDash([]);
-    const ang = Math.atan2(guide.y2-guide.y1, guide.x2-guide.x1);
-    const ex = guide.x1 + Math.cos(ang)*70;
-    const ey = guide.y1 + Math.sin(ang)*70;
+
     ctx.beginPath();
-    ctx.moveTo(ex,ey);
-    ctx.lineTo(ex-12*Math.cos(ang-0.4), ey-12*Math.sin(ang-0.4));
-    ctx.lineTo(ex-12*Math.cos(ang+0.4), ey-12*Math.sin(ang+0.4));
-    ctx.closePath(); ctx.fillStyle='rgba(30,30,30,.55)'; ctx.fill();
+    ctx.arc(targetPocket.x, targetPocket.y, 14, 0, Math.PI*2);
+    ctx.strokeStyle = 'rgba(180,0,0,.8)';
+    ctx.stroke();
+
     ctx.restore();
-  }
-
-  function updateGuide(){
-    const b = currentBaseline();
-    const target = coins.find(c => c.alive && c.color !== 'striker');
-    if(!target){ guide.show=false; return; }
-    guide.show = true;
-    guide.x1 = striker.x;
-    guide.y1 = striker.y;
-    guide.x2 = target.x;
-    guide.y2 = target.y;
-  }
-
-  function draw(){
-    drawBoard();
-    coins.forEach(drawCoin);
-    drawCoin(striker);
-    particles.forEach(p => {
-      ctx.globalAlpha = p.a;
-      ctx.fillStyle = p.c;
-      ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fill();
-      ctx.globalAlpha = 1;
-    });
-
-    if(aiming){
-      ctx.save();
-      ctx.strokeStyle = 'rgba(25,25,25,.75)';
-      ctx.lineWidth = 3;
-      ctx.beginPath(); ctx.moveTo(striker.x, striker.y); ctx.lineTo(pointer.x, pointer.y); ctx.stroke();
-      ctx.restore();
-    }
   }
 
   function wallBounce(c){
@@ -412,19 +369,11 @@
   }
 
   function pocketCheck(c){
-    const pockets = [
-      [board.x,board.y],[board.x+board.w,board.y],[board.x,board.y+board.h],[board.x+board.w,board.y+board.h]
-    ];
-    for(const [x,y] of pockets){
-      if(dist(c.x,c.y,x,y) < board.pocketR-5) return true;
-    }
-    return false;
+    return pocketList.some(p => dist(c.x,c.y,p.x,p.y) < board.pocketR-5);
   }
 
   function spawnParticles(x,y,color){
-    for(let i=0;i<12;i++){
-      particles.push({x,y,r:Math.random()*2+1, vx:(Math.random()-.5)*4, vy:(Math.random()-.5)*4, a:1, c:color});
-    }
+    for(let i=0;i<12;i++) particles.push({x,y,r:Math.random()*2+1,vx:(Math.random()-.5)*4,vy:(Math.random()-.5)*4,a:1,c:color});
   }
 
   function handlePocket(c){
@@ -440,14 +389,10 @@
       players[currentPlayer].score += 5;
       queenPocketed = true;
       queenCoverBy = null;
-      setMsg(`${players[currentPlayer].name} pocketed the Queen. Cover it for bonus points.`);
+      setMsg(`Queen pocketed by ${players[currentPlayer].name}. Cover it next.`);
       return;
     }
-    if(mode === '4'){
-      players[currentPlayer].score += 1;
-    } else {
-      players[currentPlayer].score += 1;
-    }
+    players[currentPlayer].score += 1;
   }
 
   function resolveCollision(a,b){
@@ -462,45 +407,20 @@
     const dvx = a.vx - b.vx, dvy = a.vy - b.vy;
     const rel = dvx*nx + dvy*ny;
     if(rel > 0) return;
-    const imp = -rel * 0.92;
+    const imp = -rel * 0.95;
     a.vx += imp * nx; a.vy += imp * ny;
     b.vx -= imp * nx; b.vy -= imp * ny;
   }
 
   function allStopped(){
-    const arr = [striker, ...coins.filter(c=>c.alive)];
-    return arr.every(c => Math.hypot(c.vx,c.vy) < 0.12);
+    return [striker, ...coins.filter(c=>c.alive)].every(c => Math.hypot(c.vx,c.vy) < 0.12);
   }
 
-  function evaluateEndOfShot(){
+  function nextTurn(){
     const count = currentPlayersCount();
-    const aliveCoins = coins.filter(c => c.alive && c.color !== 'red');
-    if(aliveCoins.length === 0 && !winner){
-      winner = currentPlayer;
-      setMsg(`${players[currentPlayer].name} wins!`);
-      running = false;
-      return;
-    }
-    if(queenPocketed && !queenCovered){
-      const cover = coins.find(c => c.alive && c.color !== 'red');
-      if(!cover){
-        players[currentPlayer].score = Math.max(0, players[currentPlayer].score - 5);
-        queenPocketed = false;
-        setMsg('Queen not covered. -5 penalty.');
-      }
-    }
-    if(currentPlayer===0 || currentPlayer===1 || count===4){
-      nextTurn(false);
-    } else {
-      nextTurn(false);
-    }
-  }
-
-  function nextTurn(foul){
-    const count = currentPlayersCount();
-    if(mode === 'bot' && currentPlayer === 1 && count === 2) currentPlayer = 0;
-    else currentPlayer = (currentPlayer + 1) % count;
-    active = false; aiming = false; shotCount++;
+    currentPlayer = (currentPlayer + 1) % count;
+    active = false;
+    aiming = false;
     striker.vx = striker.vy = 0;
     striker.static = true;
     striker.x = strikerStartPos().x;
@@ -512,17 +432,43 @@
 
   function botPlay(){
     if(!running) return;
-    const target = coins.find(c => c.alive && c.color !== 'red') || coins.find(c => c.alive);
-    if(!target) return;
-    striker.x = strikerStartPos().x; striker.y = strikerStartPos().y;
-    const dx = target.x - striker.x, dy = target.y - striker.y;
+    const target = selectedCoin && selectedCoin.alive ? selectedCoin : coins.find(c => c.alive && c.color !== 'red') || coins.find(c => c.alive);
+    const pocket = targetPocket || pocketList[0];
+    striker.x = strikerStartPos().x;
+    striker.y = strikerStartPos().y;
+    const aimX = target ? target.x : (pocket.x + striker.x) / 2;
+    const aimY = target ? target.y : (pocket.y + striker.y) / 2;
+    const dx = aimX - striker.x, dy = aimY - striker.y;
     const len = Math.hypot(dx,dy) || 1;
-    striker.vx = dx/len * 12;
-    striker.vy = dy/len * 12;
+    striker.vx = dx/len * 16;
+    striker.vy = dy/len * 16;
     striker.static = false;
     active = true;
     aiming = false;
     setMsg('Bot played.');
+  }
+
+  function updateGuide(){
+    guide.show = true;
+  }
+
+  function shotPowerFromDrag(startX,startY,endX,endY){
+    const drag = dist(startX,startY,endX,endY);
+    return clamp(drag / 170, 0, 1);
+  }
+
+  function computeShotVector(){
+    const b = currentBaseline();
+    const aim = selectedCoin || {x:(striker.x + targetPocket.x)/2, y:(striker.y + targetPocket.y)/2};
+    const toCoinX = aim.x - striker.x;
+    const toCoinY = aim.y - striker.y;
+    const toPocketX = targetPocket.x - aim.x;
+    const toPocketY = targetPocket.y - aim.y;
+    const dirX = toCoinX + toPocketX * 0.48;
+    const dirY = toCoinY + toPocketY * 0.48;
+    const len = Math.hypot(dirX, dirY) || 1;
+    const force = 18 + power * 18;
+    return {vx:(dirX/len) * force, vy:(dirY/len) * force};
   }
 
   function updatePhysics(){
@@ -531,13 +477,13 @@
     for(const o of objs){
       if(!o.static){
         o.x += o.vx; o.y += o.vy;
-        o.vx *= 0.992; o.vy *= 0.992;
+        o.vx *= 0.994; o.vy *= 0.994;
         if(Math.abs(o.vx) < 0.01) o.vx = 0;
         if(Math.abs(o.vy) < 0.01) o.vy = 0;
         wallBounce(o);
         if(pocketCheck(o)){
-          if(o.color === 'striker'){ o.vx=o.vy=0; handlePocket(o); return; }
           handlePocket(o);
+          if(o.color === 'striker') return;
         }
       }
     }
@@ -546,15 +492,25 @@
     if(active && allStopped()){
       active = false;
       if(queenPocketed && !queenCovered){
-        const other = coins.find(c => c.alive && c.color !== 'red');
-        if(other){
+        const cover = coins.find(c => c.alive && c.color !== 'red');
+        if(cover){
           queenCovered = true;
           queenCoverBy = currentPlayer;
           players[currentPlayer].score += 5;
           setMsg(`Queen covered by ${players[currentPlayer].name}. Bonus +5.`);
+        } else {
+          players[currentPlayer].score = Math.max(0, players[currentPlayer].score - 5);
+          queenPocketed = false;
+          setMsg('Queen not covered. -5 penalty.');
         }
       }
-      evaluateEndOfShot();
+      if(coins.filter(c => c.alive && c.color !== 'red').length === 0 && !winner){
+        winner = currentPlayer;
+        running = false;
+        setMsg(`${players[currentPlayer].name} wins!`);
+      } else {
+        nextTurn();
+      }
     }
     updateUI();
   }
@@ -562,7 +518,8 @@
   function saveGame(){
     localStorage.setItem('carrom-save', JSON.stringify({
       mode, theme, currentPlayer, shotCount, players, queenPocketed, queenCovered, queenCoverBy,
-      striker, coins
+      striker, coins, selectedCoinIndex: selectedCoin ? coins.indexOf(selectedCoin) : -1,
+      targetPocketId: targetPocket ? targetPocket.id : 1
     }));
     setMsg('Game saved.');
   }
@@ -578,28 +535,34 @@
     for(let i=0;i<players.length;i++) players[i].score = s.players[i].score;
     striker = s.striker;
     coins = s.coins;
+    selectedCoin = s.selectedCoinIndex >= 0 ? coins[s.selectedCoinIndex] : null;
+    targetPocket = pocketList.find(p => p.id === s.targetPocketId) || pocketList[0];
     updateUI();
     setMsg('Game loaded.');
   }
 
-  function pickStriker(x,y){
-    return dist(x,y,striker.x,striker.y) <= striker.r + 10;
+  function pickCoin(x,y){
+    return coins.find(c => c.alive && dist(x,y,c.x,c.y) <= c.r + 8) || null;
+  }
+
+  function pickPocket(x,y){
+    return pocketList.find(p => dist(x,y,p.x,p.y) <= 28) || null;
   }
 
   function insideBaselineArea(x,y){
-    if(currentPlayer===0) return y > board.y+board.h-70 && y < board.y+board.h-10;
-    if(currentPlayer===1) return y > board.y+10 && y < board.y+70;
-    if(currentPlayer===2) return x > board.x+10 && x < board.x+70;
-    return x > board.x+board.w-70 && x < board.x+board.w-10;
+    if(currentPlayer===0) return y > board.y+board.h-110 && y < board.y+board.h-20;
+    if(currentPlayer===1) return y > board.y+20 && y < board.y+110;
+    if(currentPlayer===2) return x > board.x+20 && x < board.x+110;
+    return x > board.x+board.w-110 && x < board.x+board.w-20;
   }
 
   function moveStrikerAlongBaseline(x,y){
     if(currentPlayer===0 || currentPlayer===1){
-      striker.x = clamp(x, board.x+50, board.x+board.w-50);
-      striker.y = currentPlayer===0 ? board.y+board.h-26 : board.y+26;
+      striker.x = clamp(x, board.x+60, board.x+board.w-60);
+      striker.y = currentPlayer===0 ? board.y+board.h-78 : board.y+78;
     } else {
-      striker.y = clamp(y, board.y+50, board.y+board.h-50);
-      striker.x = currentPlayer===2 ? board.x+26 : board.x+board.w-26;
+      striker.y = clamp(y, board.y+60, board.y+board.h-60);
+      striker.x = currentPlayer===2 ? board.x+78 : board.x+board.w-78;
     }
   }
 
@@ -607,52 +570,62 @@
     const r = canvas.getBoundingClientRect();
     const x = (e.clientX - r.left) * (canvas.width / r.width);
     const y = (e.clientY - r.top) * (canvas.height / r.height);
-    pointer.x = x; pointer.y = y; pointer.startX = x; pointer.startY = y;
-    if(!running) return;
-    if(isBotTurn()) return;
-    if(pickStriker(x,y) && !active && insideBaselineArea(x,y)){
-      draggingStriker = true; strikerHeld = true; striker.static = true;
+    if(!running || isBotTurn()) return;
+
+    const pc = pickPocket(x,y);
+    if(pc){ targetPocket = pc; updateUI(); setMsg(`Target pocket set to Pocket ${pc.id}.`); return; }
+
+    const c = pickCoin(x,y);
+    if(c){ selectedCoin = c; updateUI(); setMsg(`Selected ${c.color} coin.`); return; }
+
+    if(dist(x,y,striker.x,striker.y) < striker.r + 10 && !active && insideBaselineArea(x,y)){
+      draggingStriker = true;
+      striker.static = true;
       return;
     }
-    if(!active && !draggingStriker && dist(x,y,striker.x,striker.y) < 30){
-      aiming = true;
-    }
+
+    aiming = true;
+    pointerDown = {x,y};
   });
+
+  let pointerDown = {x:0,y:0};
 
   canvas.addEventListener('pointermove', e => {
     const r = canvas.getBoundingClientRect();
     const x = (e.clientX - r.left) * (canvas.width / r.width);
     const y = (e.clientY - r.top) * (canvas.height / r.height);
-    pointer.x = x; pointer.y = y;
+
     if(draggingStriker && !active){
       moveStrikerAlongBaseline(x,y);
-      updateGuide();
     }
+
     if(aiming){
-      power = clamp(dist(pointer.startX,pointer.startY,x,y) / 220, 0, 1);
+      power = shotPowerFromDrag(pointerDown.x, pointerDown.y, x, y);
       updateUI();
     }
   });
 
   canvas.addEventListener('pointerup', e => {
     if(draggingStriker){
-      draggingStriker = false; strikerHeld = false; updateGuide(); return;
+      draggingStriker = false;
+      striker.static = true;
+      return;
     }
     if(aiming && !active && running){
       const r = canvas.getBoundingClientRect();
       const x = (e.clientX - r.left) * (canvas.width / r.width);
       const y = (e.clientY - r.top) * (canvas.height / r.height);
-      const dx = striker.x - x, dy = striker.y - y;
-      const len = Math.hypot(dx,dy) || 1;
-      const force = clamp(dist(pointer.startX,pointer.startY,x,y)/15, 3, 18);
-      striker.vx = dx/len * force * power * 1.4;
-      striker.vy = dy/len * force * power * 1.4;
+      const shot = computeShotVector();
+      const dragPower = shotPowerFromDrag(pointerDown.x, pointerDown.y, x, y);
+      power = Math.max(power, dragPower);
+      striker.vx = shot.vx * (0.7 + power * 0.65);
+      striker.vy = shot.vy * (0.7 + power * 0.65);
       striker.static = false;
       active = true;
       aiming = false;
       shotCount++;
+      setMsg(`Shot fired toward Pocket ${targetPocket.id}.`);
       updateUI();
-      setMsg('Shot fired.');
     }
   });
 
@@ -660,27 +633,40 @@
     if(e.key.toLowerCase() === 'r'){ resetGame(); }
     if(e.key.toLowerCase() === 's'){ saveGame(); }
     if(e.key.toLowerCase() === 'l'){ loadGame(); }
+
+    if(e.key === '1') targetPocket = pocketList[0];
+    if(e.key === '2') targetPocket = pocketList[1];
+    if(e.key === '3') targetPocket = pocketList[2];
+    if(e.key === '4') targetPocket = pocketList[3];
+    if(e.key.toLowerCase() === 'c') selectedCoin = null;
+
     if(e.key === ' '){
       e.preventDefault();
       if(!active && !aiming && running){
         aiming = true;
-        pointer.startX = striker.x; pointer.startY = striker.y;
-        pointer.x = striker.x - 80; pointer.y = striker.y - 40;
-        power = 0.7;
-        striker.vx = 0; striker.vy = 0;
+        pointerDown = {x:striker.x, y:striker.y};
+        power = 0.85;
+        const shot = computeShotVector();
+        striker.vx = shot.vx * 0.85;
+        striker.vy = shot.vy * 0.85;
+        striker.static = false;
+        active = true;
+        aiming = false;
+        shotCount++;
+        updateUI();
       }
     }
+
     if(!active && !isBotTurn()){
       if(e.key.toLowerCase() === 'a'){
         if(currentPlayer===0 || currentPlayer===1) moveStrikerAlongBaseline(striker.x - 18, striker.y);
         else moveStrikerAlongBaseline(striker.x, striker.y - 18);
-        updateGuide();
       }
       if(e.key.toLowerCase() === 'd'){
         if(currentPlayer===0 || currentPlayer===1) moveStrikerAlongBaseline(striker.x + 18, striker.y);
         else moveStrikerAlongBaseline(striker.x, striker.y + 18);
-        updateGuide();
       }
+      updateUI();
     }
   });
 
@@ -689,17 +675,23 @@
   document.getElementById('loadBtn').onclick = loadGame;
   ui.mode.onchange = e => { mode = e.target.value; resetGame(); };
   ui.theme.onchange = e => { setTheme(e.target.value); };
+
   setTheme(theme);
   resetGame();
 
   function loop(){
-    updateGuide();
     if(running || particles.length){
       updatePhysics();
-      draw();
-    } else {
-      draw();
     }
+    drawBoard();
+    coins.forEach(drawCoin);
+    drawCoin(striker);
+    particles.forEach(p => {
+      ctx.globalAlpha = p.a;
+      ctx.fillStyle = p.c;
+      ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fill();
+      ctx.globalAlpha = 1;
+    });
     requestAnimationFrame(loop);
   }
   loop();
