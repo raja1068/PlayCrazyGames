@@ -152,21 +152,6 @@
       border-bottom: 1px solid #d4a37355;
     }
 
-    .power-meter-bg {
-      background: #4d321c;
-      border-radius: 20px;
-      height: 12px;
-      margin: 10px 0;
-      overflow: hidden;
-    }
-
-    .power-meter-fill {
-      width: 0%;
-      height: 100%;
-      background: linear-gradient(90deg, #ffb347, #ff6a00);
-      border-radius: 20px;
-    }
-
     .msg-area {
       background: #00000055;
       border-radius: 28px;
@@ -224,12 +209,10 @@
         <span>🔋 Power Slider</span>
         <input type="range" id="powerSlider" min="0" max="100" value="75">
       </div>
-      <div class="power-meter-bg"><div class="power-meter-fill" id="powerMeterFill"></div></div>
       <div class="stat-row"><span>🏆 Score (Red=5, Coin=1)</span><span id="scoreHint"></span></div>
       <div class="msg-area" id="gameMsg">
-        💥 SUPER HEAVY STRIKE FORCE! Coins now fly straight on impact.<br>
-        🔥 Green arrow shows target pocket path.
-      </div>
+        🎯 Increased striking force! Now you can hit coins to force it move on a straight direction with real power.<br>
+        🔥 Green arrow shows pocket trajectory for the first coin if it goes to pocket on the straight direction of striker movement, in line.</div>
       <div class="shortcut-help">
         ⌨️ <kbd>A/D</kbd> move striker · <kbd>Space</kbd> quick aim · <kbd>R</kbd> restart
       </div>
@@ -343,9 +326,9 @@
       offsets.forEach(([dx,dy,clr]) => {
         coins.push({ x: center.x + dx, y: center.y + dy, vx:0, vy:0, r: rCoin, color: clr, alive: true, static: false, mass: 1.0 });
       });
-      // Striker mass increased to 1.6 for heavy impact
+      // Striker mass increased to 2.0 for heavy impact
       striker = {
-        x: center.x, y: board.y + board.h - 28, vx:0, vy:0, r: 16.5, color: 'striker', alive: true, static: true, mass: 1.6
+        x: center.x, y: board.y + board.h - 28, vx:0, vy:0, r: 16.5, color: 'striker', alive: true, static: true, mass: 2.0
       };
       setStrikerOnBaseline();
     }
@@ -353,7 +336,7 @@
     // =========== HEAVY IMPACT PHYSICS ==========
     const COLLISION_E = 0.94;        // high restitution – crisp directional hit
     const STOP_VEL = 0.25;           
-    const AIR_DRAG = 0.992;          // low drag so coins travel with power
+    const AIR_DRAG = 1.55;          // low drag so coins travel with power
     
     function applyFriction(obj) {
       if(obj.static) return;
@@ -434,7 +417,7 @@
       if(coin.color === 'striker') {
         strikerFoulThisShot = true;
         players[currentPlayer].score = Math.max(0, players[currentPlayer].score - 2);
-        setGameMessage(`FOUL! Striker pocketed. -2 points, turn lost.`);
+        setGameMessage(`FOUL! Striker pocketed. -1 points, turn lost.`);
         return;
       }
       if(coin.color === 'red') {
