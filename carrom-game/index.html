@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-  <title>Carrom · Perfect Balance · Smart Pocket Guide</title>
+  <title>Carrom · Increased Striking Force · Balanced Impact</title>
   <style>
     * {
       box-sizing: border-box;
@@ -227,8 +227,8 @@
       <div class="power-meter-bg"><div class="power-meter-fill" id="powerMeterFill"></div></div>
       <div class="stat-row"><span>🏆 Score (Red=5, Coin=1)</span><span id="scoreHint"></span></div>
       <div class="msg-area" id="gameMsg">
-        🎯 Drag striker to aim → Green arrow shows target pocket path<br>
-        ⚡ Balanced power: control your shots precisely
+        🎯 Increased striking force! Now you can smash coins with real power.<br>
+        🔥 Green arrow shows pocket trajectory for the first coin in line.
       </div>
       <div class="shortcut-help">
         ⌨️ <kbd>A/D</kbd> move striker · <kbd>Space</kbd> quick aim · <kbd>R</kbd> restart
@@ -327,7 +327,7 @@
       for(let i=0; i<players.length; i++) players[i].score = 0;
       initCoinsAndStriker();
       updateUI();
-      setGameMessage("Perfect balance! Adjust power, aim with green pocket guide, shoot.");
+      setGameMessage("Striking force increased! Power up and smash those coins.");
       if(isBotTurn()) setTimeout(botPlay, 600);
     }
     
@@ -349,10 +349,10 @@
       setStrikerOnBaseline();
     }
     
-    // ---------- BALANCED PHYSICS (moderate force, good feel) ----------
-    const COLLISION_E = 0.85;        // natural bounce
-    const STOP_VEL = 0.25;           
-    const AIR_DRAG = 0.99;           // light friction -> coins roll naturally but stop
+    // ---------- PHYSICS WITH INCREASED FORCE ----------
+    const COLLISION_E = 0.86;        // natural bounce
+    const STOP_VEL = 0.28;           
+    const AIR_DRAG = 0.99;           // light friction for smooth roll
     
     function applyFriction(obj) {
       if(obj.static) return;
@@ -527,13 +527,13 @@
       if(!winner && isBotTurn()) setTimeout(botPlay, 400);
     }
     
-    // MODERATE FORCE: min 6.5, max 15.0 (balanced)
+    // INCREASED STRIKING FORCE: min 8.0, max 19.0
     function shootWithDirection(dirX, dirY, powerVal) {
       if(activeShot || aimingMode === false) return false;
       const len = Math.hypot(dirX, dirY);
       if(len < 0.01) return false;
       const normX = dirX / len, normY = dirY / len;
-      const force = 6.5 + powerVal * 8.5;   // 6.5 to 15.0
+      const force = 8.0 + powerVal * 11.0;   // range 8.0 → 19.0 (much more powerful)
       striker.vx = normX * force;
       striker.vy = normY * force;
       striker.static = false;
@@ -541,7 +541,7 @@
       aimingMode = false;
       shotCounter++;
       updateUI();
-      setGameMessage(`Shot power: ${Math.round(powerVal*100)}% — smooth and controlled.`);
+      setGameMessage(`⚡ POWERFUL SHOT! ${Math.round(powerVal*100)}% — CRISP IMPACT!`);
       return true;
     }
     
@@ -556,15 +556,15 @@
       const dy = target.y - striker.y;
       const length = Math.hypot(dx,dy);
       if(length < 0.01) return;
-      const powerVal = 0.65;
+      const powerVal = 0.7;   // 70% power → ~15.7 force
       const normX = dx/length, normY = dy/length;
-      const force = 6.5 + powerVal * 8.5;
+      const force = 8.0 + powerVal * 11.0;
       striker.vx = normX * force;
       striker.vy = normY * force;
       striker.static = false;
       activeShot = true;
       aimingMode = false;
-      setGameMessage(`🤖 Bot shoots (moderate power).`);
+      setGameMessage(`🤖 Bot strikes with increased force!`);
       updateUI();
     }
     
@@ -686,10 +686,9 @@
       ctx.fillStyle = '#ffaa33';
       ctx.fill();
       
-      // --- Enhanced green pocket guide ---
+      // Green pocket guide
       const firstCoin = raycastFirstCoin(fromX, fromY, dirX, dirY);
       if(firstCoin && firstCoin.alive && firstCoin.color !== 'striker') {
-        // highlight first coin with green glow
         ctx.beginPath(); ctx.arc(firstCoin.x, firstCoin.y, firstCoin.r+5, 0, Math.PI*2);
         ctx.strokeStyle = '#22ff88';
         ctx.lineWidth = 3;
@@ -699,13 +698,11 @@
         
         const targetPocket = nearestPocket(firstCoin);
         if(targetPocket) {
-          // Draw bright green line from coin to pocket
           ctx.beginPath(); ctx.moveTo(firstCoin.x, firstCoin.y); ctx.lineTo(targetPocket.x, targetPocket.y);
           ctx.strokeStyle = '#44ff88';
           ctx.lineWidth = 3.5;
           ctx.setLineDash([6, 8]);
           ctx.stroke();
-          // glow pocket
           ctx.beginPath(); ctx.arc(targetPocket.x, targetPocket.y, 14, 0, Math.PI*2);
           ctx.fillStyle = '#88ffaa44';
           ctx.fill();
