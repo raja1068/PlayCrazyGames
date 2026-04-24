@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>Carrom Pro – Sharp Impact · Dotted Aim + Green Pocket Arrow</title>
+  <title>Carrom Pro – Powerful Impact · Green Pocket Arrow Guide</title>
   <style>
     * {
       box-sizing: border-box;
@@ -200,13 +200,12 @@
         <div class="stat-line"><span>💥 Power</span><span id="powerPercent">0%</span></div>
         <div class="power-bar">
           <span>🔋 Power Slider</span>
-          <input type="range" id="powerSlider" min="0" max="100" value="72">
+          <input type="range" id="powerSlider" min="0" max="100" value="75">
         </div>
         <div class="power-meter"><div class="power-fill" id="powerFill"></div></div>
         <div class="msg-box" id="gameMsg">
-          🎯 <strong>Sharp impact!</strong> Drag striker → aim → release.<br>
-          ⚫ <strong>White dotted line</strong> → first coin in path.<br>
-          🟢 <strong>Green arrow</strong> → pocket direction of that coin.
+          💪 <strong>Increased impact force!</strong> Drag striker → aim → release.<br>
+          🟢 <strong>Green arrow</strong> shows targeted coin's pocket path based on your aim.
         </div>
         <div class="stat-line"><span>⌨️ Shortcuts</span><span><kbd>A/D</kbd> move striker · <kbd>Space</kbd> aim</span></div>
       </div>
@@ -218,7 +217,6 @@
 
 <script>
   (function(){
-    // Canvas
     const canvas = document.getElementById('carromCanvas');
     const ctx = canvas.getContext('2d');
     const W = 1000, H = 1000;
@@ -245,7 +243,6 @@
     let striker = null;
     let aimVector = { x: 0, y: 0 };
     
-    // DOM refs
     const powerSlider = document.getElementById('powerSlider');
     const powerPercentSpan = document.getElementById('powerPercent');
     const powerFillDiv = document.getElementById('powerFill');
@@ -305,7 +302,7 @@
     function initStriker() {
       striker = {
         x: center.x, y: board.y+board.h-32, vx:0, vy:0, r: STRIKER_RADIUS,
-        color: 'striker', alive: true, static: true, mass: 1.85   // heavier for impact
+        color: 'striker', alive: true, static: true, mass: 2.0   // heavier for real impact
       };
       setStrikerOnBaseline();
     }
@@ -328,14 +325,14 @@
       initCoins();
       initStriker();
       updateUI();
-      setMessage("⚡ Sharp impact physics! Dotted line → target coin, green arrow → pocket direction.");
+      setMessage("💪 Enhanced impact! Aim with green pocket arrow guide.");
       if(isBotTurn()) setTimeout(botAimAndShoot, 500);
     }
     
-    // ========== SHARP IMPACT PHYSICS (crisp collision, moderate drag) ==========
-    const COLLISION_E = 0.92;        // high restitution = sharp bounce
+    // ========== IMPROVED COLLISION PHYSICS (mass-based, crisp transfer) ==========
+    const COLLISION_E = 0.92;
     const STOP_VEL = 0.28;
-    const AIR_DRAG = 0.986;
+    const AIR_DRAG = 0.987;
     
     function applyFriction(obj) {
       if(obj.static) return;
@@ -351,10 +348,10 @@
       const minX = board.x+18, maxX = board.x+board.w-18;
       const minY = board.y+18, maxY = board.y+board.h-18;
       let bounce = false;
-      if(c.x - c.r < minX) { c.x = minX + c.r; c.vx = -c.vx * 0.86; bounce = true; }
-      if(c.x + c.r > maxX) { c.x = maxX - c.r; c.vx = -c.vx * 0.86; bounce = true; }
-      if(c.y - c.r < minY) { c.y = minY + c.r; c.vy = -c.vy * 0.86; bounce = true; }
-      if(c.y + c.r > maxY) { c.y = maxY - c.r; c.vy = -c.vy * 0.86; bounce = true; }
+      if(c.x - c.r < minX) { c.x = minX + c.r; c.vx = -c.vx * 0.87; bounce = true; }
+      if(c.x + c.r > maxX) { c.x = maxX - c.r; c.vx = -c.vx * 0.87; bounce = true; }
+      if(c.y - c.r < minY) { c.y = minY + c.r; c.vy = -c.vy * 0.87; bounce = true; }
+      if(c.y + c.r > maxY) { c.y = maxY - c.r; c.vy = -c.vy * 0.87; bounce = true; }
       if(bounce) applyFriction(c);
     }
     
@@ -367,9 +364,10 @@
     }
     
     function addParticles(x,y,col) {
-      for(let i=0;i<12;i++) particles.push({ x, y, r: Math.random()*3+1, vx: (Math.random()-0.5)*4, vy: (Math.random()-0.5)*4, a:1, color:col });
+      for(let i=0;i<14;i++) particles.push({ x, y, r: Math.random()*3+1, vx: (Math.random()-0.5)*5, vy: (Math.random()-0.5)*5, a:1, color:col });
     }
     
+    // Proper impulse-based collision with mass
     function resolveCollision(a,b) {
       if(!a.alive || !b.alive) return;
       const dx = b.x - a.x, dy = b.y - a.y;
@@ -383,11 +381,14 @@
       const vrelx = a.vx - b.vx, vrely = a.vy - b.vy;
       const velAlong = vrelx * nx + vrely * ny;
       if(velAlong > 0) return;
-      const m1 = a.mass || 1, m2 = b.mass || 1;
+      const m1 = a.mass || 1.0, m2 = b.mass || 1.0;
       const imp = -(1 + COLLISION_E) * velAlong / ((1/m1)+(1/m2));
-      a.vx -= imp * nx / m1; a.vy -= imp * ny / m1;
-      b.vx += imp * nx / m2; b.vy += imp * ny / m2;
-      applyFriction(a); applyFriction(b);
+      a.vx -= imp * nx / m1;
+      a.vy -= imp * ny / m1;
+      b.vx += imp * nx / m2;
+      b.vy += imp * ny / m2;
+      applyFriction(a);
+      applyFriction(b);
     }
     
     function handlePocket(coin) {
@@ -405,7 +406,7 @@
         players[currentPlayer].pocketedRed = true;
         queenPocketed = true;
         queenCoveredBy = currentPlayer;
-        setMessage(`👑 Queen +5 points! (covered automatically)`);
+        setMessage(`👑 Queen +5 points! Covered automatically.`);
         pocketedThisTurn.push('queen');
         return;
       }
@@ -450,7 +451,7 @@
       let hasPocket = pocketedThisTurn.length > 0;
       let foul = strikerFoul;
       if(hasPocket && !foul) {
-        setMessage(`🔥 Sharp hit! Extra turn.`);
+        setMessage(`🔥 Powerful hit! Extra turn.`);
       } else {
         const total = currentPlayerCount();
         if(mode === 'bot' && currentPlayer === 1) currentPlayer = 0;
@@ -473,27 +474,27 @@
         const extraRedBonus = players[bestIdx].pocketedRed ? 5 : 0;
         const finalPoints = remainingCoinsCount + extraRedBonus;
         players[bestIdx].score += finalPoints;
-        setMessage(`🏆 ${players[bestIdx].name} WINS! +${finalPoints} bonus (${remainingCoinsCount} left coins + red ${extraRedBonus})`);
+        setMessage(`🏆 ${players[bestIdx].name} WINS! +${finalPoints} bonus (${remainingCoinsCount} left + red ${extraRedBonus})`);
         activeShot = false;
       }
       updateUI();
       if(!winnerDeclared && isBotTurn()) setTimeout(botAimAndShoot, 450);
     }
     
-    // Moderate-High striking force (9 → 18) gives sharp impact without scattering
+    // INCREASED STRIKING FORCE (10 → 20) - strong but controlled
     function shootWithDirection(dirX, dirY, powerVal) {
       if(activeShot || aiming === false) return false;
       const len = Math.hypot(dirX, dirY);
       if(len < 0.01) return false;
       const normX = dirX/len, normY = dirY/len;
-      const force = 9.0 + powerVal * 9.0;   // 9 .. 18
+      const force = 10.0 + powerVal * 10.0;   // 10 to 20
       striker.vx = normX * force;
       striker.vy = normY * force;
       striker.static = false;
       activeShot = true;
       aiming = false;
       updateUI();
-      setMessage(`💥 Sharp strike! Power ${Math.round(powerVal*100)}% – crisp impact.`);
+      setMessage(`💥 POWERFUL STRIKE! ${Math.round(powerVal*100)}% – coin will move decisively.`);
       return true;
     }
     
@@ -507,26 +508,26 @@
       const dy = target.y - striker.y;
       const len = Math.hypot(dx,dy);
       if(len<0.01) return;
-      const powerVal = 0.7;
+      const powerVal = 0.72;
       const normX = dx/len, normY = dy/len;
-      const force = 9.0 + powerVal * 9.0;
+      const force = 10.0 + powerVal * 10.0;
       striker.vx = normX * force;
       striker.vy = normY * force;
       striker.static = false;
       activeShot = true;
-      setMessage(`🤖 Bot strikes with sharp impact.`);
+      setMessage(`🤖 Bot delivers powerful strike!`);
       updateUI();
     }
     
-    // ========== VISUAL GUIDES: DOTTED LINE TO TARGET COIN + GREEN POCKET ARROW ==========
-    function raycastFirstCoin(fromX, fromY, dirX, dirY) {
+    // ========== GREEN ARROW GUIDE (target coin → pocket) ==========
+    function getFirstCoinInAim(fromX, fromY, dirX, dirY) {
       let closest = null, minDist = Infinity;
       for(let coin of coins) {
         if(!coin.alive) continue;
         const toX = coin.x - fromX, toY = coin.y - fromY;
         const cross = dirX * toY - dirY * toX;
         const dot = dirX * toX + dirY * toY;
-        if(Math.abs(cross) < coin.r+7 && dot > 0) {
+        if(Math.abs(cross) < coin.r+8 && dot > 0) {
           const d2 = Math.hypot(toX, toY);
           if(d2 < minDist && d2 < 380) { minDist = d2; closest = coin; }
         }
@@ -534,7 +535,7 @@
       return closest;
     }
     
-    function getStraightPocketFromCoin(coin, dirX, dirY) {
+    function getPocketForCoinAlongDir(coin, dirX, dirY) {
       const pockets = [[board.x,board.y],[board.x+board.w,board.y],[board.x,board.y+board.h],[board.x+board.w,board.y+board.h]];
       let bestPocket = null, bestProj = Infinity;
       for(let p of pockets) {
@@ -543,7 +544,7 @@
         if(proj > 0) {
           const closestX = coin.x + dirX*proj;
           const closestY = coin.y + dirY*proj;
-          if(distance(closestX,closestY,p.x,p.y) < 28 && proj < bestProj) {
+          if(distance(closestX,closestY,p.x,p.y) < 30 && proj < bestProj) {
             bestProj = proj;
             bestPocket = p;
           }
@@ -552,7 +553,7 @@
       return bestPocket;
     }
     
-    // Drawing routines
+    // Drawing
     function drawBoard() {
       ctx.fillStyle = '#f2dca8'; ctx.fillRect(0,0,W,H);
       ctx.fillStyle = '#e7b874'; ctx.fillRect(board.x,board.y,board.w,board.h);
@@ -602,7 +603,7 @@
       ctx.beginPath(); ctx.arc(striker.x,striker.y,10,0,Math.PI*2); ctx.fillStyle='#cc9b60'; ctx.fill();
     }
     
-    function drawAimGuides() {
+    function drawAimAndGreenArrow() {
       if(!aiming || activeShot) return;
       const fromX = striker.x, fromY = striker.y;
       const toX = aimVector.x, toY = aimVector.y;
@@ -610,26 +611,23 @@
       if(len < 5) return;
       const dirX = (toX-fromX)/len, dirY = (toY-fromY)/len;
       
-      // First: find target coin along this direction
-      const targetCoin = raycastFirstCoin(fromX, fromY, dirX, dirY);
+      // Find target coin
+      const targetCoin = getFirstCoinInAim(fromX, fromY, dirX, dirY);
       
-      // Draw white dotted line from striker to the target coin (if exists) or just extended line
+      // Draw white dotted line from striker to target coin
       if(targetCoin) {
         ctx.beginPath(); ctx.moveTo(fromX, fromY); ctx.lineTo(targetCoin.x, targetCoin.y);
         ctx.strokeStyle = '#ffffffcc'; ctx.lineWidth = 3.5; ctx.setLineDash([10, 12]);
         ctx.stroke();
         ctx.setLineDash([]);
       } else {
-        // just extended dotted line to show direction
-        const farX = fromX + dirX * 250;
-        const farY = fromY + dirY * 250;
-        ctx.beginPath(); ctx.moveTo(fromX, fromY); ctx.lineTo(farX, farY);
-        ctx.strokeStyle = '#dddddd'; ctx.lineWidth = 3; ctx.setLineDash([10, 12]);
+        ctx.beginPath(); ctx.moveTo(fromX, fromY); ctx.lineTo(fromX + dirX*200, fromY + dirY*200);
+        ctx.strokeStyle = '#cccccc'; ctx.lineWidth = 3; ctx.setLineDash([10, 12]);
         ctx.stroke();
         ctx.setLineDash([]);
       }
       
-      // Draw yellow aiming arrow (from striker direction)
+      // Draw yellow aiming arrow
       const arrowEndX = fromX + dirX * 110;
       const arrowEndY = fromY + dirY * 110;
       ctx.beginPath(); ctx.moveTo(fromX, fromY); ctx.lineTo(arrowEndX, arrowEndY);
@@ -641,35 +639,34 @@
       ctx.lineTo(arrowEndX-12*Math.cos(angle+0.6), arrowEndY-12*Math.sin(angle+0.6));
       ctx.fillStyle = '#ffaa33'; ctx.fill();
       
-      // GREEN POCKET ARROW from target coin to pocket
+      // DRAW GREEN ARROW from target coin to pocket
       if(targetCoin && targetCoin.alive && targetCoin.color !== 'striker') {
-        // highlight target coin with green ring
-        ctx.beginPath(); ctx.arc(targetCoin.x, targetCoin.y, targetCoin.r+5, 0, Math.PI*2);
+        ctx.beginPath(); ctx.arc(targetCoin.x, targetCoin.y, targetCoin.r+6, 0, Math.PI*2);
         ctx.strokeStyle = '#33ff99'; ctx.lineWidth = 3; ctx.setLineDash([4,4]); ctx.stroke();
         ctx.setLineDash([]);
         
-        const pocket = getStraightPocketFromCoin(targetCoin, dirX, dirY);
+        const pocket = getPocketForCoinAlongDir(targetCoin, dirX, dirY);
         if(pocket) {
           ctx.beginPath(); ctx.moveTo(targetCoin.x, targetCoin.y); ctx.lineTo(pocket.x, pocket.y);
-          ctx.strokeStyle = '#66ff99'; ctx.lineWidth = 4.5; ctx.setLineDash([8,10]);
+          ctx.strokeStyle = '#66ff99'; ctx.lineWidth = 5; ctx.setLineDash([6, 10]);
           ctx.stroke();
-          ctx.beginPath(); ctx.arc(pocket.x, pocket.y, 16, 0, Math.PI*2);
+          ctx.beginPath(); ctx.arc(pocket.x, pocket.y, 18, 0, Math.PI*2);
           ctx.fillStyle = '#88ffaa88'; ctx.fill();
-          ctx.beginPath(); ctx.arc(pocket.x, pocket.y, 9, 0, Math.PI*2);
+          ctx.beginPath(); ctx.arc(pocket.x, pocket.y, 10, 0, Math.PI*2);
           ctx.fillStyle = '#ccffbb'; ctx.fill();
           const pAngle = Math.atan2(pocket.y - targetCoin.y, pocket.x - targetCoin.x);
-          const tipX = pocket.x - 12*Math.cos(pAngle);
-          const tipY = pocket.y - 12*Math.sin(pAngle);
+          const tipX = pocket.x - 14*Math.cos(pAngle);
+          const tipY = pocket.y - 14*Math.sin(pAngle);
           ctx.beginPath(); ctx.moveTo(pocket.x, pocket.y);
-          ctx.lineTo(tipX-7*Math.cos(pAngle-0.7), tipY-7*Math.sin(pAngle-0.7));
-          ctx.lineTo(tipX-7*Math.cos(pAngle+0.7), tipY-7*Math.sin(pAngle+0.7));
+          ctx.lineTo(tipX-8*Math.cos(pAngle-0.7), tipY-8*Math.sin(pAngle-0.7));
+          ctx.lineTo(tipX-8*Math.cos(pAngle+0.7), tipY-8*Math.sin(pAngle+0.7));
           ctx.fillStyle = '#aaff99'; ctx.fill();
+          ctx.setLineDash([]);
         } else {
-          // extended green line
           const extX = targetCoin.x + dirX * 160;
           const extY = targetCoin.y + dirY * 160;
           ctx.beginPath(); ctx.moveTo(targetCoin.x, targetCoin.y); ctx.lineTo(extX, extY);
-          ctx.strokeStyle = '#88ff88'; ctx.lineWidth = 3.5; ctx.setLineDash([8,8]); ctx.stroke();
+          ctx.strokeStyle = '#88ff88'; ctx.lineWidth = 4; ctx.setLineDash([8,8]); ctx.stroke();
         }
         ctx.setLineDash([]);
       }
@@ -695,7 +692,7 @@
       }
       scorePanelDiv.innerHTML = html;
       turnNameSpan.innerText = players[currentPlayer].name;
-      phaseLabelSpan.innerText = activeShot ? '⚡ IMPACT ⚡' : (aiming ? '🎯 AIM (dotted → coin, green → pocket)' : 'READY');
+      phaseLabelSpan.innerText = activeShot ? '⚡ POWER SHOT ⚡' : (aiming ? '🎯 AIM (green arrow → pocket)' : 'READY');
       let qText = queenPocketed ? `Pocketed by P${queenCoveredBy+1}` : 'On board 👑';
       queenStatusSpan.innerText = qText;
       let pwr = powerSlider.value/100;
@@ -717,9 +714,9 @@
       if(bounds.axis === 'x') onBase = Math.abs(y - bounds.yFixed) < 28 && x > bounds.xMin-12 && x < bounds.xMax+12;
       else onBase = Math.abs(x - bounds.xFixed) < 28 && y > bounds.yMin-12 && y < bounds.yMax+12;
       if(onStriker && onBase && !activeShot) { draggingStriker = true; return; }
-      if(distance(x,y, striker.x, striker.y) < striker.r+32 && !activeShot && !draggingStriker) {
+      if(distance(x,y, striker.x, striker.y) < striker.r+34 && !activeShot && !draggingStriker) {
         aiming = true;
-        aimVector = { x: striker.x+40, y: striker.y-20 };
+        aimVector = { x: striker.x+45, y: striker.y-22 };
       }
     }
     
@@ -759,7 +756,7 @@
       const key = e.key.toLowerCase();
       if(key === 'a' || key === 'd') {
         const bounds = baselineBounds();
-        let step = key === 'a' ? -24 : 24;
+        let step = key === 'a' ? -26 : 26;
         if(bounds.axis === 'x') striker.x = clamp(striker.x+step, bounds.xMin, bounds.xMax);
         else striker.y = clamp(striker.y+step, bounds.yMin, bounds.yMax);
         setStrikerOnBaseline();
@@ -767,7 +764,7 @@
       }
       if(key === ' ') {
         e.preventDefault();
-        if(!aiming && !activeShot) { aiming = true; aimVector = { x: striker.x+45, y: striker.y-24 }; }
+        if(!aiming && !activeShot) { aiming = true; aimVector = { x: striker.x+48, y: striker.y-26 }; }
       }
       if(key === 'r') resetMatch();
     });
@@ -795,7 +792,7 @@
       drawBoard();
       coins.forEach(drawCoin);
       drawStriker();
-      drawAimGuides();
+      drawAimAndGreenArrow();
       drawParticles();
       requestAnimationFrame(animate);
     }
