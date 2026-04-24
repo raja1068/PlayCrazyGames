@@ -1,953 +1,260 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-  <title>Carrom · Fixed Physics · Powerful Straight Hits</title>
-  <style>
-    * {
-      box-sizing: border-box;
-      user-select: none;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    body {
-      margin: 0;
-      background: linear-gradient(145deg, #2c1a0c, #1e1208);
-      font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      padding: 20px;
-    }
-
-    .game-container {
-      max-width: 1350px;
-      width: 100%;
-      background: rgba(0, 0, 0, 0.25);
-      border-radius: 48px;
-      padding: 20px;
-      backdrop-filter: blur(2px);
-      box-shadow: 0 20px 35px rgba(0, 0, 0, 0.5);
-    }
-
-    .top-bar {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      align-items: center;
-      gap: 15px;
-      background: #2b1a0ecc;
-      backdrop-filter: blur(8px);
-      padding: 12px 20px;
-      border-radius: 60px;
-      margin-bottom: 20px;
-    }
-
-    .score-panel {
-      display: flex;
-      gap: 20px;
-      flex-wrap: wrap;
-    }
-
-    .player-badge {
-      background: #1f1408;
-      padding: 6px 20px;
-      border-radius: 40px;
-      font-weight: bold;
-      color: #ffecb3;
-      box-shadow: inset 0 1px 2px rgba(0,0,0,0.3), 0 2px 5px rgba(0,0,0,0.2);
-      transition: all 0.1s ease;
-    }
-
-    .player-badge.active {
-      background: #f5a623;
-      color: #2c1a0c;
-      box-shadow: 0 0 0 2px #ffdd88;
-    }
-
-    .controls-group {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-      align-items: center;
-    }
-
-    select, button, .power-slider-wrap {
-      background: #2f241b;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 36px;
-      font-weight: bold;
-      color: #ffe6c7;
-      cursor: pointer;
-      font-size: 0.85rem;
-      transition: 0.1s linear;
-    }
-
-    button {
-      background: #3e2b1b;
-    }
-
-    button.primary {
-      background: #1f7a3b;
-      color: white;
-    }
-
-    .power-slider-wrap {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      background: #2a1d10;
-      padding: 5px 16px;
-    }
-
-    .power-slider-wrap label {
-      font-weight: bold;
-      letter-spacing: 1px;
-    }
-
-    input[type="range"] {
-      width: 160px;
-      height: 5px;
-      border-radius: 10px;
-      background: #f5bc70;
-    }
-
-    .main-grid {
-      display: grid;
-      grid-template-columns: 1fr 280px;
-      gap: 20px;
-    }
-
-    .board-holder {
-      background: #4a2c14;
-      border-radius: 40px;
-      padding: 16px;
-      box-shadow: 0 20px 35px rgba(0,0,0,0.5);
-    }
-
-    canvas {
-      width: 100%;
-      height: auto;
-      display: block;
-      border-radius: 24px;
-      touch-action: none;
-      cursor: crosshair;
-    }
-
-    .info-panel {
-      background: #2c1d0fe6;
-      backdrop-filter: blur(8px);
-      border-radius: 32px;
-      padding: 18px;
-      color: #f7e9d7;
-    }
-
-    .stat-row {
-      display: flex;
-      justify-content: space-between;
-      padding: 10px 0;
-      border-bottom: 1px solid #d4a37355;
-    }
-
-    .msg-area {
-      background: #00000055;
-      border-radius: 28px;
-      padding: 12px;
-      margin-top: 12px;
-      font-size: 0.85rem;
-    }
-
-    .shortcut-help {
-      font-size: 0.75rem;
-      margin-top: 12px;
-      opacity: 0.8;
-    }
-
-    kbd {
-      background: #1a130c;
-      border-radius: 6px;
-      padding: 2px 8px;
-      font-family: monospace;
-      margin: 0 2px;
-    }
-
-    @media (max-width: 880px) {
-      .main-grid { grid-template-columns: 1fr; }
-      .top-bar { flex-direction: column; align-items: stretch; }
-    }
-  </style>
-</head>
-<body>
-<div class="game-container">
-  <div class="top-bar">
-    <div class="score-panel" id="scorePanel"></div>
-    <div class="controls-group">
-      <select id="modeSelect">
-        <option value="2">2 Players</option>
-        <option value="4">4 Players</option>
-        <option value="bot">VS Bot</option>
-      </select>
-      <button id="restartBtn" class="primary">🎲 New Game</button>
-      <button id="saveBtn">💾 Save</button>
-      <button id="loadBtn">📂 Load</button>
-    </div>
-  </div>
-
-  <div class="main-grid">
-    <div class="board-holder">
-      anvas id="carromCanvas" width="860" height="860"></canvas>
-    </div>
-    <div class="info-panel">
-      <div class="stat-row"><span>🎯 Turn</span><span id="turnName">Player 1</span></div>
-      <div class="stat-row"><span>⚡ Phase</span><span id="phaseLabel">Ready</span></div>
-      <div class="stat-row"><span>👑 Queen</span><span id="queenStatus">On board</span></div>
-      <div class="stat-row"><span>💥 Shot Power</span><span id="powerPercent">0%</span></div>
-      <div class="power-slider-wrap" style="background:#2a1d10; justify-content:space-between">
-        <span>🔋 Power Slider</span>
-        <input type="range" id="powerSlider" min="0" max="100" value="80">
-      </div>
-      <div class="stat-row"><span>Selected Coin</span><span id="coinStatus">Auto</span></div>
-      <div class="stat-row"><span>Target Pocket</span><span id="pocketStatus">Auto</span></div>
-      <div class="msg-area" id="gameMsg">
-        Drag striker on your baseline, click a coin, click a pocket, then aim and release.
-      </div>
-      <div class="shortcut-help">
-        ⌨️ <kbd>A/D</kbd> move striker · <kbd>Space</kbd> quick aim · <kbd>R</kbd> restart · <kbd>1-4</kbd> pocket select
-      </div>
-    </div>
-  </div>
-</div>
-
-<script>
 (() => {
-  const canvas = document.getElementById('carromCanvas');
+  const canvas = document.getElementById('game');
   const ctx = canvas.getContext('2d');
-  const W = canvas.width = 860, H = canvas.height = 860;
 
-  const board = { x: 68, y: 68, w: 724, h: 724, pocketR: 32 };
+  const ui = {
+    p1: document.getElementById('p1Pill'),
+    p2: document.getElementById('p2Pill'),
+    p3: document.getElementById('p3Pill'),
+    p4: document.getElementById('p4Pill'),
+    turn: document.getElementById('turnPill'),
+    turnText: document.getElementById('turnText'),
+    phaseText: document.getElementById('phaseText'),
+    queenText: document.getElementById('queenText'),
+    shotText: document.getElementById('shotText'),
+    powerText: document.getElementById('powerText'),
+    meterFill: document.getElementById('meterFill'),
+    msg: document.getElementById('msg'),
+    mode: document.getElementById('mode'),
+    theme: document.getElementById('theme')
+  };
+
+  const W = canvas.width, H = canvas.height;
+  const board = { x: 58, y: 58, w: 704, h: 704, pocketR: 35, line: 2, baselineGap: 46 };
   const center = { x: W / 2, y: H / 2 };
 
-  let mode = '2';
-  let currentPlayer = 0;
-  let activeShot = false;
-  let aimingMode = false;
-  let draggingStrikerPos = false;
-  let winner = null;
-  let shotCounter = 0;
-
-  let pocketedThisShot = [];
-  let strikerFoulThisShot = false;
-  let queenPocketed = false;
-  let queenCovered = false;
-  let queenCoveredBy = null;
-
-  let coins = [];
-  let striker = null;
-  let particles = [];
-  let selectedCoin = null;
-  let targetPocketIndex = 0;
-
-  const pockets = [
-    { id: 1, x: board.x, y: board.y },
-    { id: 2, x: board.x + board.w, y: board.y },
-    { id: 3, x: board.x, y: board.y + board.h },
-    { id: 4, x: board.x + board.w, y: board.y + board.h }
-  ];
-
-  const powerSlider = document.getElementById('powerSlider');
-  const scorePanelDiv = document.getElementById('scorePanel');
-  const turnNameSpan = document.getElementById('turnName');
-  const phaseLabelSpan = document.getElementById('phaseLabel');
-  const queenStatusSpan = document.getElementById('queenStatus');
-  const gameMsgSpan = document.getElementById('gameMsg');
-  const powerPercentSpan = document.getElementById('powerPercent');
-  const coinStatusSpan = document.getElementById('coinStatus');
-  const pocketStatusSpan = document.getElementById('pocketStatus');
+  let theme = 'classic', mode = '2', running = true, currentPlayer = 0;
+  let shotCount = 0, active = false, aiming = false, draggingStriker = false;
+  let pointer = { x: 0, y: 0, startX: 0, startY: 0 };
+  let power = 0, winner = null, queenPocketed = false, queenCovered = false, queenCoverBy = null;
 
   const players = [
-    { name: 'Player 1', score: 0, side: 'bottom' },
-    { name: 'Player 2', score: 0, side: 'top' },
-    { name: 'Player 3', score: 0, side: 'left' },
-    { name: 'Player 4', score: 0, side: 'right' }
+    { name: 'Player 1', score: 0 }, { name: 'Player 2', score: 0 },
+    { name: 'Player 3', score: 0 }, { name: 'Player 4', score: 0 }
   ];
 
-  function clamp(v, min, max) { return Math.min(max, Math.max(min, v)); }
-  function distance(x1, y1, x2, y2) { return Math.hypot(x2 - x1, y2 - y1); }
-  function currentPlayersCount() { return mode === '4' ? 4 : 2; }
-  function isBotTurn() { return mode === 'bot' && currentPlayer === 1 && !activeShot && !winner; }
+  let coins = [], striker = null, particles = [];
 
-  function setGameMessage(msg) {
-    gameMsgSpan.innerHTML = msg;
+  function setMsg(t) { ui.msg.textContent = t; }
+  function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
+  function dist(a, b, c, d) { return Math.hypot(c - a, d - b); }
+
+  function resetGame() {
+    running = true; winner = null; currentPlayer = 0; shotCount = 0;
+    queenPocketed = false; queenCovered = false; particles = [];
+    coins = [];
+    const r = 15;
+    const cx = center.x, cy = center.y;
+    const arrangement = [
+      [0, 0, 'red'], [24, 0, 'black'], [-24, 0, 'white'], [12, 21, 'black'], [-12, 21, 'white'],
+      [12, -21, 'white'], [-12, -21, 'black'], [0, 30, 'white'], [0, -30, 'black'],
+      [31, 18, 'white'], [-31, 18, 'black'], [31, -18, 'black'], [-31, -18, 'white'],
+      [43, 0, 'black'], [-43, 0, 'white']
+    ];
+    arrangement.forEach(([dx, dy, c]) => coins.push(makeCoin(cx + dx, cy + dy, c, r)));
+    striker = makeCoin(cx, board.y + board.h - 26, 'striker', 19);
+    striker.static = true;
+    updateUI();
+  }
+
+  function makeCoin(x, y, color, r) {
+    return { x, y, vx: 0, vy: 0, r, color, alive: true, static: false };
   }
 
   function updateUI() {
-    const cnt = currentPlayersCount();
-    let html = '';
-    for (let i = 0; i < cnt; i++) {
-      html += `<div class="player-badge ${currentPlayer === i && !winner ? 'active' : ''}">${players[i].name}: ${players[i].score}</div>`;
-    }
-    scorePanelDiv.innerHTML = html;
-    turnNameSpan.innerText = players[currentPlayer].name;
-    phaseLabelSpan.innerText = activeShot ? 'Shot in motion' : (aimingMode ? 'Aiming' : 'Ready');
-    queenStatusSpan.innerText = queenCovered ? `Covered by ${players[queenCoveredBy].name}` : (queenPocketed ? 'Pocketed, await cover' : 'On board');
-    powerPercentSpan.innerText = `${powerSlider.value}%`;
-    coinStatusSpan.innerText = selectedCoin ? selectedCoin.color : 'Auto';
-    pocketStatusSpan.innerText = `Pocket ${pockets[targetPocketIndex].id}`;
+    ui.turn.textContent = `Current Player: ${currentPlayer + 1}`;
+    ui.powerText.textContent = `${Math.round(power * 100)}%`;
+    ui.meterFill.style.width = `${Math.round(power * 100)}%`;
+    ui.p1.textContent = `P1: ${players[0].score}`;
+    ui.p2.textContent = `P2: ${players[1].score}`;
   }
 
-  function getBaselineBounds() {
-    if (currentPlayer === 0) return { axis: 'x', yFixed: board.y + board.h - 78, xMin: board.x + 70, xMax: board.x + board.w - 70 };
-    if (currentPlayer === 1) return { axis: 'x', yFixed: board.y + 78, xMin: board.x + 70, xMax: board.x + board.w - 70 };
-    if (currentPlayer === 2) return { axis: 'y', xFixed: board.x + 78, yMin: board.y + 70, yMax: board.y + board.h - 70 };
-    return { axis: 'y', xFixed: board.x + board.w - 78, yMin: board.y + 70, yMax: board.y + board.h - 70 };
+  function drawArrow(x, y, tx, ty, color = '#1f8a3a') {
+    const angle = Math.atan2(ty - y, tx - x);
+    ctx.save();
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(tx, ty);
+    ctx.stroke();
+    // Arrow Head
+    ctx.translate(tx, ty);
+    ctx.rotate(angle);
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(-15, -8);
+    ctx.lineTo(-15, 8);
+    ctx.closePath();
+    ctx.fillStyle = color;
+    ctx.fill();
+    ctx.restore();
   }
 
-  function setStrikerOnBaseline() {
-    const b = getBaselineBounds();
-    if (b.axis === 'x') {
-      striker.y = b.yFixed;
-      striker.x = clamp(striker.x, b.xMin, b.xMax);
-    } else {
-      striker.x = b.xFixed;
-      striker.y = clamp(striker.y, b.yMin, b.yMax);
-    }
-    striker.vx = 0;
-    striker.vy = 0;
-    striker.static = true;
-  }
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+    // Board Drawing Logic
+    ctx.fillStyle = "#f0d8a8"; ctx.fillRect(board.x, board.y, board.w, board.h);
+    ctx.strokeStyle = "#5d3210"; ctx.lineWidth = 15; ctx.strokeRect(board.x, board.y, board.w, board.h);
 
-  function initCoinsAndStriker() {
-    coins = [];
-    const rCoin = 13.5;
-    const offsets = [
-      [0,0,'red'], [24,0,'black'], [-24,0,'white'], [12,21,'black'], [-12,21,'white'],
-      [12,-21,'white'], [-12,-21,'black'], [0,30,'white'], [0,-30,'black'],
-      [31,18,'white'], [-31,18,'black'], [31,-18,'black'], [-31,-18,'white'],
-      [43,0,'black'], [-43,0,'white']
-    ];
-    offsets.forEach(([dx, dy, clr]) => {
-      coins.push({ x: center.x + dx, y: center.y + dy, vx: 0, vy: 0, r: rCoin, color: clr, alive: true, static: false, mass: 1.0 });
+    // Pockets
+    ctx.fillStyle = "#111";
+    [[board.x, board.y], [board.x + board.w, board.y], [board.x, board.y + board.h], [board.x + board.w, board.y + board.h]].forEach(p => {
+      ctx.beginPath(); ctx.arc(p[0], p[1], board.pocketR, 0, Math.PI * 2); ctx.fill();
     });
-    striker = {
-      x: center.x,
-      y: board.y + board.h - 78,
-      vx: 0,
-      vy: 0,
-      r: 16.5,
-      color: 'striker',
-      alive: true,
-      static: true,
-      mass: 2.2
-    };
-    setStrikerOnBaseline();
-  }
 
-  function resetGame() {
-    winner = null;
-    currentPlayer = 0;
-    activeShot = false;
-    aimingMode = false;
-    draggingStrikerPos = false;
-    shotCounter = 0;
-    queenPocketed = false;
-    queenCovered = false;
-    queenCoveredBy = null;
-    pocketedThisShot = [];
-    strikerFoulThisShot = false;
-    selectedCoin = null;
-    targetPocketIndex = 0;
-    particles = [];
-    for (let i = 0; i < players.length; i++) players[i].score = 0;
-    initCoinsAndStriker();
-    updateUI();
-    setGameMessage('Drag striker on the baseline. Click a coin and pocket to target more precisely.');
-    if (isBotTurn()) setTimeout(botPlay, 600);
-  }
+    // Baseline
+    ctx.strokeStyle = "rgba(0,0,0,0.3)"; ctx.lineWidth = 2;
+    ctx.strokeRect(board.x + 40, board.y + board.h - 35, board.w - 80, 20);
 
-  const COLLISION_E = 0.92;
-  const STOP_VEL = 0.22;
-  const AIR_DRAG = 0.989;
+    coins.forEach(c => { if (c.alive) drawCoin(c); });
+    if (striker.alive) drawCoin(striker);
 
-  function applyFriction(obj) {
-    if (obj.static) return;
-    obj.vx *= AIR_DRAG;
-    obj.vy *= AIR_DRAG;
-    if (Math.abs(obj.vx) < STOP_VEL) obj.vx = 0;
-    if (Math.abs(obj.vy) < STOP_VEL) obj.vy = 0;
-  }
+    // AIMING LOGIC & PREDICTION ARROW
+    if (aiming) {
+      const dx = striker.x - pointer.x, dy = striker.y - pointer.y;
+      const angle = Math.atan2(dy, dx);
+      const distVal = dist(striker.x, striker.y, pointer.x, pointer.y);
+      power = clamp(distVal / 200, 0, 1);
 
-  function wallBoundary(c) {
-    const minX = board.x + 20, maxX = board.x + board.w - 20;
-    const minY = board.y + 20, maxY = board.y + board.h - 20;
-    if (c.x - c.r < minX) { c.x = minX + c.r; c.vx = -c.vx * 0.86; }
-    if (c.x + c.r > maxX) { c.x = maxX - c.r; c.vx = -c.vx * 0.86; }
-    if (c.y - c.r < minY) { c.y = minY + c.r; c.vy = -c.vy * 0.86; }
-    if (c.y + c.r > maxY) { c.y = maxY - c.r; c.vy = -c.vy * 0.86; }
-  }
+      // Draw Striker Path
+      ctx.setLineDash([5, 5]);
+      ctx.strokeStyle = "rgba(0,0,0,0.2)";
+      ctx.beginPath();
+      ctx.moveTo(striker.x, striker.y);
+      ctx.lineTo(striker.x + Math.cos(angle) * 500, striker.y + Math.sin(angle) * 500);
+      ctx.stroke();
+      ctx.setLineDash([]);
 
-  function isPocketed(c) {
-    return pockets.some(p => distance(c.x, c.y, p.x, p.y) < board.pocketR - 5);
-  }
-
-  function addParticles(x, y, color) {
-    for (let i = 0; i < 14; i++) {
-      particles.push({
-        x, y,
-        r: Math.random() * 3 + 1,
-        vx: (Math.random() - 0.5) * 5,
-        vy: (Math.random() - 0.5) * 5,
-        a: 1,
-        color
+      // Find if we are aiming at a coin
+      coins.forEach(c => {
+        if (!c.alive) return;
+        const dToLine = Math.abs((Math.sin(angle) * (c.x - striker.x)) - (Math.cos(angle) * (c.y - striker.y)));
+        if (dToLine < c.r + striker.r && dist(striker.x, striker.y, c.x, c.y) < 400) {
+          // If aiming near coin, show the GREEN IMPACT ARROW
+          const hitAngle = Math.atan2(c.y - striker.y, c.x - striker.x);
+          drawArrow(c.x, c.y, c.x + Math.cos(hitAngle) * 80, c.y + Math.sin(hitAngle) * 80, "#2ecc71");
+        }
       });
+      
+      updateUI();
     }
+    
+    particles = particles.filter(p => (p.a -= 0.02) > 0);
+    particles.forEach(p => {
+        ctx.globalAlpha = p.a; ctx.fillStyle = p.c;
+        ctx.beginPath(); ctx.arc(p.x+=p.vx, p.y+=p.vy, 2, 0, Math.PI*2); ctx.fill();
+        ctx.globalAlpha = 1;
+    });
   }
 
-  function resolveCollision(a, b) {
-    if (!a.alive || !b.alive) return;
-    const dx = b.x - a.x, dy = b.y - a.y;
-    const dist = Math.hypot(dx, dy);
-    const minDist = a.r + b.r;
-    if (dist === 0 || dist >= minDist) return;
-
-    const nx = dx / dist, ny = dy / dist;
-    const overlap = minDist - dist;
-    a.x -= nx * overlap / 2;
-    a.y -= ny * overlap / 2;
-    b.x += nx * overlap / 2;
-    b.y += ny * overlap / 2;
-
-    const vrelx = a.vx - b.vx, vrely = a.vy - b.vy;
-    const velAlong = vrelx * nx + vrely * ny;
-    if (velAlong > 0) return;
-
-    const m1 = a.mass || 1.0, m2 = b.mass || 1.0;
-    const impulseMag = -(1 + COLLISION_E) * velAlong / ((1 / m1) + (1 / m2));
-    const impX = impulseMag * nx, impY = impulseMag * ny;
-    a.vx -= impX / m1;
-    a.vy -= impY / m1;
-    b.vx += impX / m2;
-    b.vy += impY / m2;
-  }
-
-  function handlePocket(coin) {
-    if (!coin.alive) return;
-    coin.alive = false;
-    addParticles(coin.x, coin.y, coin.color === 'black' ? '#2c2c2c' : (coin.color === 'white' ? '#f5f5f5' : '#e34234'));
-
-    if (coin.color === 'striker') {
-      strikerFoulThisShot = true;
-      players[currentPlayer].score = Math.max(0, players[currentPlayer].score - 2);
-      setGameMessage('Foul: striker pocketed. -2 points.');
-      return;
-    }
-
-    if (coin.color === 'red') {
-      players[currentPlayer].score += 5;
-      queenPocketed = true;
-      queenCovered = false;
-      pocketedThisShot.push('queen');
-      setGameMessage('Queen pocketed. Cover it for bonus points.');
-      return;
-    }
-
-    players[currentPlayer].score += 1;
-    pocketedThisShot.push(coin.color);
-  }
-
-  function allStopped() {
-    return [striker, ...coins.filter(c => c.alive)].every(c => Math.hypot(c.vx, c.vy) < 0.12);
-  }
-
-  function shootWithDirection(dx, dy, powerVal) {
-    const len = Math.hypot(dx, dy);
-    if (len < 0.01 || activeShot) return;
-    const nx = dx / len, ny = dy / len;
-    const force = 10 + powerVal * 18;
-    striker.vx = nx * force;
-    striker.vy = ny * force;
-    striker.static = false;
-    activeShot = true;
-    aimingMode = false;
-    shotCounter++;
-    setGameMessage(`Power shot fired toward Pocket ${pockets[targetPocketIndex].id}.`);
-    updateUI();
-  }
-
-  function endOfShot() {
-    if (queenPocketed && !queenCovered && pocketedThisShot.length > 0 && !strikerFoulThisShot) {
-      queenCovered = true;
-      queenCoveredBy = currentPlayer;
-      players[currentPlayer].score += 5;
-      setGameMessage('Queen covered. Bonus +5.');
-    }
-
-    const remain = coins.filter(c => c.alive && c.color !== 'red').length;
-    if (remain === 0 && !winner) {
-      winner = currentPlayer;
-      setGameMessage(`${players[currentPlayer].name} wins!`);
-      return;
-    }
-
-    const gotScore = pocketedThisShot.length > 0 && !strikerFoulThisShot;
-    if (!gotScore) currentPlayer = (currentPlayer + 1) % currentPlayersCount();
-
-    pocketedThisShot = [];
-    strikerFoulThisShot = false;
-    aimingMode = false;
-    draggingStrikerPos = false;
-
-    striker.static = true;
-    setStrikerOnBaseline();
-    updateUI();
-
-    if (!winner && isBotTurn()) setTimeout(botPlay, 500);
+  function drawCoin(c) {
+    ctx.beginPath(); ctx.arc(c.x, c.y, c.r, 0, Math.PI * 2);
+    ctx.fillStyle = c.color === 'striker' ? '#fff' : (c.color === 'red' ? '#e74c3c' : (c.color === 'white' ? '#f9f9f9' : '#333'));
+    ctx.fill();
+    ctx.strokeStyle = "#999"; ctx.lineWidth = 2; ctx.stroke();
   }
 
   function updatePhysics() {
-    if (winner) return;
+    const all = [striker, ...coins.filter(c => c.alive)];
+    all.forEach(c => {
+      if (c.static) return;
+      c.x += c.vx; c.y += c.vy;
+      c.vx *= 0.985; c.vy *= 0.985; // Friction
 
-    const allObjects = [striker, ...coins.filter(c => c.alive)];
+      // Wall Bounce
+      if (c.x < board.x + c.r || c.x > board.x + board.w - c.r) { c.vx *= -0.8; c.x = clamp(c.x, board.x + c.r, board.x + board.w - c.r); }
+      if (c.y < board.y + c.r || c.y > board.y + board.h - c.r) { c.vy *= -0.8; c.y = clamp(c.y, board.y + c.r, board.y + board.h - c.r); }
 
-    for (let obj of allObjects) {
-      if (!obj.static) {
-        obj.x += obj.vx;
-        obj.y += obj.vy;
-        applyFriction(obj);
-        wallBoundary(obj);
-        if (isPocketed(obj)) {
-          handlePocket(obj);
-          if (obj.color === 'striker') {
-            activeShot = false;
-            endOfShot();
-            return;
+      // Pocket Check
+      [[board.x, board.y], [board.x + board.w, board.y], [board.x, board.y + board.h], [board.x + board.w, board.y + board.h]].forEach(p => {
+        if (dist(c.x, c.y, p[0], p[1]) < board.pocketR) {
+          c.alive = false;
+          players[currentPlayer].score += (c.color === 'red' ? 50 : 10);
+          if(c.color === 'striker') { players[currentPlayer].score -= 20; resetStriker(); }
+        }
+      });
+    });
+
+    // Collisions
+    for (let i = 0; i < all.length; i++) {
+      for (let j = i + 1; j < all.length; j++) {
+        const a = all[i], b = all[j];
+        const d = dist(a.x, a.y, b.x, b.y);
+        if (d < a.r + b.r) {
+          const angle = Math.atan2(b.y - a.y, b.x - a.x);
+          const overlap = (a.r + b.r) - d;
+          // Resolve overlap
+          a.x -= Math.cos(angle) * overlap / 2; a.y -= Math.sin(angle) * overlap / 2;
+          b.x += Math.cos(angle) * overlap / 2; b.y += Math.sin(angle) * overlap / 2;
+
+          // Impact Physics (Direct Vector Transfer for "Straight" movement)
+          const force = 1.1; // Increased impact multiplier
+          const nx = Math.cos(angle), ny = Math.sin(angle);
+          const relVel = (a.vx - b.vx) * nx + (a.vy - b.vy) * ny;
+          if (relVel > 0) {
+            const impulse = (2 * relVel) / 2;
+            a.vx -= impulse * nx * force; a.vy -= impulse * ny * force;
+            b.vx += impulse * nx * force; b.vy += impulse * ny * force;
           }
         }
       }
     }
 
-    for (let iter = 0; iter < 3; iter++) {
-      for (let i = 0; i < allObjects.length; i++) {
-        for (let j = i + 1; j < allObjects.length; j++) {
-          resolveCollision(allObjects[i], allObjects[j]);
-        }
-      }
-    }
-
-    if (activeShot && allStopped()) {
-      activeShot = false;
-      endOfShot();
+    if (active && all.every(c => Math.hypot(c.vx, c.vy) < 0.2)) {
+      active = false; resetStriker();
+      currentPlayer = (currentPlayer + 1) % 2;
+      updateUI();
     }
   }
 
-  function botPlay() {
-    if (winner || activeShot) return;
-    const targets = coins.filter(c => c.alive && c.color !== 'red');
-    const target = targets.length ? targets[Math.floor(Math.random() * targets.length)] : coins.find(c => c.alive);
-    if (!target) return;
-    const dx = target.x - striker.x;
-    const dy = target.y - striker.y;
-    shootWithDirection(dx, dy, 0.8);
-    setGameMessage('Bot shot fired.');
-  }
-
-  function raycastFirstCoin(fromX, fromY, dirX, dirY) {
-    let best = null, bestScore = Infinity;
-    for (const coin of coins) {
-      if (!coin.alive) continue;
-      const px = coin.x - fromX;
-      const py = coin.y - fromY;
-      const along = px * dirX + py * dirY;
-      if (along <= 0) continue;
-      const perp = Math.abs(dirX * py - dirY * px);
-      if (perp < coin.r + 7 && along < bestScore) {
-        best = coin;
-        bestScore = along;
-      }
-    }
-    return best;
-  }
-
-  function nearestPocketForCoin(coin) {
-    let best = pockets[0], bestDist = Infinity;
-    for (const p of pockets) {
-      const d = distance(coin.x, coin.y, p.x, p.y);
-      if (d < bestDist) {
-        bestDist = d;
-        best = p;
-      }
-    }
-    return best;
-  }
-
-  function drawBoard() {
-    ctx.fillStyle = '#e7b874';
-    ctx.fillRect(0, 0, W, H);
-
-    ctx.fillStyle = '#e2ac6c';
-    ctx.fillRect(board.x, board.y, board.w, board.h);
-
-    ctx.strokeStyle = '#111';
-    ctx.lineWidth = 8;
-    ctx.strokeRect(board.x, board.y, board.w, board.h);
-
-    ctx.lineWidth = 2;
-    ctx.strokeStyle = '#5a3e2a';
-    ctx.strokeRect(board.x + 12, board.y + 12, board.w - 24, board.h - 24);
-
-    pockets.forEach(p => {
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, board.pocketR - 2, 0, Math.PI * 2);
-      ctx.fillStyle = '#000000cc';
-      ctx.fill();
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, board.pocketR - 8, 0, Math.PI * 2);
-      ctx.fillStyle = '#1a1a1a';
-      ctx.fill();
-    });
-
-    ctx.save();
-    ctx.strokeStyle = '#2b2118';
-    ctx.lineWidth = 3;
-
-    const topLine = board.y + 42;
-    const topLine2 = board.y + 54;
-    const bottomLine = board.y + board.h - 42;
-    const bottomLine2 = board.y + board.h - 54;
-    const leftLine = board.x + 42;
-    const leftLine2 = board.x + 54;
-    const rightLine = board.x + board.w - 42;
-    const rightLine2 = board.x + board.w - 54;
-
-    ctx.beginPath();
-    ctx.moveTo(board.x + 42, topLine); ctx.lineTo(board.x + board.w - 42, topLine); ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(board.x + 42, topLine2); ctx.lineTo(board.x + board.w - 42, topLine2); ctx.stroke();
-
-    ctx.beginPath();
-    ctx.moveTo(board.x + 42, bottomLine); ctx.lineTo(board.x + board.w - 42, bottomLine); ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(board.x + 42, bottomLine2); ctx.lineTo(board.x + board.w - 42, bottomLine2); ctx.stroke();
-
-    ctx.beginPath();
-    ctx.moveTo(leftLine, board.y + 42); ctx.lineTo(leftLine, board.y + board.h - 42); ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(leftLine2, board.y + 42); ctx.lineTo(leftLine2, board.y + board.h - 42); ctx.stroke();
-
-    ctx.beginPath();
-    ctx.moveTo(rightLine, board.y + 42); ctx.lineTo(rightLine, board.y + board.h - 42); ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(rightLine2, board.y + 42); ctx.lineTo(rightLine2, board.y + board.h - 42); ctx.stroke();
-    ctx.restore();
-
-    ctx.beginPath();
-    ctx.arc(center.x, center.y, 40, 0, Math.PI * 2);
-    ctx.strokeStyle = '#aa7c58';
-    ctx.stroke();
-
-    ctx.beginPath();
-    ctx.arc(center.x, center.y, 12, 0, Math.PI * 2);
-    ctx.fillStyle = '#b0302a';
-    ctx.fill();
-  }
-
-  function drawCoin(c) {
-    if (!c.alive) return;
-    ctx.beginPath();
-    ctx.arc(c.x, c.y, c.r, 0, Math.PI * 2);
-    let fill = '#e0b07f';
-    if (c.color === 'white') fill = '#fcf9f2';
-    else if (c.color === 'black') fill = '#2c2c2c';
-    else if (c.color === 'red') fill = '#d64531';
-    ctx.fillStyle = fill;
-    ctx.fill();
-    ctx.strokeStyle = '#5f4c38';
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.arc(c.x, c.y, c.r * 0.35, 0, Math.PI * 2);
-    ctx.fillStyle = '#c79a6e';
-    ctx.fill();
-  }
-
-  function drawStriker() {
-    ctx.beginPath();
-    ctx.arc(striker.x, striker.y, striker.r, 0, Math.PI * 2);
-    ctx.fillStyle = '#f2e8cf';
-    ctx.fill();
-    ctx.strokeStyle = '#6b4c2c';
-    ctx.lineWidth = 2.5;
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.arc(striker.x, striker.y, 5, 0, Math.PI * 2);
-    ctx.fillStyle = '#ab8a5a';
-    ctx.fill();
-  }
-
-  function drawAimAssist() {
-    if (!aimingMode || activeShot) return;
-
-    const dx = aimDirection.x - striker.x;
-    const dy = aimDirection.y - striker.y;
-    const len = Math.hypot(dx, dy);
-    if (len < 5) return;
-
-    const nx = dx / len;
-    const ny = dy / len;
-    const endX = striker.x + nx * 120;
-    const endY = striker.y + ny * 120;
-
-    ctx.beginPath();
-    ctx.moveTo(striker.x, striker.y);
-    ctx.lineTo(endX, endY);
-    ctx.strokeStyle = '#ffcc77';
-    ctx.lineWidth = 5;
-    ctx.setLineDash([6, 8]);
-    ctx.stroke();
-    ctx.setLineDash([]);
-
-    ctx.beginPath();
-    ctx.moveTo(endX, endY);
-    ctx.lineTo(endX - 12 * Math.cos(Math.atan2(ny, nx) - 0.6), endY - 12 * Math.sin(Math.atan2(ny, nx) - 0.6));
-    ctx.lineTo(endX - 12 * Math.cos(Math.atan2(ny, nx) + 0.6), endY - 12 * Math.sin(Math.atan2(ny, nx) + 0.6));
-    ctx.fillStyle = '#ffaa33';
-    ctx.fill();
-
-    const firstCoin = raycastFirstCoin(striker.x, striker.y, nx, ny);
-    if (firstCoin) {
-      ctx.beginPath();
-      ctx.arc(firstCoin.x, firstCoin.y, firstCoin.r + 6, 0, Math.PI * 2);
-      ctx.strokeStyle = '#33ff99';
-      ctx.lineWidth = 3.5;
-      ctx.setLineDash([4, 4]);
-      ctx.stroke();
-      ctx.setLineDash([]);
-
-      const pocket = nearestPocketForCoin(firstCoin);
-      ctx.beginPath();
-      ctx.moveTo(firstCoin.x, firstCoin.y);
-      ctx.lineTo(pocket.x, pocket.y);
-      ctx.strokeStyle = '#66ff99';
-      ctx.lineWidth = 4;
-      ctx.setLineDash([6, 8]);
-      ctx.stroke();
-
-      ctx.beginPath();
-      ctx.arc(pocket.x, pocket.y, 14, 0, Math.PI * 2);
-      ctx.fillStyle = '#88ffaa66';
-      ctx.fill();
-      ctx.beginPath();
-      ctx.arc(pocket.x, pocket.y, 8, 0, Math.PI * 2);
-      ctx.fillStyle = '#bbffcc';
-      ctx.fill();
-      ctx.setLineDash([]);
-    }
-  }
-
-  function drawParticles() {
-    particles = particles.filter(p => (p.a -= 0.04) > 0);
-    for (let p of particles) {
-      p.x += p.vx;
-      p.y += p.vy;
-      ctx.globalAlpha = p.a;
-      ctx.fillStyle = p.color || '#ffaa66';
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-      ctx.fill();
-    }
-    ctx.globalAlpha = 1;
-  }
-
-  function render() {
-    drawBoard();
-    coins.forEach(drawCoin);
-    drawStriker();
-    drawAimAssist();
-    drawParticles();
-  }
-
-  function getPointerPos(e) {
-    const rect = canvas.getBoundingClientRect();
-    const scaleX = canvas.width / rect.width;
-    const scaleY = canvas.height / rect.height;
-    return {
-      x: (e.clientX - rect.left) * scaleX,
-      y: (e.clientY - rect.top) * scaleY
-    };
-  }
-
-  function insideBaselineArea(x, y) {
-    const b = getBaselineBounds();
-    if (b.axis === 'x') return Math.abs(y - b.yFixed) < 24 && x >= b.xMin - 15 && x <= b.xMax + 15;
-    return Math.abs(x - b.xFixed) < 24 && y >= b.yMin - 15 && y <= b.yMax + 15;
-  }
-
-  function moveStrikerAlongBaseline(x, y) {
-    const b = getBaselineBounds();
-    if (b.axis === 'x') {
-      striker.x = clamp(x, b.xMin, b.xMax);
-      striker.y = b.yFixed;
-    } else {
-      striker.y = clamp(y, b.yMin, b.yMax);
-      striker.x = b.xFixed;
-    }
-  }
-
-  function pickCoin(x, y) {
-    return coins.find(c => c.alive && distance(x, y, c.x, c.y) <= c.r + 8) || null;
-  }
-
-  function pickPocket(x, y) {
-    return pockets.find(p => distance(x, y, p.x, p.y) <= 24) || null;
+  function resetStriker() {
+    striker.alive = true; striker.vx = 0; striker.vy = 0; striker.static = true;
+    striker.x = center.x; striker.y = board.y + board.h - 26;
   }
 
   canvas.addEventListener('pointerdown', e => {
-    if (winner || activeShot || isBotTurn()) return;
-    const p = getPointerPos(e);
-    const c = pickCoin(p.x, p.y);
-    if (c) {
-      selectedCoin = c;
-      updateUI();
-      setGameMessage(`Selected ${c.color} coin.`);
-      return;
+    const rect = canvas.getBoundingClientRect();
+    const x = (e.clientX - rect.left) * (W / rect.width);
+    const y = (e.clientY - rect.top) * (H / rect.height);
+    if (!active) {
+      if (dist(x, y, striker.x, striker.y) < 40) {
+        draggingStriker = true;
+      } else {
+        aiming = true;
+        pointer.startX = striker.x; pointer.startY = striker.y;
+      }
     }
-    const pk = pickPocket(p.x, p.y);
-    if (pk) {
-      targetPocketIndex = pockets.indexOf(pk);
-      updateUI();
-      setGameMessage(`Target pocket set to Pocket ${pk.id}.`);
-      return;
-    }
-
-    if (distance(p.x, p.y, striker.x, striker.y) <= striker.r + 10 && insideBaselineArea(p.x, p.y)) {
-      draggingStrikerPos = true;
-      return;
-    }
-
-    aimingMode = true;
-    aimDirection = p;
-    updateUI();
   });
 
   canvas.addEventListener('pointermove', e => {
-    if (winner || activeShot) return;
-    const p = getPointerPos(e);
-    if (draggingStrikerPos) moveStrikerAlongBaseline(p.x, p.y);
-    if (aimingMode) aimDirection = p;
+    const rect = canvas.getBoundingClientRect();
+    pointer.x = (e.clientX - rect.left) * (W / rect.width);
+    pointer.y = (e.clientY - rect.top) * (H / rect.height);
+    if (draggingStriker) {
+      striker.x = clamp(pointer.x, board.x + 50, board.x + board.w - 50);
+    }
   });
 
-  canvas.addEventListener('pointerup', e => {
-    if (winner) return;
-    const p = getPointerPos(e);
-
-    if (draggingStrikerPos) {
-      draggingStrikerPos = false;
-      setStrikerOnBaseline();
-      return;
+  canvas.addEventListener('pointerup', () => {
+    if (aiming) {
+      const dx = striker.x - pointer.x, dy = striker.y - pointer.y;
+      const angle = Math.atan2(dy, dx);
+      const shotForce = power * 25; // Scale power to speed
+      striker.vx = Math.cos(angle) * shotForce;
+      striker.vy = Math.sin(angle) * shotForce;
+      striker.static = false;
+      active = true;
     }
-
-    if (aimingMode && !activeShot) {
-      const dx = aimDirection.x - striker.x;
-      const dy = aimDirection.y - striker.y;
-      const powerVal = powerSlider.value / 100;
-      shootWithDirection(dx, dy, powerVal);
-      aimingMode = false;
-    }
-
-    updateUI();
+    aiming = false; draggingStriker = false;
   });
-
-  window.addEventListener('keydown', e => {
-    if (winner || activeShot) return;
-    const key = e.key.toLowerCase();
-
-    if (key === 'r') resetGame();
-
-    if (key === '1') targetPocketIndex = 0;
-    if (key === '2') targetPocketIndex = 1;
-    if (key === '3') targetPocketIndex = 2;
-    if (key === '4') targetPocketIndex = 3;
-
-    if (key === 'c') selectedCoin = null;
-
-    if (key === 'a' || key === 'd') {
-      const b = getBaselineBounds();
-      const step = key === 'a' ? -20 : 20;
-      if (b.axis === 'x') striker.x = clamp(striker.x + step, b.xMin, b.xMax);
-      else striker.y = clamp(striker.y + step, b.yMin, b.yMax);
-      setStrikerOnBaseline();
-    }
-
-    if (key === ' ') {
-      e.preventDefault();
-      if (!aimingMode && !activeShot) {
-        aimingMode = true;
-        aimDirection = { x: striker.x + 35, y: striker.y - 20 };
-      }
-    }
-
-    updateUI();
-  });
-
-  document.getElementById('restartBtn').onclick = resetGame;
-  document.getElementById('modeSelect').onchange = e => { mode = e.target.value; resetGame(); };
-  powerSlider.addEventListener('input', updateUI);
-
-  document.getElementById('saveBtn').onclick = () => {
-    localStorage.setItem('carrom_save', JSON.stringify({
-      players, currentPlayer, mode, queenPocketed, queenCovered, queenCoveredBy,
-      coins, striker, selectedCoinIndex: selectedCoin ? coins.indexOf(selectedCoin) : -1, targetPocketIndex
-    }));
-    setGameMessage('Game saved.');
-  };
-
-  document.getElementById('loadBtn').onclick = () => {
-    const data = localStorage.getItem('carrom_save');
-    if (!data) {
-      setGameMessage('No save found.');
-      return;
-    }
-    const s = JSON.parse(data);
-    mode = s.mode || '2';
-    document.getElementById('modeSelect').value = mode;
-    currentPlayer = s.currentPlayer || 0;
-    queenPocketed = !!s.queenPocketed;
-    queenCovered = !!s.queenCovered;
-    queenCoveredBy = s.queenCoveredBy ?? null;
-    for (let i = 0; i < players.length; i++) players[i].score = s.players[i].score;
-    coins = s.coins;
-    striker = s.striker;
-    selectedCoin = s.selectedCoinIndex >= 0 ? coins[s.selectedCoinIndex] : null;
-    targetPocketIndex = s.targetPocketIndex || 0;
-    setStrikerOnBaseline();
-    updateUI();
-    setGameMessage('Game loaded.');
-  };
-
-  function botPlay() {
-    if (winner || activeShot) return;
-    const alive = coins.filter(c => c.alive && c.color !== 'red');
-    const target = alive.length ? alive[Math.floor(Math.random() * alive.length)] : coins.find(c => c.alive);
-    if (!target) return;
-    const dx = target.x - striker.x;
-    const dy = target.y - striker.y;
-    aimingMode = false;
-    shootWithDirection(dx, dy, 0.82);
-    setGameMessage('Bot shot fired.');
-  }
 
   function loop() {
-    updatePhysics();
-    updateUI();
-    render();
-    if (!activeShot && isBotTurn() && !winner) setTimeout(botPlay, 500);
+    if (running) { updatePhysics(); draw(); }
     requestAnimationFrame(loop);
   }
 
+  document.getElementById('runBtn').onclick = resetGame;
   resetGame();
   loop();
 })();
-</script>
-</body>
-</html>
