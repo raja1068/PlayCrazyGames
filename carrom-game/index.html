@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-  <title>Carrom · Realistic Striking Force · Balanced Gameplay</title>
+  <title>Carrom · Perfect Balance · Smart Pocket Guide</title>
   <style>
     * {
       box-sizing: border-box;
@@ -222,13 +222,13 @@
       <div class="stat-row"><span>💥 Shot Power</span><span id="powerPercent">0%</span></div>
       <div class="power-slider-wrap" style="background:#2a1d10; justify-content:space-between">
         <span>🔋 Power Slider</span>
-        <input type="range" id="powerSlider" min="0" max="100" value="75">
+        <input type="range" id="powerSlider" min="0" max="100" value="70">
       </div>
       <div class="power-meter-bg"><div class="power-meter-fill" id="powerMeterFill"></div></div>
       <div class="stat-row"><span>🏆 Score (Red=5, Coin=1)</span><span id="scoreHint"></span></div>
       <div class="msg-area" id="gameMsg">
-        🎯 Drag striker → Aim direction → Release for PRECISE SHOT!<br>
-        ⚡ Realistic power: solid hit without overkill.
+        🎯 Drag striker to aim → Green arrow shows target pocket path<br>
+        ⚡ Balanced power: control your shots precisely
       </div>
       <div class="shortcut-help">
         ⌨️ <kbd>A/D</kbd> move striker · <kbd>Space</kbd> quick aim · <kbd>R</kbd> restart
@@ -327,7 +327,7 @@
       for(let i=0; i<players.length; i++) players[i].score = 0;
       initCoinsAndStriker();
       updateUI();
-      setGameMessage("Realistic carrom! Adjust power, aim precisely, release for balanced strike.");
+      setGameMessage("Perfect balance! Adjust power, aim with green pocket guide, shoot.");
       if(isBotTurn()) setTimeout(botPlay, 600);
     }
     
@@ -349,15 +349,15 @@
       setStrikerOnBaseline();
     }
     
-    // =========== REALISTIC PHYSICS (balanced force) ==========
-    const COLLISION_E = 0.86;        // good bounce but not too elastic
-    const STOP_VEL = 0.28;           // stop when very slow
+    // ---------- BALANCED PHYSICS (moderate force, good feel) ----------
+    const COLLISION_E = 0.85;        // natural bounce
+    const STOP_VEL = 0.25;           
+    const AIR_DRAG = 0.99;           // light friction -> coins roll naturally but stop
     
     function applyFriction(obj) {
       if(obj.static) return;
-      // moderate air drag to stop naturally after a short slide
-      obj.vx *= 0.985;
-      obj.vy *= 0.985;
+      obj.vx *= AIR_DRAG;
+      obj.vy *= AIR_DRAG;
       if (Math.abs(obj.vx) < STOP_VEL && Math.abs(obj.vy) < STOP_VEL && !activeShot) {
         obj.vx = 0; obj.vy = 0;
         obj.static = true;
@@ -369,10 +369,10 @@
       const minX = board.x + 20, maxX = board.x + board.w - 20;
       const minY = board.y + 20, maxY = board.y + board.h - 20;
       let bounced = false;
-      if(c.x - c.r < minX) { c.x = minX + c.r; c.vx = -c.vx * 0.86; bounced = true; }
-      if(c.x + c.r > maxX) { c.x = maxX - c.r; c.vx = -c.vx * 0.86; bounced = true; }
-      if(c.y - c.r < minY) { c.y = minY + c.r; c.vy = -c.vy * 0.86; bounced = true; }
-      if(c.y + c.r > maxY) { c.y = maxY - c.r; c.vy = -c.vy * 0.86; bounced = true; }
+      if(c.x - c.r < minX) { c.x = minX + c.r; c.vx = -c.vx * 0.87; bounced = true; }
+      if(c.x + c.r > maxX) { c.x = maxX - c.r; c.vx = -c.vx * 0.87; bounced = true; }
+      if(c.y - c.r < minY) { c.y = minY + c.r; c.vy = -c.vy * 0.87; bounced = true; }
+      if(c.y + c.r > maxY) { c.y = maxY - c.r; c.vy = -c.vy * 0.87; bounced = true; }
       if(bounced) applyFriction(c);
     }
     
@@ -388,7 +388,7 @@
     }
     
     function addParticles(x,y,color) {
-      for(let i=0;i<10;i++) {
+      for(let i=0;i<12;i++) {
         particles.push({ x, y, r: Math.random()*2.5+1, vx: (Math.random()-0.5)*4, vy: (Math.random()-0.5)*4, a: 1, color });
       }
     }
@@ -439,7 +439,7 @@
         players[currentPlayer].score += 5;
         queenPocketed = true;
         queenCovered = false;
-        setGameMessage(`👑 QUEEN POCKETED! +5 points. Cover it to secure bonus!`);
+        setGameMessage(`👑 QUEEN POCKETED! +5 points. Cover it!`);
         pocketedThisShot.push('queen');
         return;
       }
@@ -471,7 +471,6 @@
         }
       }
       
-      // collision iterations
       for(let iter=0; iter<2; iter++) {
         for(let i=0;i<allObjects.length;i++) {
           for(let j=i+1;j<allObjects.length;j++) {
@@ -489,7 +488,7 @@
       
       let stillMoving = false;
       for(let obj of allObjects) {
-        if(!obj.static && (Math.abs(obj.vx) > 0.1 || Math.abs(obj.vy) > 0.1)) {
+        if(!obj.static && (Math.abs(obj.vx) > 0.12 || Math.abs(obj.vy) > 0.12)) {
           stillMoving = true;
           break;
         }
@@ -504,12 +503,12 @@
       let hasPocket = pocketedThisShot.length > 0;
       let foul = strikerFoulThisShot;
       if(hasPocket && !foul) {
-        setGameMessage(`Nice hit! You pocketed a coin. Extra turn!`);
+        setGameMessage(`Great hit! Another turn!`);
       } else {
         const total = currentPlayersCount();
         if(mode === 'bot' && currentPlayer === 1) currentPlayer = 0;
         else currentPlayer = (currentPlayer + 1) % total;
-        setGameMessage(`Turn passes to ${players[currentPlayer].name}`);
+        setGameMessage(`Turn → ${players[currentPlayer].name}`);
       }
       pocketedThisShot = [];
       strikerFoulThisShot = false;
@@ -528,14 +527,13 @@
       if(!winner && isBotTurn()) setTimeout(botPlay, 400);
     }
     
-    // REALISTIC FORCE: max around 12-13, base 5
+    // MODERATE FORCE: min 6.5, max 15.0 (balanced)
     function shootWithDirection(dirX, dirY, powerVal) {
       if(activeShot || aimingMode === false) return false;
       const len = Math.hypot(dirX, dirY);
       if(len < 0.01) return false;
       const normX = dirX / len, normY = dirY / len;
-      // force range: min 5.0 (weak) to max 12.5 (strong but realistic)
-      const force = 5.0 + powerVal * 7.5;
+      const force = 6.5 + powerVal * 8.5;   // 6.5 to 15.0
       striker.vx = normX * force;
       striker.vy = normY * force;
       striker.static = false;
@@ -543,7 +541,7 @@
       aimingMode = false;
       shotCounter++;
       updateUI();
-      setGameMessage(`Shot power: ${Math.round(powerVal*100)}%  —  crisp, realistic strike!`);
+      setGameMessage(`Shot power: ${Math.round(powerVal*100)}% — smooth and controlled.`);
       return true;
     }
     
@@ -558,19 +556,19 @@
       const dy = target.y - striker.y;
       const length = Math.hypot(dx,dy);
       if(length < 0.01) return;
-      const powerVal = 0.65;        // medium power
+      const powerVal = 0.65;
       const normX = dx/length, normY = dy/length;
-      const force = 5.0 + powerVal * 7.5;
+      const force = 6.5 + powerVal * 8.5;
       striker.vx = normX * force;
       striker.vy = normY * force;
       striker.static = false;
       activeShot = true;
       aimingMode = false;
-      setGameMessage(`🤖 Bot shoots with moderate force.`);
+      setGameMessage(`🤖 Bot shoots (moderate power).`);
       updateUI();
     }
     
-    // raycast & visuals
+    // raycast & pocket prediction for green guide
     function raycastFirstCoin(fromX, fromY, dirX, dirY) {
       let closest = null, minDist = Infinity;
       for(let coin of coins) {
@@ -578,9 +576,9 @@
         const toCoinX = coin.x - fromX, toCoinY = coin.y - fromY;
         const cross = dirX * toCoinY - dirY * toCoinX;
         const dp = dirX * toCoinX + dirY * toCoinY;
-        if(Math.abs(cross) < coin.r + 8 && dp > 0) {
+        if(Math.abs(cross) < coin.r + 6 && dp > 0) {
           const distTo = Math.hypot(toCoinX, toCoinY);
-          if(distTo < minDist && distTo < 300) {
+          if(distTo < minDist && distTo < 280) {
             minDist = distTo;
             closest = coin;
           }
@@ -673,36 +671,48 @@
       const len = Math.hypot(toX-fromX, toY-fromY);
       if(len < 5) return;
       const dirX = (toX-fromX)/len, dirY = (toY-fromY)/len;
-      const arrowEndX = fromX + dirX * 95;
-      const arrowEndY = fromY + dirY * 95;
+      const arrowEndX = fromX + dirX * 100;
+      const arrowEndY = fromY + dirY * 100;
       ctx.beginPath(); ctx.moveTo(fromX, fromY); ctx.lineTo(arrowEndX, arrowEndY);
-      ctx.strokeStyle = '#ffaa44';
+      ctx.strokeStyle = '#ffcc77';
       ctx.lineWidth = 4;
       ctx.setLineDash([6, 8]);
       ctx.stroke();
       ctx.setLineDash([]);
       const angle = Math.atan2(dirY, dirX);
       ctx.beginPath(); ctx.moveTo(arrowEndX, arrowEndY);
-      ctx.lineTo(arrowEndX - 10*Math.cos(angle-0.6), arrowEndY - 10*Math.sin(angle-0.6));
-      ctx.lineTo(arrowEndX - 10*Math.cos(angle+0.6), arrowEndY - 10*Math.sin(angle+0.6));
-      ctx.fillStyle = '#ff8800';
+      ctx.lineTo(arrowEndX - 11*Math.cos(angle-0.6), arrowEndY - 11*Math.sin(angle-0.6));
+      ctx.lineTo(arrowEndX - 11*Math.cos(angle+0.6), arrowEndY - 11*Math.sin(angle+0.6));
+      ctx.fillStyle = '#ffaa33';
       ctx.fill();
       
-      const first = raycastFirstCoin(fromX, fromY, dirX, dirY);
-      if(first) {
-        ctx.beginPath(); ctx.arc(first.x, first.y, first.r+4, 0, Math.PI*2);
-        ctx.strokeStyle = '#ff3300';
-        ctx.lineWidth = 2.5;
+      // --- Enhanced green pocket guide ---
+      const firstCoin = raycastFirstCoin(fromX, fromY, dirX, dirY);
+      if(firstCoin && firstCoin.alive && firstCoin.color !== 'striker') {
+        // highlight first coin with green glow
+        ctx.beginPath(); ctx.arc(firstCoin.x, firstCoin.y, firstCoin.r+5, 0, Math.PI*2);
+        ctx.strokeStyle = '#22ff88';
+        ctx.lineWidth = 3;
+        ctx.setLineDash([4, 4]);
         ctx.stroke();
-        const pocket = nearestPocket(first);
-        if(pocket) {
-          ctx.beginPath(); ctx.moveTo(first.x, first.y); ctx.lineTo(pocket.x, pocket.y);
-          ctx.strokeStyle = '#44ffaa';
-          ctx.lineWidth = 2.5;
-          ctx.setLineDash([8,6]);
+        ctx.setLineDash([]);
+        
+        const targetPocket = nearestPocket(firstCoin);
+        if(targetPocket) {
+          // Draw bright green line from coin to pocket
+          ctx.beginPath(); ctx.moveTo(firstCoin.x, firstCoin.y); ctx.lineTo(targetPocket.x, targetPocket.y);
+          ctx.strokeStyle = '#44ff88';
+          ctx.lineWidth = 3.5;
+          ctx.setLineDash([6, 8]);
           ctx.stroke();
-          ctx.fillStyle = '#ddffaa88';
-          ctx.beginPath(); ctx.arc(pocket.x, pocket.y, 12, 0, Math.PI*2); ctx.fill();
+          // glow pocket
+          ctx.beginPath(); ctx.arc(targetPocket.x, targetPocket.y, 14, 0, Math.PI*2);
+          ctx.fillStyle = '#88ffaa44';
+          ctx.fill();
+          ctx.beginPath(); ctx.arc(targetPocket.x, targetPocket.y, 8, 0, Math.PI*2);
+          ctx.fillStyle = '#aaffcc';
+          ctx.fill();
+          ctx.setLineDash([]);
         }
       }
       ctx.setLineDash([]);
@@ -728,7 +738,7 @@
       }
       scorePanelDiv.innerHTML = html;
       turnNameSpan.innerText = players[currentPlayer].name;
-      phaseLabelSpan.innerText = activeShot ? '⚡ SHOT MOVING ⚡' : (aimingMode ? '🎯 AIMING (release to fire)' : 'READY');
+      phaseLabelSpan.innerText = activeShot ? '⚡ IN MOTION ⚡' : (aimingMode ? '🎯 AIM (green path ready)' : 'READY');
       let qText = queenCovered ? `Covered (P${queenCoveredBy+1})` : (queenPocketed ? 'Pocketed 🔴' : 'On board 👑');
       queenStatusSpan.innerText = qText;
       let powerVal = powerSlider.value / 100;
@@ -738,7 +748,7 @@
     
     function setGameMessage(msg) { gameMsgSpan.innerHTML = msg; }
     
-    // Input events
+    // input handlers
     function handleStart(e) {
       if(winner || activeShot) return;
       const rect = canvas.getBoundingClientRect();
@@ -751,9 +761,9 @@
       if(bounds.axis === 'x') onBaseline = Math.abs(y - bounds.yFixed) < 22 && x > bounds.xMin-8 && x < bounds.xMax+8;
       else onBaseline = Math.abs(x - bounds.xFixed) < 22 && y > bounds.yMin-8 && y < bounds.yMax+8;
       if(onStriker && onBaseline && !activeShot) { draggingStrikerPos = true; return; }
-      if(distance(x,y, striker.x, striker.y) < striker.r + 22 && !activeShot && !draggingStrikerPos) {
+      if(distance(x,y, striker.x, striker.y) < striker.r + 25 && !activeShot && !draggingStrikerPos) {
         aimingMode = true;
-        aimDirection = { x: striker.x+25, y: striker.y-15 };
+        aimDirection = { x: striker.x+30, y: striker.y-15 };
       }
     }
     
