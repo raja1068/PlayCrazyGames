@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>Carrom Master – Precision Strike & Green Pocket Guide</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>Carrom Board Master – Power Slider & Precision Aim</title>
   <style>
     * {
       box-sizing: border-box;
@@ -12,24 +12,25 @@
     }
 
     body {
-      background: linear-gradient(145deg, #2a1a0c, #1a0f06);
-      min-height: 100vh;
+      margin: 0;
+      background: linear-gradient(145deg, #2c1a0c, #1e1208);
+      font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
       display: flex;
       justify-content: center;
       align-items: center;
-      font-family: 'Segoe UI', 'Roboto', system-ui, sans-serif;
+      min-height: 100vh;
       padding: 20px;
-      margin: 0;
     }
 
-    .game-wrapper {
-      max-width: 1300px;
+    /* main game container */
+    .game-container {
+      max-width: 1350px;
       width: 100%;
-      background: rgba(0, 0, 0, 0.35);
-      border-radius: 56px;
+      background: rgba(0, 0, 0, 0.25);
+      border-radius: 48px;
       padding: 20px;
-      backdrop-filter: blur(3px);
-      box-shadow: 0 20px 35px rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(2px);
+      box-shadow: 0 20px 35px rgba(0, 0, 0, 0.5);
     }
 
     .top-bar {
@@ -37,11 +38,12 @@
       flex-wrap: wrap;
       justify-content: space-between;
       align-items: center;
-      background: #2c1b0ccc;
-      border-radius: 48px;
-      padding: 10px 20px;
-      margin-bottom: 20px;
       gap: 15px;
+      background: #2b1a0ecc;
+      backdrop-filter: blur(8px);
+      padding: 12px 20px;
+      border-radius: 60px;
+      margin-bottom: 20px;
     }
 
     .score-panel {
@@ -50,236 +52,271 @@
       flex-wrap: wrap;
     }
 
-    .player-card {
-      background: #241708;
+    .player-badge {
+      background: #1f1408;
       padding: 6px 20px;
       border-radius: 40px;
       font-weight: bold;
-      color: #ffddb0;
-      transition: 0.1s;
+      color: #ffecb3;
       box-shadow: inset 0 1px 2px rgba(0,0,0,0.3), 0 2px 5px rgba(0,0,0,0.2);
+      transition: all 0.1s ease;
     }
 
-    .player-card.active {
+    .player-badge.active {
       background: #f5a623;
       color: #2c1a0c;
-      box-shadow: 0 0 0 2px #feda7a;
+      box-shadow: 0 0 0 2px #ffdd88;
     }
 
-    .controls {
+    .controls-group {
       display: flex;
       gap: 12px;
       flex-wrap: wrap;
       align-items: center;
     }
 
-    select, button {
-      background: #352618;
+    select, button, .power-slider-wrap {
+      background: #2f241b;
       border: none;
-      padding: 8px 20px;
-      border-radius: 40px;
+      padding: 8px 16px;
+      border-radius: 36px;
       font-weight: bold;
-      color: #ffefcf;
+      color: #ffe6c7;
       cursor: pointer;
       font-size: 0.85rem;
+      transition: 0.1s linear;
+    }
+
+    button {
+      background: #3e2b1b;
     }
 
     button.primary {
-      background: #1f6e3a;
+      background: #1f7a3b;
+      color: white;
     }
 
-    .power-area {
-      background: #2c1b0e;
-      border-radius: 40px;
-      padding: 6px 18px;
+    .power-slider-wrap {
       display: flex;
       align-items: center;
-      gap: 15px;
+      gap: 12px;
+      background: #2a1d10;
+      padding: 5px 16px;
+    }
+
+    .power-slider-wrap label {
+      font-weight: bold;
+      letter-spacing: 1px;
     }
 
     input[type="range"] {
       width: 160px;
       height: 5px;
       border-radius: 10px;
-      background: #dba551;
+      background: #f5bc70;
     }
 
     .main-grid {
       display: grid;
-      grid-template-columns: 1fr 290px;
+      grid-template-columns: 1fr 280px;
       gap: 20px;
     }
 
-    .board-frame {
-      background: #4e2c14;
-      border-radius: 32px;
-      padding: 14px;
-      box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+    .board-holder {
+      background: #4a2c14;
+      border-radius: 40px;
+      padding: 16px;
+      box-shadow: 0 20px 35px rgba(0,0,0,0.5);
     }
 
     canvas {
       width: 100%;
       height: auto;
       display: block;
-      border-radius: 20px;
+      border-radius: 24px;
       touch-action: none;
       cursor: crosshair;
     }
 
-    .info-card {
-      background: #2a1c0fe6;
-      backdrop-filter: blur(10px);
+    .info-panel {
+      background: #2c1d0fe6;
+      backdrop-filter: blur(8px);
       border-radius: 32px;
       padding: 18px;
-      color: #faeac9;
+      color: #f7e9d7;
     }
 
-    .stat {
+    .stat-row {
       display: flex;
       justify-content: space-between;
       padding: 10px 0;
       border-bottom: 1px solid #d4a37355;
     }
 
-    .power-meter {
-      background: #4a311c;
+    .power-meter-bg {
+      background: #4d321c;
       border-radius: 20px;
       height: 12px;
-      margin: 8px 0;
+      margin: 10px 0;
       overflow: hidden;
     }
 
-    .power-fill {
-      height: 100%;
+    .power-meter-fill {
       width: 0%;
+      height: 100%;
       background: linear-gradient(90deg, #ffb347, #ff6a00);
+      border-radius: 20px;
     }
 
-    .message-box {
-      background: #00000066;
-      border-radius: 24px;
+    .msg-area {
+      background: #00000055;
+      border-radius: 28px;
       padding: 12px;
-      margin-top: 15px;
+      margin-top: 12px;
       font-size: 0.85rem;
     }
 
+    .shortcut-help {
+      font-size: 0.75rem;
+      margin-top: 12px;
+      opacity: 0.8;
+    }
+
     kbd {
-      background: #1f150d;
-      border-radius: 8px;
-      padding: 2px 10px;
+      background: #1a130c;
+      border-radius: 6px;
+      padding: 2px 8px;
       font-family: monospace;
-      margin: 0 3px;
+      margin: 0 2px;
     }
 
     @media (max-width: 880px) {
       .main-grid { grid-template-columns: 1fr; }
+      .top-bar { flex-direction: column; align-items: stretch; }
     }
   </style>
 </head>
 <body>
-<div class="game-wrapper">
+<div class="game-container">
   <div class="top-bar">
     <div class="score-panel" id="scorePanel"></div>
-    <div class="controls">
+    <div class="controls-group">
       <select id="modeSelect">
         <option value="2">2 Players</option>
         <option value="4">4 Players</option>
         <option value="bot">VS Bot</option>
       </select>
-      <button id="restartBtn" class="primary">🔄 New Game</button>
+      <button id="restartBtn" class="primary">🎲 New Game</button>
       <button id="saveBtn">💾 Save</button>
       <button id="loadBtn">📂 Load</button>
     </div>
   </div>
 
   <div class="main-grid">
-    <div class="board-frame">
+    <div class="board-holder">
       <canvas id="carromCanvas" width="860" height="860"></canvas>
     </div>
-    <div class="info-card">
-      <div class="stat"><span>🎯 Turn</span><span id="turnName">Player 1</span></div>
-      <div class="stat"><span>⚡ Phase</span><span id="phaseText">Ready</span></div>
-      <div class="stat"><span>👑 Queen</span><span id="queenStatus">On board</span></div>
-      <div class="stat"><span>💥 Power</span><span id="powerPercent">0%</span></div>
-      <div class="power-area">
-        <span>🔋 Slider</span>
+    <div class="info-panel">
+      <div class="stat-row"><span>🎯 Turn</span><span id="turnName">Player 1</span></div>
+      <div class="stat-row"><span>⚡ Phase</span><span id="phaseLabel">Ready</span></div>
+      <div class="stat-row"><span>👑 Queen</span><span id="queenStatus">On board</span></div>
+      <div class="stat-row"><span>💥 Shot Power</span><span id="powerPercent">0%</span></div>
+      <div class="power-slider-wrap" style="background:#2a1d10; justify-content:space-between">
+        <span>🔋 Power Slider</span>
         <input type="range" id="powerSlider" min="0" max="100" value="72">
       </div>
-      <div class="power-meter"><div class="power-fill" id="powerFill"></div></div>
-      <div class="message-box" id="gameMsg">
-        🧲 Drag striker on your baseline → Aim direction → Release.<br>
-        🟢 Green arrow shows pocket path for the first coin in line.
+      <div class="power-meter-bg"><div class="power-meter-fill" id="powerMeterFill"></div></div>
+      <div class="stat-row"><span>🏆 Score (Red=5, Coin=1)</span><span id="scoreHint"></span></div>
+      <div class="msg-area" id="gameMsg">
+        🎯 Drag striker on your baseline to reposition.<br>
+        👉 Then drag from striker → aim direction → release.<br>
+        ⚡ Power = slider value. Shoot with arrow guide!
       </div>
-      <div class="stat"><span>💡 Shortcuts</span><span><kbd>A/D</kbd> move · <kbd>Space</kbd> aim · <kbd>R</kbd> restart</span></div>
+      <div class="shortcut-help">
+        ⌨️ <kbd>A/D</kbd> move striker · <kbd>Space</kbd> quick aim · <kbd>R</kbd> restart
+      </div>
     </div>
   </div>
 </div>
 
 <script>
   (function(){
+    // ---- canvas & dimensions ----
     const canvas = document.getElementById('carromCanvas');
     const ctx = canvas.getContext('2d');
-    const W = 860, H = 860;
-    canvas.width = W; canvas.height = H;
+    const W = canvas.width = 860, H = canvas.height = 860;
 
-    // board geometry (light orange wood, black borders)
+    // board geometry (light orange & black borders)
     const board = {
       x: 68, y: 68, w: 724, h: 724,
-      pocketR: 33,
+      pocketR: 32,
     };
     const center = { x: W/2, y: H/2 };
 
-    let mode = '2';           // '2', '4', 'bot'
-    let currentPlayer = 0;
-    let activeShot = false;
-    let aiming = false;
-    let draggingStriker = false;
+    // ---------- GAME STATE ----------
+    let mode = '2';            // '2', '4', 'bot'
+    let currentPlayer = 0;     // 0-based
+    let activeShot = false;     // physics moving
+    let aimingMode = false;     // dragging to set direction
+    let draggingStrikerPos = false;
     let winner = null;
-    let pocketedThisShot = [];
-    let strikerFoul = false;
-    let queenPocketed = false;
+    let shotCounter = 0;
+    
+    // pocket tracking for turn retention
+    let pocketedThisShot = [];       // store colors that got pocketed during active shot
+    let strikerFoulThisShot = false;
+    let queenPocketed = false;       // queen currently pocketed but not covered
     let queenCovered = false;
     let queenCoveredBy = null;
     
+    // striker and coins arrays
     let coins = [];
     let striker = null;
     let particles = [];
-    let aimVector = { x: 0, y: 0 };
     
-    // DOM elements
+    // aim guide data
+    let aimDirection = { x: 0, y: 0, active: false };
+    let predictedHitCoin = null;    // first coin along ray
+    let predictedPocketLine = null;  // { toX, toY }
+    
+    // power slider
     const powerSlider = document.getElementById('powerSlider');
     const powerPercentSpan = document.getElementById('powerPercent');
-    const powerFillDiv = document.getElementById('powerFill');
-    const scorePanel = document.getElementById('scorePanel');
+    const powerMeterFill = document.getElementById('powerMeterFill');
+    
+    // UI elements
+    const scorePanelDiv = document.getElementById('scorePanel');
     const turnNameSpan = document.getElementById('turnName');
-    const phaseTextSpan = document.getElementById('phaseText');
+    const phaseLabelSpan = document.getElementById('phaseLabel');
     const queenStatusSpan = document.getElementById('queenStatus');
     const gameMsgSpan = document.getElementById('gameMsg');
     
+    // players data (max 4)
     let players = [
-      { name: 'Player 1', score: 0 },
-      { name: 'Player 2', score: 0 },
-      { name: 'Player 3', score: 0 },
-      { name: 'Player 4', score: 0 }
+      { name: 'Player 1', score: 0, side: 'bottom', color: '#e34234' },
+      { name: 'Player 2', score: 0, side: 'top', color: '#3a86ff' },
+      { name: 'Player 3', score: 0, side: 'left', color: '#2e7d32' },
+      { name: 'Player 4', score: 0, side: 'right', color: '#ff9800' }
     ];
     
     // helper functions
     function clamp(v, min, max) { return Math.min(max, Math.max(min, v)); }
     function distance(x1,y1,x2,y2) { return Math.hypot(x2-x1, y2-y1); }
-    function currentPlayerCount() { return mode === '4' ? 4 : 2; }
-    function isBotTurn() { return mode === 'bot' && currentPlayer === 1 && !activeShot && !aiming && !winner; }
     
-    // baseline bounds
-    function baselineBounds() {
-      const p = currentPlayer;
-      if(p === 0) return { xMin: board.x+44, xMax: board.x+board.w-44, yFixed: board.y+board.h-28, axis: 'x' };
-      if(p === 1) return { xMin: board.x+44, xMax: board.x+board.w-44, yFixed: board.y+28, axis: 'x' };
-      if(p === 2) return { yMin: board.y+44, yMax: board.y+board.h-44, xFixed: board.x+28, axis: 'y' };
-      return { yMin: board.y+44, yMax: board.y+board.h-44, xFixed: board.x+board.w-28, axis: 'y' };
+    function currentPlayersCount() { return mode === '4' ? 4 : 2; }
+    function isBotTurn() { return mode === 'bot' && currentPlayer === 1 && !activeShot && !aimingMode && !winner; }
+    
+    // baseline line: position & limits for striker placement
+    function getBaselineBounds() {
+      const pIdx = currentPlayer;
+      if(pIdx === 0) return { xMin: board.x + 48, xMax: board.x + board.w - 48, yFixed: board.y + board.h - 28, axis: 'x' };
+      if(pIdx === 1) return { xMin: board.x + 48, xMax: board.x + board.w - 48, yFixed: board.y + 28, axis: 'x' };
+      if(pIdx === 2) return { yMin: board.y + 48, yMax: board.y + board.h - 48, xFixed: board.x + 28, axis: 'y' };
+      return { yMin: board.y + 48, yMax: board.y + board.h - 48, xFixed: board.x + board.w - 28, axis: 'y' };
     }
     
     function setStrikerOnBaseline() {
-      const bounds = baselineBounds();
+      const bounds = getBaselineBounds();
       if(bounds.axis === 'x') {
         striker.x = clamp(striker.x, bounds.xMin, bounds.xMax);
         striker.y = bounds.yFixed;
@@ -291,80 +328,74 @@
       striker.static = true;
     }
     
-    // coins & striker init
-    function initCoins() {
-      coins = [];
-      const rCoin = 13.5;
-      const offsets = [
-        [0,0,'red'],[24,0,'black'],[-24,0,'white'],[12,21,'black'],[-12,21,'white'],
-        [12,-21,'white'],[-12,-21,'black'],[0,30,'white'],[0,-30,'black'],
-        [31,18,'white'],[-31,18,'black'],[31,-18,'black'],[-31,-18,'white'],
-        [43,0,'black'],[-43,0,'white']
-      ];
-      offsets.forEach(([dx,dy,col]) => {
-        coins.push({ x: center.x+dx, y: center.y+dy, vx:0, vy:0, r: rCoin, color: col, alive: true, static: false, mass: 1.0 });
-      });
-      striker = {
-        x: center.x, y: board.y+board.h-28, vx:0, vy:0, r: 16.5, color: 'striker', alive: true, static: true, mass: 1.6
-      };
-      setStrikerOnBaseline();
-    }
-    
+    // Reset full game
     function resetGame() {
       winner = null;
       currentPlayer = 0;
       activeShot = false;
-      aiming = false;
-      draggingStriker = false;
+      aimingMode = false;
+      draggingStrikerPos = false;
+      shotCounter = 0;
       queenPocketed = false;
       queenCovered = false;
       queenCoveredBy = null;
       pocketedThisShot = [];
-      strikerFoul = false;
+      strikerFoulThisShot = false;
       particles = [];
-      for(let i=0;i<players.length;i++) players[i].score = 0;
-      initCoins();
+      
+      for(let i=0; i<players.length; i++) players[i].score = 0;
+      
+      initCoinsAndStriker();
       updateUI();
-      setMessage("Game ready! Drag striker on baseline, aim with green pocket guide.");
-      if(isBotTurn()) setTimeout(botPlay, 500);
+      setGameMessage("Game started! Place striker on baseline, use power slider & aim arrow!");
+      if(isBotTurn()) setTimeout(botPlay, 600);
     }
     
-    // =========== IMPROVED PHYSICS: CRISP HITS, NO SLIDING ASIDE ==========
-    const COLLISION_E = 0.92;
-    const STOP_THRESH = 0.28;
-    const AIR_DRAG = 0.986;
-    
-    function applyFriction(obj) {
-      if(obj.static) return;
-      obj.vx *= AIR_DRAG;
-      obj.vy *= AIR_DRAG;
-      if(Math.abs(obj.vx) < STOP_THRESH && Math.abs(obj.vy) < STOP_THRESH && !activeShot) {
-        obj.vx = 0; obj.vy = 0; obj.static = true;
-      } else if(Math.abs(obj.vx) < 0.02) obj.vx = 0;
-      else if(Math.abs(obj.vy) < 0.02) obj.vy = 0;
+    function initCoinsAndStriker() {
+      coins = [];
+      const rCoin = 14;
+      // classic carrom arrangement (15 coins + queen)
+      const offsets = [
+        [0,0,'red'], [24,0,'black'], [-24,0,'white'], [12,21,'black'], [-12,21,'white'],
+        [12,-21,'white'], [-12,-21,'black'], [0,30,'white'], [0,-30,'black'],
+        [31,18,'white'], [-31,18,'black'], [31,-18,'black'], [-31,-18,'white'],
+        [43,0,'black'], [-43,0,'white']
+      ];
+      offsets.forEach(([dx,dy,clr]) => {
+        coins.push({ x: center.x + dx, y: center.y + dy, vx:0, vy:0, r: rCoin, color: clr, alive: true, static: false });
+      });
+      // striker
+      striker = {
+        x: center.x, y: board.y + board.h - 28, vx:0, vy:0, r: 17, color: 'striker', alive: true, static: true
+      };
+      setStrikerOnBaseline();
     }
     
+    // =========== PHYSICS & REALISTIC COLLISION ==========
     function wallBoundary(c) {
-      const minX = board.x+20, maxX = board.x+board.w-20;
-      const minY = board.y+20, maxY = board.y+board.h-20;
-      let bounce = false;
-      if(c.x - c.r < minX) { c.x = minX + c.r; c.vx = -c.vx * 0.86; bounce = true; }
-      if(c.x + c.r > maxX) { c.x = maxX - c.r; c.vx = -c.vx * 0.86; bounce = true; }
-      if(c.y - c.r < minY) { c.y = minY + c.r; c.vy = -c.vy * 0.86; bounce = true; }
-      if(c.y + c.r > maxY) { c.y = maxY - c.r; c.vy = -c.vy * 0.86; bounce = true; }
-      if(bounce) applyFriction(c);
+      const minX = board.x + 20, maxX = board.x + board.w - 20;
+      const minY = board.y + 20, maxY = board.y + board.h - 20;
+      if(c.x - c.r < minX) { c.x = minX + c.r; c.vx *= -0.88; }
+      if(c.x + c.r > maxX) { c.x = maxX - c.r; c.vx *= -0.88; }
+      if(c.y - c.r < minY) { c.y = minY + c.r; c.vy *= -0.88; }
+      if(c.y + c.r > maxY) { c.y = maxY - c.r; c.vy *= -0.88; }
     }
     
     function isPocketed(c) {
-      const pockets = [[board.x,board.y],[board.x+board.w,board.y],[board.x,board.y+board.h],[board.x+board.w,board.y+board.h]];
+      const pockets = [
+        [board.x, board.y], [board.x+board.w, board.y],
+        [board.x, board.y+board.h], [board.x+board.w, board.y+board.h]
+      ];
       for(let [px,py] of pockets) {
-        if(distance(c.x,c.y,px,py) < board.pocketR - 6) return true;
+        if(distance(c.x, c.y, px, py) < board.pocketR - 5) return true;
       }
       return false;
     }
     
-    function addSparks(x,y,col) {
-      for(let i=0;i<12;i++) particles.push({ x, y, r: Math.random()*3+1, vx: (Math.random()-0.5)*5, vy: (Math.random()-0.5)*5, a:1, color:col });
+    function addParticles(x,y,color) {
+      for(let i=0;i<12;i++) {
+        particles.push({ x, y, r: Math.random()*3+1, vx: (Math.random()-0.5)*5, vy: (Math.random()-0.5)*5, a: 1, color });
+      }
     }
     
     function resolveCollision(a,b) {
@@ -375,384 +406,455 @@
       if(dist === 0 || dist >= minDist) return;
       const nx = dx/dist, ny = dy/dist;
       const overlap = minDist - dist;
-      a.x -= nx * overlap/2; a.y -= ny * overlap/2;
-      b.x += nx * overlap/2; b.y += ny * overlap/2;
-      const vrelx = a.vx - b.vx, vrely = a.vy - b.vy;
-      const velAlong = vrelx * nx + vrely * ny;
-      if(velAlong > 0) return;
-      const m1 = a.mass || 1.0, m2 = b.mass || 1.0;
-      const imp = -(1 + COLLISION_E) * velAlong / ((1/m1)+(1/m2));
-      a.vx -= imp * nx / m1; a.vy -= imp * ny / m1;
-      b.vx += imp * nx / m2; b.vy += imp * ny / m2;
-      applyFriction(a); applyFriction(b);
+      a.x -= nx * overlap/2;
+      a.y -= ny * overlap/2;
+      b.x += nx * overlap/2;
+      b.y += ny * overlap/2;
+      const dvx = a.vx - b.vx, dvy = a.vy - b.vy;
+      const reln = dvx*nx + dvy*ny;
+      if(reln > 0) return;
+      const e = 0.92;
+      const imp = -reln * e;
+      a.vx += imp * nx; a.vy += imp * ny;
+      b.vx -= imp * nx; b.vy -= imp * ny;
     }
     
     function handlePocket(coin) {
       if(!coin.alive) return;
       coin.alive = false;
-      addSparks(coin.x, coin.y, coin.color === 'black' ? '#2c2c2c' : (coin.color==='white'?'#f0f0f0':'#e36242'));
+      addParticles(coin.x, coin.y, coin.color === 'black' ? '#2c2c2c' : (coin.color === 'white' ? '#f5f5f5' : '#e34234'));
+      
       if(coin.color === 'striker') {
-        strikerFoul = true;
+        strikerFoulThisShot = true;
         players[currentPlayer].score = Math.max(0, players[currentPlayer].score - 2);
-        setMessage(`Foul! Striker pocketed. -2 points, turn lost.`);
+        setGameMessage(`Foul! Striker pocketed. -2 points, turn lost.`);
         return;
       }
+      // queen
       if(coin.color === 'red') {
         players[currentPlayer].score += 5;
         queenPocketed = true;
         queenCovered = false;
-        setMessage(`👑 Queen pocketed! +5 points. Cover it with another coin!`);
+        setGameMessage(`👑 Queen pocketed! +5 points. Cover it with another coin to keep bonus.`);
         pocketedThisShot.push('queen');
         return;
       }
+      // normal coin (white/black) 1 point
       players[currentPlayer].score += 1;
       pocketedThisShot.push(coin.color);
-      setMessage(`Pocketed ${coin.color} coin! +1 point.`);
+      setGameMessage(`Pocketed ${coin.color} coin! +1 point`);
     }
     
-    function updatePhysics() {
+    function updatePhysicsAndCollisions() {
       if(!activeShot) return;
+      let allMoving = false;
       const allObjects = [striker, ...coins.filter(c=>c.alive)];
+      // move & apply friction
       for(let obj of allObjects) {
         if(!obj.static) {
           obj.x += obj.vx;
           obj.y += obj.vy;
-          applyFriction(obj);
+          obj.vx *= 0.992;
+          obj.vy *= 0.992;
+          if(Math.abs(obj.vx) < 0.02) obj.vx = 0;
+          if(Math.abs(obj.vy) < 0.02) obj.vy = 0;
+          if(Math.abs(obj.vx) > 0.01 || Math.abs(obj.vy) > 0.01) allMoving = true;
           wallBoundary(obj);
           if(isPocketed(obj)) {
             handlePocket(obj);
             if(obj.color === 'striker') {
               activeShot = false;
-              endOfTurn();
+              endOfShotTurn();
               return;
             }
           }
         }
       }
-      // collision iterations for stable transfer
-      for(let iter=0;iter<2;iter++) {
-        for(let i=0;i<allObjects.length;i++) {
-          for(let j=i+1;j<allObjects.length;j++) resolveCollision(allObjects[i], allObjects[j]);
+      // collisions
+      for(let i=0;i<allObjects.length;i++) {
+        for(let j=i+1;j<allObjects.length;j++) {
+          resolveCollision(allObjects[i], allObjects[j]);
         }
       }
-      // queen cover detection
-      if(queenPocketed && !queenCovered && pocketedThisShot.length>0 && !strikerFoul) {
+      // after pocketed queen, check cover condition (any pocketed coin after queen)
+      if(queenPocketed && !queenCovered && pocketedThisShot.length > 0 && !strikerFoulThisShot) {
         queenCovered = true;
         queenCoveredBy = currentPlayer;
         players[currentPlayer].score += 5;
-        setMessage(`✨ Queen covered! +5 bonus! ✨`);
+        setGameMessage(`✨ Queen covered! +5 bonus points! ✨`);
       }
-      let moving = false;
-      for(let obj of allObjects) if(!obj.static && (Math.abs(obj.vx)>0.12 || Math.abs(obj.vy)>0.12)) { moving=true; break; }
-      if(!moving && activeShot) {
+      
+      if(!allMoving && activeShot) {
         activeShot = false;
-        endOfTurn();
+        endOfShotTurn();
       }
     }
     
-    function endOfTurn() {
+    function endOfShotTurn() {
+      // Determine if player gets another turn
       let hasPocket = pocketedThisShot.length > 0;
-      let foul = strikerFoul;
-      if(hasPocket && !foul) {
-        setMessage(`🔥 Excellent hit! Another turn!`);
+      let foul = strikerFoulThisShot;
+      let retainTurn = (hasPocket && !foul);
+      // Queen cover not lost but additional turn already considered
+      if(retainTurn) {
+        setGameMessage(`Nice! You pocketed a coin. Extra turn!`);
       } else {
-        const total = currentPlayerCount();
+        // switch player
+        const total = currentPlayersCount();
         if(mode === 'bot' && currentPlayer === 1) currentPlayer = 0;
         else currentPlayer = (currentPlayer + 1) % total;
-        setMessage(`Turn → ${players[currentPlayer].name}`);
+        setGameMessage(`Turn passes to ${players[currentPlayer].name}`);
       }
+      // reset shot trackers
       pocketedThisShot = [];
-      strikerFoul = false;
-      aiming = false;
-      draggingStriker = false;
+      strikerFoulThisShot = false;
+      aimingMode = false;
+      draggingStrikerPos = false;
       striker.static = true;
       setStrikerOnBaseline();
-      // win condition
-      const remaining = coins.filter(c=>c.alive && c.color !== 'red').length;
-      if(remaining === 0 && !winner) {
+      
+      // check win condition
+      const remainingCoins = coins.filter(c => c.alive && c.color !== 'red').length;
+      if(remainingCoins === 0 && !winner) {
         winner = currentPlayer;
-        setMessage(`🏆🏆 ${players[currentPlayer].name} WINS! 🏆🏆`);
+        setGameMessage(`🏆 ${players[currentPlayer].name} WINS THE MATCH! 🏆`);
         activeShot = false;
+        aimingMode = false;
       }
       updateUI();
-      if(!winner && isBotTurn()) setTimeout(botPlay, 450);
+      if(!winner && isBotTurn()) setTimeout(botPlay, 400);
     }
     
-    // balanced striking force (moderate but impactful)
+    // shoot with power slider & direction
     function shootWithDirection(dirX, dirY, powerVal) {
-      if(activeShot || aiming === false) return false;
+      if(activeShot || aimingMode === false) return false;
       const len = Math.hypot(dirX, dirY);
       if(len < 0.01) return false;
-      const normX = dirX/len, normY = dirY/len;
-      const force = 8.5 + powerVal * 10.5;   // 8.5 → 19
+      const normX = dirX / len;
+      const normY = dirY / len;
+      const force = 8 + powerVal * 19;  // max around 27 force
       striker.vx = normX * force;
       striker.vy = normY * force;
       striker.static = false;
       activeShot = true;
-      aiming = false;
+      aimingMode = false;
+      shotCounter++;
       updateUI();
-      setMessage(`💥 Strike! ${Math.round(powerVal*100)}% power. Coins fly straight!`);
+      setGameMessage(`Shot with ${Math.round(powerVal*100)}% power!`);
       return true;
     }
     
+    // AI bot
     function botPlay() {
-      if(winner || activeShot || aiming) return;
+      if(winner || activeShot || aimingMode) return;
+      // reposition striker near center baseline
       setStrikerOnBaseline();
-      let targets = coins.filter(c=>c.alive && c.color !== 'red');
-      if(targets.length ===0) targets = coins.filter(c=>c.alive);
-      if(targets.length===0) return;
+      let targets = coins.filter(c => c.alive && c.color !== 'red');
+      if(targets.length === 0) targets = coins.filter(c => c.alive);
+      if(targets.length === 0) return;
       const target = targets[Math.floor(Math.random()*targets.length)];
-      const dx = target.x - striker.x, dy = target.y - striker.y;
-      const len = Math.hypot(dx,dy);
-      if(len<0.01) return;
-      const powerVal = 0.68;
-      const normX = dx/len, normY = dy/len;
-      const force = 8.5 + powerVal * 10.5;
+      const dx = target.x - striker.x;
+      const dy = target.y - striker.y;
+      const length = Math.hypot(dx,dy);
+      if(length < 0.01) return;
+      const powerVal = 0.65;
+      const normX = dx/length, normY = dy/length;
+      const force = 8 + powerVal * 22;
       striker.vx = normX * force;
       striker.vy = normY * force;
       striker.static = false;
       activeShot = true;
-      aiming = false;
-      setMessage(`🤖 Bot strikes with balanced force!`);
+      aimingMode = false;
+      setGameMessage(`🤖 Bot shoots!`);
       updateUI();
     }
     
-    // ========== GREEN POCKET GUIDE ==========
+    // ----- RAYCAST for guided arrow + pocket suggestion -----
     function raycastFirstCoin(fromX, fromY, dirX, dirY) {
-      let closest = null, minDist = Infinity;
+      let closest = null;
+      let minDist = Infinity;
       for(let coin of coins) {
         if(!coin.alive) continue;
-        const toX = coin.x - fromX, toY = coin.y - fromY;
-        const cross = dirX * toY - dirY * toX;
-        const dot = dirX * toX + dirY * toY;
-        if(Math.abs(cross) < coin.r+6 && dot > 0) {
-          const d2 = Math.hypot(toX, toY);
-          if(d2 < minDist && d2 < 300) { minDist = d2; closest = coin; }
+        const toCoinX = coin.x - fromX, toCoinY = coin.y - fromY;
+        const cross = dirX * toCoinY - dirY * toCoinX;
+        const dp = dirX * toCoinX + dirY * toCoinY;
+        if(Math.abs(cross) < coin.r + 8 && dp > 0) {
+          const distTo = Math.hypot(toCoinX, toCoinY);
+          if(distTo < minDist && distTo < 300) {
+            minDist = distTo;
+            closest = coin;
+          }
         }
       }
       return closest;
     }
     
-    function nearestPocket(coin) {
+    function nearestPocketToCoin(coin) {
       const pockets = [
         {x: board.x, y: board.y}, {x: board.x+board.w, y: board.y},
         {x: board.x, y: board.y+board.h}, {x: board.x+board.w, y: board.y+board.h}
       ];
-      let best = null, bestD = Infinity;
+      let best = null, bestDist = Infinity;
       for(let p of pockets) {
         let d = distance(coin.x, coin.y, p.x, p.y);
-        if(d < bestD) { bestD = d; best = p; }
+        if(d < bestDist) { bestDist = d; best = p; }
       }
       return best;
     }
     
-    // ========== DRAWING ==========
+    // Drawing ===============================================
     function drawBoard() {
-      ctx.fillStyle = '#e7b874'; ctx.fillRect(0,0,W,H);
-      ctx.fillStyle = '#e2ac6c'; ctx.fillRect(board.x,board.y,board.w,board.h);
-      ctx.strokeStyle = '#111'; ctx.lineWidth = 8; ctx.strokeRect(board.x,board.y,board.w,board.h);
-      ctx.strokeStyle = '#5a3e2a'; ctx.lineWidth = 2; ctx.strokeRect(board.x+12,board.y+12,board.w-24,board.h-24);
+      // Light orange board background
+      ctx.fillStyle = '#e7b874';
+      ctx.fillRect(0,0,W,H);
+      ctx.fillStyle = '#e2ac6c';
+      ctx.fillRect(board.x, board.y, board.w, board.h);
+      // black border side bars (black border thickness)
+      ctx.strokeStyle = '#111';
+      ctx.lineWidth = 8;
+      ctx.strokeRect(board.x, board.y, board.w, board.h);
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = '#5a3e2a';
+      ctx.strokeRect(board.x+12, board.y+12, board.w-24, board.h-24);
+      
+      // pockets
       const pockets = [[board.x,board.y],[board.x+board.w,board.y],[board.x,board.y+board.h],[board.x+board.w,board.y+board.h]];
       pockets.forEach(([px,py]) => {
-        ctx.beginPath(); ctx.arc(px,py,board.pocketR-2,0,Math.PI*2); ctx.fillStyle='#000000cc'; ctx.fill();
-        ctx.beginPath(); ctx.arc(px,py,board.pocketR-8,0,Math.PI*2); ctx.fillStyle='#1a1a1a'; ctx.fill();
+        ctx.beginPath(); ctx.arc(px, py, board.pocketR-2, 0, Math.PI*2); ctx.fillStyle = '#000000cc'; ctx.fill();
+        ctx.beginPath(); ctx.arc(px, py, board.pocketR-8, 0, Math.PI*2); ctx.fillStyle = '#1a1a1a'; ctx.fill();
       });
-      // double baselines (always visible)
+      
+      // Draw all four baselines (two parallel lines each side)
       ctx.save();
-      ctx.strokeStyle = '#2b2118'; ctx.lineWidth = 3;
-      const yB = board.y+board.h-26; ctx.beginPath(); ctx.moveTo(board.x+40,yB); ctx.lineTo(board.x+board.w-40,yB); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(board.x+40,yB-12); ctx.lineTo(board.x+board.w-40,yB-12); ctx.stroke();
-      const yT = board.y+26; ctx.beginPath(); ctx.moveTo(board.x+40,yT); ctx.lineTo(board.x+board.w-40,yT); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(board.x+40,yT+12); ctx.lineTo(board.x+board.w-40,yT+12); ctx.stroke();
-      const xL = board.x+26; ctx.beginPath(); ctx.moveTo(xL,board.y+40); ctx.lineTo(xL,board.y+board.h-40); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(xL+12,board.y+40); ctx.lineTo(xL+12,board.y+board.h-40); ctx.stroke();
-      const xR = board.x+board.w-26; ctx.beginPath(); ctx.moveTo(xR,board.y+40); ctx.lineTo(xR,board.y+board.h-40); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(xR-12,board.y+40); ctx.lineTo(xR-12,board.y+board.h-40); ctx.stroke();
+      ctx.strokeStyle = '#2b2118';
+      ctx.lineWidth = 3;
+      // bottom baseline double line
+      const yBottom = board.y + board.h - 26;
+      ctx.beginPath(); ctx.moveTo(board.x+40, yBottom); ctx.lineTo(board.x+board.w-40, yBottom); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(board.x+40, yBottom-12); ctx.lineTo(board.x+board.w-40, yBottom-12); ctx.stroke();
+      // top baseline
+      const yTop = board.y + 26;
+      ctx.beginPath(); ctx.moveTo(board.x+40, yTop); ctx.lineTo(board.x+board.w-40, yTop); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(board.x+40, yTop+12); ctx.lineTo(board.x+board.w-40, yTop+12); ctx.stroke();
+      // left baseline
+      const xLeft = board.x + 26;
+      ctx.beginPath(); ctx.moveTo(xLeft, board.y+40); ctx.lineTo(xLeft, board.y+board.h-40); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(xLeft+12, board.y+40); ctx.lineTo(xLeft+12, board.y+board.h-40); ctx.stroke();
+      // right baseline
+      const xRight = board.x+board.w - 26;
+      ctx.beginPath(); ctx.moveTo(xRight, board.y+40); ctx.lineTo(xRight, board.y+board.h-40); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(xRight-12, board.y+40); ctx.lineTo(xRight-12, board.y+board.h-40); ctx.stroke();
       ctx.restore();
-      ctx.beginPath(); ctx.arc(center.x,center.y,40,0,Math.PI*2); ctx.strokeStyle='#aa7c58'; ctx.stroke();
-      ctx.beginPath(); ctx.arc(center.x,center.y,12,0,Math.PI*2); ctx.fillStyle='#b0302a'; ctx.fill();
+      
+      // center circle
+      ctx.beginPath(); ctx.arc(center.x, center.y, 40, 0, Math.PI*2); ctx.strokeStyle = '#aa7c58'; ctx.stroke();
+      ctx.beginPath(); ctx.arc(center.x, center.y, 12, 0, Math.PI*2); ctx.fillStyle = '#b0302a'; ctx.fill();
     }
     
     function drawCoin(c) {
       if(!c.alive) return;
-      ctx.beginPath(); ctx.arc(c.x,c.y,c.r,0,Math.PI*2);
-      let fill = '#e0b07f';
-      if(c.color === 'white') fill = '#fcf9f2';
-      else if(c.color === 'black') fill = '#2c2c2c';
-      else if(c.color === 'red') fill = '#d64531';
-      else fill = '#f2e8cf';
-      ctx.fillStyle = fill; ctx.fill();
-      ctx.strokeStyle = '#5f4c38'; ctx.stroke();
-      ctx.beginPath(); ctx.arc(c.x,c.y,c.r*0.35,0,Math.PI*2); ctx.fillStyle='#c79a6e'; ctx.fill();
+      ctx.shadowBlur = 0;
+      ctx.beginPath(); ctx.arc(c.x, c.y, c.r, 0, Math.PI*2);
+      let fillColor = '#e0b07f';
+      if(c.color === 'white') fillColor = '#fcf9f2';
+      else if(c.color === 'black') fillColor = '#2c2c2c';
+      else if(c.color === 'red') fillColor = '#d64531';
+      else fillColor = '#ffdd99';
+      ctx.fillStyle = fillColor;
+      ctx.fill();
+      ctx.strokeStyle = '#5f4c38';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+      ctx.beginPath(); ctx.arc(c.x, c.y, c.r*0.35, 0, Math.PI*2); ctx.fillStyle = '#c79a6e'; ctx.fill();
     }
     
     function drawStriker() {
-      ctx.beginPath(); ctx.arc(striker.x,striker.y,striker.r,0,Math.PI*2);
-      ctx.fillStyle='#f2e8cf'; ctx.fill();
-      ctx.strokeStyle='#6b4c2c'; ctx.lineWidth=2.5; ctx.stroke();
-      ctx.beginPath(); ctx.arc(striker.x,striker.y,5,0,Math.PI*2); ctx.fillStyle='#ab8a5a'; ctx.fill();
+      if(!striker) return;
+      ctx.shadowBlur = 6;
+      ctx.beginPath(); ctx.arc(striker.x, striker.y, striker.r, 0, Math.PI*2);
+      ctx.fillStyle = '#f2e8cf';
+      ctx.fill();
+      ctx.strokeStyle = '#6b4c2c';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      ctx.beginPath(); ctx.arc(striker.x, striker.y, 5, 0, Math.PI*2); ctx.fillStyle = '#ab8a5a'; ctx.fill();
+      ctx.shadowBlur = 0;
     }
     
-    function drawAimAndGuide() {
-      if(!aiming || activeShot) return;
+    function drawAimAssist() {
+      if(!aimingMode || activeShot) return;
       const fromX = striker.x, fromY = striker.y;
-      const toX = aimVector.x, toY = aimVector.y;
+      const toX = aimDirection.x, toY = aimDirection.y;
       const len = Math.hypot(toX-fromX, toY-fromY);
-      if(len<5) return;
+      if(len < 5) return;
       const dirX = (toX-fromX)/len, dirY = (toY-fromY)/len;
-      const arrowEndX = fromX + dirX*105, arrowEndY = fromY + dirY*105;
-      ctx.beginPath(); ctx.moveTo(fromX,fromY); ctx.lineTo(arrowEndX,arrowEndY);
-      ctx.strokeStyle='#ffcc77'; ctx.lineWidth=5; ctx.setLineDash([6,8]); ctx.stroke();
+      const arrowEndX = fromX + dirX * 100;
+      const arrowEndY = fromY + dirY * 100;
+      ctx.beginPath(); ctx.moveTo(fromX, fromY); ctx.lineTo(arrowEndX, arrowEndY);
+      ctx.strokeStyle = '#ffd966';
+      ctx.lineWidth = 4;
+      ctx.setLineDash([6, 8]);
+      ctx.stroke();
       ctx.setLineDash([]);
-      const angle = Math.atan2(dirY,dirX);
-      ctx.beginPath(); ctx.moveTo(arrowEndX,arrowEndY);
-      ctx.lineTo(arrowEndX-12*Math.cos(angle-0.6), arrowEndY-12*Math.sin(angle-0.6));
-      ctx.lineTo(arrowEndX-12*Math.cos(angle+0.6), arrowEndY-12*Math.sin(angle+0.6));
-      ctx.fillStyle='#ffaa33'; ctx.fill();
+      // arrow head
+      const angle = Math.atan2(dirY, dirX);
+      const arrX = arrowEndX, arrY = arrowEndY;
+      ctx.beginPath(); ctx.moveTo(arrX, arrY);
+      ctx.lineTo(arrX - 10*Math.cos(angle-0.6), arrY - 10*Math.sin(angle-0.6));
+      ctx.lineTo(arrX - 10*Math.cos(angle+0.6), arrY - 10*Math.sin(angle+0.6));
+      ctx.fillStyle = '#ffb347';
+      ctx.fill();
       
+      // prediction highlight on first coin
       const firstCoin = raycastFirstCoin(fromX, fromY, dirX, dirY);
-      if(firstCoin && firstCoin.alive && firstCoin.color !== 'striker') {
-        ctx.beginPath(); ctx.arc(firstCoin.x, firstCoin.y, firstCoin.r+5, 0, Math.PI*2);
-        ctx.strokeStyle='#33ff99'; ctx.lineWidth=3.5; ctx.setLineDash([4,4]); ctx.stroke();
-        ctx.setLineDash([]);
-        const pocket = nearestPocket(firstCoin);
-        if(pocket) {
-          ctx.beginPath(); ctx.moveTo(firstCoin.x, firstCoin.y); ctx.lineTo(pocket.x, pocket.y);
-          ctx.strokeStyle='#66ff99'; ctx.lineWidth=4; ctx.setLineDash([6,8]); ctx.stroke();
-          ctx.beginPath(); ctx.arc(pocket.x, pocket.y, 14, 0, Math.PI*2); ctx.fillStyle='#88ffaa66'; ctx.fill();
-          ctx.beginPath(); ctx.arc(pocket.x, pocket.y, 8, 0, Math.PI*2); ctx.fillStyle='#ccffbb'; ctx.fill();
-          ctx.setLineDash([]);
+      if(firstCoin) {
+        ctx.beginPath(); ctx.arc(firstCoin.x, firstCoin.y, firstCoin.r+4, 0, Math.PI*2);
+        ctx.strokeStyle = '#ff3300';
+        ctx.lineWidth = 3;
+        ctx.stroke();
+        const targetPocket = nearestPocketToCoin(firstCoin);
+        if(targetPocket) {
+          ctx.beginPath(); ctx.moveTo(firstCoin.x, firstCoin.y); ctx.lineTo(targetPocket.x, targetPocket.y);
+          ctx.strokeStyle = '#aa66ff';
+          ctx.lineWidth = 2.5;
+          ctx.setLineDash([8,6]);
+          ctx.stroke();
+          ctx.fillStyle = '#ffcc88';
+          ctx.beginPath(); ctx.arc(targetPocket.x, targetPocket.y, 12, 0, Math.PI*2); ctx.fill();
         }
       }
       ctx.setLineDash([]);
     }
     
     function drawParticles() {
-      particles = particles.filter(p=> (p.a-=0.04)>0);
+      particles = particles.filter(p => (p.a -= 0.03) > 0);
       for(let p of particles) {
         p.x += p.vx; p.y += p.vy;
         ctx.globalAlpha = p.a;
-        ctx.fillStyle = p.color || '#ffaa66';
-        ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fill();
+        ctx.fillStyle = p.color || '#f0b27a';
+        ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2); ctx.fill();
       }
       ctx.globalAlpha = 1;
     }
     
+    // UI Update
     function updateUI() {
-      const cnt = currentPlayerCount();
+      const pCount = currentPlayersCount();
       let html = '';
-      for(let i=0;i<cnt;i++) {
+      for(let i=0; i<pCount; i++) {
         let activeClass = (currentPlayer === i && !winner) ? 'active' : '';
-        html += `<div class="player-card ${activeClass}">${players[i].name}: ${players[i].score}</div>`;
+        html += `<div class="player-badge ${activeClass}">${players[i].name}: ${players[i].score}</div>`;
       }
-      scorePanel.innerHTML = html;
+      scorePanelDiv.innerHTML = html;
       turnNameSpan.innerText = players[currentPlayer].name;
-      phaseTextSpan.innerText = activeShot ? '⚡ IN MOTION ⚡' : (aiming ? '🎯 AIM (green path)' : 'READY');
+      phaseLabelSpan.innerText = activeShot ? 'Moving...' : (aimingMode ? 'Aiming 🔥' : 'Ready');
       let qText = queenCovered ? `Covered (P${queenCoveredBy+1})` : (queenPocketed ? 'Pocketed 🔴' : 'On board 👑');
       queenStatusSpan.innerText = qText;
       let powerVal = powerSlider.value / 100;
       powerPercentSpan.innerText = `${Math.round(powerVal*100)}%`;
-      powerFillDiv.style.width = `${powerVal*100}%`;
+      powerMeterFill.style.width = `${powerVal*100}%`;
     }
     
-    function setMessage(msg) { gameMsgSpan.innerHTML = msg; }
+    function setGameMessage(msg) { gameMsgSpan.innerHTML = msg; }
     
-    // input events
-    function handleStart(e) {
+    // event handlers
+    function handlePointerStart(e) {
       if(winner || activeShot) return;
       const rect = canvas.getBoundingClientRect();
-      const sx = canvas.width/rect.width, sy = canvas.height/rect.height;
-      let x = (e.clientX - rect.left)*sx, y = (e.clientY - rect.top)*sy;
-      const bounds = baselineBounds();
-      let onStriker = distance(x,y, striker.x, striker.y) < striker.r+12;
-      let onBase = false;
-      if(bounds.axis === 'x') onBase = Math.abs(y - bounds.yFixed) < 22 && x > bounds.xMin-8 && x < bounds.xMax+8;
-      else onBase = Math.abs(x - bounds.xFixed) < 22 && y > bounds.yMin-8 && y < bounds.yMax+8;
-      if(onStriker && onBase && !activeShot) { draggingStriker = true; return; }
-      if(distance(x,y, striker.x, striker.y) < striker.r+28 && !activeShot && !draggingStriker) {
-        aiming = true;
-        aimVector = { x: striker.x+30, y: striker.y-15 };
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      let x = (e.clientX - rect.left) * scaleX;
+      let y = (e.clientY - rect.top) * scaleY;
+      const bounds = getBaselineBounds();
+      let onStriker = distance(x,y, striker.x, striker.y) < striker.r + 8;
+      let onBaseline = false;
+      if(bounds.axis === 'x') onBaseline = Math.abs(y - bounds.yFixed) < 20 && x > bounds.xMin-10 && x < bounds.xMax+10;
+      else onBaseline = Math.abs(x - bounds.xFixed) < 20 && y > bounds.yMin-10 && y < bounds.yMax+10;
+      if(onStriker && onBaseline && !activeShot) {
+        draggingStrikerPos = true;
+        return;
+      }
+      // start aiming if near striker
+      if(distance(x,y, striker.x, striker.y) < striker.r + 20 && !activeShot && !draggingStrikerPos) {
+        aimingMode = true;
+        aimDirection = { x: striker.x+20, y: striker.y+20, active: true };
       }
     }
     
-    function handleMove(e) {
+    function handlePointerMove(e) {
       if(winner) return;
       const rect = canvas.getBoundingClientRect();
-      const sx = canvas.width/rect.width, sy = canvas.height/rect.height;
-      let x = (e.clientX - rect.left)*sx, y = (e.clientY - rect.top)*sy;
-      if(draggingStriker && !activeShot) {
-        const bounds = baselineBounds();
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      let x = (e.clientX - rect.left) * scaleX;
+      let y = (e.clientY - rect.top) * scaleY;
+      if(draggingStrikerPos && !activeShot) {
+        const bounds = getBaselineBounds();
         if(bounds.axis === 'x') striker.x = clamp(x, bounds.xMin, bounds.xMax);
         else striker.y = clamp(y, bounds.yMin, bounds.yMax);
         setStrikerOnBaseline();
       }
-      if(aiming && !activeShot) aimVector = { x, y };
+      if(aimingMode && !activeShot) {
+        aimDirection = { x: x, y: y };
+      }
     }
     
-    function handleEnd(e) {
-      if(draggingStriker) { draggingStriker = false; setStrikerOnBaseline(); return; }
-      if(aiming && !activeShot && !winner) {
-        const dx = aimVector.x - striker.x, dy = aimVector.y - striker.y;
-        if(Math.hypot(dx,dy) > 8) {
+    function handlePointerEnd(e) {
+      if(draggingStrikerPos) {
+        draggingStrikerPos = false;
+        setStrikerOnBaseline();
+        return;
+      }
+      if(aimingMode && !activeShot && !winner) {
+        const dx = aimDirection.x - striker.x;
+        const dy = aimDirection.y - striker.y;
+        if(Math.hypot(dx,dy) > 5) {
           const powerVal = powerSlider.value / 100;
           shootWithDirection(dx, dy, powerVal);
         }
-        aiming = false;
+        aimingMode = false;
         updateUI();
       }
     }
     
-    canvas.addEventListener('pointerdown', handleStart);
-    canvas.addEventListener('pointermove', handleMove);
-    canvas.addEventListener('pointerup', handleEnd);
-    
+    // keyboard controls
     window.addEventListener('keydown', e => {
       if(winner || activeShot) return;
       const key = e.key.toLowerCase();
       if(key === 'a' || key === 'd') {
-        const bounds = baselineBounds();
-        let step = key === 'a' ? -20 : 20;
-        if(bounds.axis === 'x') striker.x = clamp(striker.x+step, bounds.xMin, bounds.xMax);
-        else striker.y = clamp(striker.y+step, bounds.yMin, bounds.yMax);
+        const bounds = getBaselineBounds();
+        let step = key === 'a' ? -18 : 18;
+        if(bounds.axis === 'x') striker.x = clamp(striker.x + step, bounds.xMin, bounds.xMax);
+        else striker.y = clamp(striker.y + step, bounds.yMin, bounds.yMax);
         setStrikerOnBaseline();
         e.preventDefault();
       }
       if(key === ' ') {
         e.preventDefault();
-        if(!aiming && !activeShot) {
-          aiming = true;
-          aimVector = { x: striker.x+40, y: striker.y-20 };
+        if(!aimingMode && !activeShot) {
+          aimingMode = true;
+          aimDirection = { x: striker.x+40, y: striker.y-20 };
         }
       }
       if(key === 'r') resetGame();
     });
     
-    document.getElementById('restartBtn').onclick = resetGame;
-    document.getElementById('saveBtn').onclick = () => {
-      localStorage.setItem('carrom_save', JSON.stringify({players, currentPlayer, queenPocketed, queenCovered, queenCoveredBy, coins: coins.map(c=>({...c, alive:c.alive})), striker}));
-      setMessage('Game saved');
-    };
-    document.getElementById('loadBtn').onclick = () => {
-      const data = localStorage.getItem('carrom_save');
-      if(data) {
-        const s = JSON.parse(data);
-        players = s.players; currentPlayer = s.currentPlayer; queenPocketed = s.queenPocketed;
-        queenCovered = s.queenCovered; queenCoveredBy = s.queenCoveredBy;
-        coins = s.coins; striker = s.striker;
-        setStrikerOnBaseline();
-        updateUI();
-        setMessage('Game loaded');
-      } else setMessage('No save');
-    };
+    // attach canvas events
+    canvas.addEventListener('pointerdown', handlePointerStart);
+    canvas.addEventListener('pointermove', handlePointerMove);
+    canvas.addEventListener('pointerup', handlePointerEnd);
+    document.getElementById('restartBtn').onclick = () => resetGame();
+    document.getElementById('saveBtn').onclick = () => { localStorage.setItem('carrom_save', JSON.stringify({players, currentPlayer, queenPocketed, queenCovered, queenCoveredBy, coins: coins.map(c=>({...c, alive:c.alive})), striker})); setGameMessage('Game saved'); };
+    document.getElementById('loadBtn').onclick = () => { const data = localStorage.getItem('carrom_save'); if(data) { const s=JSON.parse(data); players=s.players; currentPlayer=s.currentPlayer; queenPocketed=s.queenPocketed; queenCovered=s.queenCovered; queenCoveredBy=s.queenCoveredBy; coins=s.coins; striker=s.striker; setStrikerOnBaseline(); updateUI(); setGameMessage('Loaded'); } else setGameMessage('No save'); };
     document.getElementById('modeSelect').onchange = e => { mode = e.target.value; resetGame(); };
     powerSlider.addEventListener('input', () => updateUI());
     
     function animate() {
-      updatePhysics();
+      updatePhysicsAndCollisions();
       drawBoard();
       coins.forEach(drawCoin);
       drawStriker();
-      drawAimAndGuide();
+      drawAimAssist();
       drawParticles();
       requestAnimationFrame(animate);
     }
