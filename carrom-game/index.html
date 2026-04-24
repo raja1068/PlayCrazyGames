@@ -152,21 +152,6 @@
       border-bottom: 1px solid #d4a37355;
     }
 
-    .power-meter-bg {
-      background: #4d321c;
-      border-radius: 20px;
-      height: 12px;
-      margin: 8px 0;
-      overflow: hidden;
-    }
-
-    .power-meter-fill {
-      width: 0%;
-      height: 100%;
-      background: linear-gradient(90deg, #ffb347, #ff6a00);
-      border-radius: 20px;
-    }
-
     .msg-area {
       background: #00000055;
       border-radius: 28px;
@@ -224,11 +209,10 @@
         <span>🔋 Power Slider</span>
         <input type="range" id="powerSlider" min="0" max="100" value="75">
       </div>
-      <div class="power-meter-bg"><div class="power-meter-fill" id="powerMeterFill"></div></div>
       <div class="stat-row"><span>🏆 Score (Red=5, Coin=1)</span><span id="scoreHint"></span></div>
       <div class="msg-area" id="gameMsg">
-        💥 FIXED PHYSICS! Striker delivers HEAVY straight hits – coins fly without sliding.<br>
-        🔥 Green arrow shows pocket trajectory for the first coin in path.
+        💥 FIXED PHYSICS! Striker delivers HEAVY straight hits – coins sliding.<br>
+        🔥 Green arrow shows pocket trajectory for the first coin ondirection of striker path.
       </div>
       <div class="shortcut-help">
         ⌨️ <kbd>A/D</kbd> move striker · <kbd>Space</kbd> quick aim · <kbd>R</kbd> restart
@@ -327,7 +311,7 @@
       for(let i=0; i<players.length; i++) players[i].score = 0;
       initCoinsAndStriker();
       updateUI();
-      setGameMessage("🔥 FIXED PHYSICS! Striker hits with real power – coins fly straight.");
+      setGameMessage("🔥 FIXED PHYSICS! Striker hits with real power – coins goes straight ahead.");
       if(isBotTurn()) setTimeout(botPlay, 600);
     }
     
@@ -345,7 +329,7 @@
       });
       // Heavy striker for powerful impact
       striker = {
-        x: center.x, y: board.y + board.h - 28, vx:0, vy:0, r: 16.5, color: 'striker', alive: true, static: true, mass: 1.8
+        x: center.x, y: board.y + board.h - 28, vx:0, vy:0, r: 16.5, color: 'striker', alive: true, static: true, mass: 2.0
       };
       setStrikerOnBaseline();
     }
@@ -353,7 +337,7 @@
     // =========== CORRECTED PHYSICS (no acceleration, realistic hits) ==========
     const COLLISION_E = 0.92;        // high restitution for crisp hit
     const STOP_VEL = 0.28;           
-    const AIR_DRAG = 0.985;          // less than 1 → deceleration (fixed!)
+    const AIR_DRAG = 0.992;          // less than 1 → deceleration (fixed!)
     
     function applyFriction(obj) {
       if(obj.static) return;
@@ -533,13 +517,13 @@
       if(!winner && isBotTurn()) setTimeout(botPlay, 400);
     }
     
-    // BALANCED FORCE: min 9, max 19 (strong but not crazy)
+    // BALANCED FORCE: min 7.5, max 16 (strong but not crazy)
     function shootWithDirection(dirX, dirY, powerVal) {
       if(activeShot || aimingMode === false) return false;
       const len = Math.hypot(dirX, dirY);
       if(len < 0.01) return false;
       const normX = dirX / len, normY = dirY / len;
-      const force = 9.0 + powerVal * 10.0;   // 9 → 19
+      const force = 9.0 + powerVal * 10.0;   // 7.5 → 16
       striker.vx = normX * force;
       striker.vy = normY * force;
       striker.static = false;
