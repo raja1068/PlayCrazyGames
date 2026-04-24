@@ -3,14 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>Carrom Pro – Master Board | Precision Striker & Green Pocket Guide</title>
+  <title>Carrom Pro – Precision Striker | Double Baseline & Green Pocket Guide</title>
   <style>
     * {
       box-sizing: border-box;
       user-select: none;
       -webkit-tap-highlight-color: transparent;
     }
-
     body {
       margin: 0;
       background: linear-gradient(145deg, #21170e, #140f08);
@@ -21,8 +20,6 @@
       min-height: 100vh;
       padding: 20px;
     }
-
-    /* ad top / bottom placeholders */
     .ad-slot {
       background: rgba(0,0,0,0.2);
       text-align: center;
@@ -33,7 +30,6 @@
       border-radius: 28px;
       backdrop-filter: blur(4px);
     }
-
     .game-container {
       max-width: 1300px;
       width: 100%;
@@ -43,7 +39,6 @@
       backdrop-filter: blur(4px);
       box-shadow: 0 20px 40px rgba(0,0,0,0.6);
     }
-
     .top-bar {
       display: flex;
       flex-wrap: wrap;
@@ -55,13 +50,11 @@
       margin-bottom: 18px;
       gap: 12px;
     }
-
     .score-panel {
       display: flex;
       gap: 18px;
       flex-wrap: wrap;
     }
-
     .player-badge {
       background: #211407;
       padding: 6px 22px;
@@ -72,20 +65,17 @@
       transition: all 0.12s;
       font-size: 1rem;
     }
-
     .player-badge.active {
       background: #f5a623;
       color: #251a0c;
       box-shadow: 0 0 0 3px #ffdf88;
     }
-
     .controls {
       display: flex;
       gap: 12px;
       flex-wrap: wrap;
       align-items: center;
     }
-
     select, button {
       background: #3a2a1b;
       border: none;
@@ -97,12 +87,10 @@
       font-size: 0.85rem;
       transition: 0.07s linear;
     }
-
     button.primary {
       background: #1f7a3a;
       color: white;
     }
-
     .power-bar {
       background: #2f2215;
       border-radius: 60px;
@@ -111,27 +99,23 @@
       align-items: center;
       gap: 18px;
     }
-
     input[type="range"] {
       width: 170px;
       height: 5px;
       border-radius: 15px;
       background: #e2a442;
     }
-
     .main-grid {
       display: grid;
       grid-template-columns: 1fr 290px;
       gap: 22px;
     }
-
     .board-frame {
       background: #5a371b;
       border-radius: 38px;
       padding: 16px;
       box-shadow: 0 12px 28px black;
     }
-
     canvas {
       width: 100%;
       height: auto;
@@ -141,7 +125,6 @@
       cursor: crosshair;
       background: #f3deba;
     }
-
     .info-panel {
       background: #2d1f12e0;
       backdrop-filter: blur(12px);
@@ -149,14 +132,12 @@
       padding: 18px;
       color: #ffeedd;
     }
-
     .stat-line {
       display: flex;
       justify-content: space-between;
       padding: 10px 0;
       border-bottom: 1px solid #cb9e6b55;
     }
-
     .power-meter {
       background: #3f2e1c;
       border-radius: 20px;
@@ -164,13 +145,11 @@
       margin: 8px 0;
       overflow: hidden;
     }
-
     .power-fill {
       height: 100%;
       width: 0%;
       background: linear-gradient(90deg, #ffbc6e, #ff7700);
     }
-
     .msg-box {
       background: #00000066;
       border-radius: 36px;
@@ -178,7 +157,6 @@
       margin-top: 18px;
       font-size: 0.85rem;
     }
-
     kbd {
       background: #241e16;
       border-radius: 12px;
@@ -187,7 +165,6 @@
       margin: 0 3px;
       font-weight: bold;
     }
-
     @media (max-width: 880px) {
       .main-grid { grid-template-columns: 1fr; }
     }
@@ -195,8 +172,8 @@
 </head>
 <body>
 <div style="width:100%; max-width:1400px; margin:0 auto">
-  <!-- top ad space -->
-  <div class="ad-slot" id="topAd">Advertisement Space (Google AdSense)</div>
+  <!-- top ad space (Google AdSense can be inserted here) -->
+  <div class="ad-slot" id="topAd">Advertisement Space — Google AdSense</div>
 
   <div class="game-container">
     <div class="top-bar">
@@ -237,7 +214,7 @@
   </div>
 
   <!-- bottom ad space -->
-  <div class="ad-slot" id="bottomAd">Advertisement Space (Google AdSense)</div>
+  <div class="ad-slot" id="bottomAd">Advertisement Space — Google AdSense</div>
 </div>
 
 <script>
@@ -263,19 +240,16 @@
     let strikerFoul = false;
     let queenPocketed = false;
     let queenCoveredBy = null;
-    let matchWinner = null;       // stores winner object when all coins pocketed
+    let matchWinner = null;
     let particles = [];
 
-    // coins & striker (double size striker: radius 22 vs coin radius 11)
     const COIN_RADIUS = 11;
     const STRIKER_RADIUS = 22;
     let coins = [];
     let striker = null;
 
-    // aim data
     let aimVector = { x: 0, y: 0 };
     
-    // DOM elements
     const powerSlider = document.getElementById('powerSlider');
     const powerPercentSpan = document.getElementById('powerPercent');
     const powerFillDiv = document.getElementById('powerFill');
@@ -292,13 +266,11 @@
       { name: 'Player 4', score: 0, pocketedRed: false, side: 'right' }
     ];
     
-    // helpers
     function clamp(v, min, max) { return Math.min(max, Math.max(min, v)); }
     function distance(x1,y1,x2,y2) { return Math.hypot(x2-x1, y2-y1); }
     function currentPlayerCount() { return mode === '4' ? 4 : 2; }
     function isBotTurn() { return mode === 'bot' && currentPlayer === 1 && !activeShot && !aiming && !winnerDeclared; }
     
-    // baseline bounds (double parallel lines) for each player side
     function baselineBounds() {
       const p = currentPlayer;
       if(p === 0) return { xMin: board.x+54, xMax: board.x+board.w-54, yFixed: board.y+board.h-32, axis: 'x' };
@@ -320,17 +292,13 @@
       striker.static = true;
     }
     
-    // initialize coins: 8 white, 8 black, 1 red (total 17)
     function initCoins() {
       coins = [];
       const rCoin = COIN_RADIUS;
       const layout = [
-        // red center
         [0,0,'red'],
-        // inner ring (8 coins: 4 white, 4 black)
         [28,0,'white'], [-28,0,'black'], [0,28,'white'], [0,-28,'black'],
         [20,20,'black'], [-20,-20,'white'], [20,-20,'black'], [-20,20,'white'],
-        // outer ring (remaining 8 coins alternating)
         [50,0,'black'], [-50,0,'white'], [0,50,'black'], [0,-50,'white'],
         [36,36,'white'], [-36,-36,'black'], [36,-36,'white'], [-36,36,'black']
       ];
@@ -347,7 +315,6 @@
       setStrikerOnBaseline();
     }
     
-    // reset full match
     function resetMatch() {
       winnerDeclared = false;
       matchWinner = null;
@@ -371,7 +338,6 @@
       if(isBotTurn()) setTimeout(botAimAndShoot, 500);
     }
     
-    // ========== PHYSICS (realistic but moderate force) ==========
     const COLLISION_E = 0.88;
     const STOP_VEL = 0.28;
     const AIR_DRAG = 0.985;
@@ -448,7 +414,6 @@
         pocketedThisTurn.push('queen');
         return;
       }
-      // white/black coin
       players[currentPlayer].score += 1;
       pocketedThisTurn.push(coin.color);
       setMessage(`Pocketed ${coin.color} coin! +1 point.`);
@@ -504,11 +469,9 @@
       striker.static = true;
       setStrikerOnBaseline();
       
-      // check win condition : no white/black coins left
       const remainingNonRed = coins.filter(c=>c.alive && c.color !== 'red').length;
       if(remainingNonRed === 0 && !winnerDeclared) {
         winnerDeclared = true;
-        // determine winner (player with highest score? but based on loose coins rule: winner gets opponent leftovers)
         let bestScore = -1, bestIdx = -1;
         for(let i=0;i<currentPlayerCount();i++) if(players[i].score > bestScore) { bestScore = players[i].score; bestIdx = i; }
         matchWinner = bestIdx;
@@ -523,13 +486,12 @@
       if(!winnerDeclared && isBotTurn()) setTimeout(botAimAndShoot, 450);
     }
     
-    // moderate force (6.5 to 13.5) to keep control
     function shootWithDirection(dirX, dirY, powerVal) {
       if(activeShot || aiming === false) return false;
       const len = Math.hypot(dirX, dirY);
       if(len < 0.01) return false;
       const normX = dirX/len, normY = dirY/len;
-      const force = 6.5 + powerVal * 7.0;   // 6.5 → 13.5
+      const force = 6.5 + powerVal * 7.0;
       striker.vx = normX * force;
       striker.vy = normY * force;
       striker.static = false;
@@ -540,7 +502,6 @@
       return true;
     }
     
-    // bot logic: aim at random white/black coin or queen and shoot
     function botAimAndShoot() {
       if(winnerDeclared || activeShot || aiming) return;
       setStrikerOnBaseline();
@@ -563,7 +524,6 @@
       updateUI();
     }
     
-    // ---------- GREEN POCKET GUIDE (raycast + directional path) ----------
     function raycastFirstCoin(fromX, fromY, dirX, dirY) {
       let closest = null, minDist = Infinity;
       for(let coin of coins) {
@@ -597,7 +557,6 @@
       return bestPocket;
     }
     
-    // ========== DRAWING ==========
     function drawBoard() {
       ctx.fillStyle = '#f2dca8'; ctx.fillRect(0,0,W,H);
       ctx.fillStyle = '#e7b874'; ctx.fillRect(board.x,board.y,board.w,board.h);
@@ -608,8 +567,6 @@
         ctx.beginPath(); ctx.arc(px,py,board.pocketR-2,0,Math.PI*2); ctx.fillStyle='#111'; ctx.fill();
         ctx.beginPath(); ctx.arc(px,py,board.pocketR-9,0,Math.PI*2); ctx.fillStyle='#1e1a14'; ctx.fill();
       });
-      
-      // double parallel baselines (visible all sides)
       ctx.save();
       ctx.strokeStyle = '#5e4530'; ctx.lineWidth = 3.5;
       const yBot = board.y+board.h-30;
@@ -728,7 +685,6 @@
     
     function setMessage(msg) { gameMsgSpan.innerHTML = msg; }
     
-    // ----- EVENT HANDLERS -----
     function handleStart(e) {
       if(winnerDeclared || activeShot) return;
       const rect = canvas.getBoundingClientRect();
