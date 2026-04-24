@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-  <title>Carrom · Increased Striking Force · Balanced Impact</title>
+  <title>Carrom · Heavy Impact · Directional Strikes</title>
   <style>
     * {
       box-sizing: border-box;
@@ -222,13 +222,13 @@
       <div class="stat-row"><span>💥 Shot Power</span><span id="powerPercent">0%</span></div>
       <div class="power-slider-wrap" style="background:#2a1d10; justify-content:space-between">
         <span>🔋 Power Slider</span>
-        <input type="range" id="powerSlider" min="0" max="100" value="70">
+        <input type="range" id="powerSlider" min="0" max="100" value="75">
       </div>
       <div class="power-meter-bg"><div class="power-meter-fill" id="powerMeterFill"></div></div>
       <div class="stat-row"><span>🏆 Score (Red=5, Coin=1)</span><span id="scoreHint"></span></div>
       <div class="msg-area" id="gameMsg">
-        🎯 Increased striking force! Now you can smash coins with real power.<br>
-        🔥 Green arrow shows pocket trajectory for the first coin in line.
+        💥 SUPER HEAVY STRIKE FORCE! Coins now fly straight on impact.<br>
+        🔥 Green arrow shows target pocket path.
       </div>
       <div class="shortcut-help">
         ⌨️ <kbd>A/D</kbd> move striker · <kbd>Space</kbd> quick aim · <kbd>R</kbd> restart
@@ -327,7 +327,7 @@
       for(let i=0; i<players.length; i++) players[i].score = 0;
       initCoinsAndStriker();
       updateUI();
-      setGameMessage("Striking force increased! Power up and smash those coins.");
+      setGameMessage("🔥 MASSIVE HIT FORCE! Striker smashes coins straight ahead.");
       if(isBotTurn()) setTimeout(botPlay, 600);
     }
     
@@ -343,16 +343,17 @@
       offsets.forEach(([dx,dy,clr]) => {
         coins.push({ x: center.x + dx, y: center.y + dy, vx:0, vy:0, r: rCoin, color: clr, alive: true, static: false, mass: 1.0 });
       });
+      // Striker mass increased to 1.6 for heavy impact
       striker = {
-        x: center.x, y: board.y + board.h - 28, vx:0, vy:0, r: 16.5, color: 'striker', alive: true, static: true, mass: 1.2
+        x: center.x, y: board.y + board.h - 28, vx:0, vy:0, r: 16.5, color: 'striker', alive: true, static: true, mass: 1.6
       };
       setStrikerOnBaseline();
     }
     
-    // ---------- PHYSICS WITH INCREASED FORCE ----------
-    const COLLISION_E = 0.86;        // natural bounce
-    const STOP_VEL = 0.28;           
-    const AIR_DRAG = 0.99;           // light friction for smooth roll
+    // =========== HEAVY IMPACT PHYSICS ==========
+    const COLLISION_E = 0.94;        // high restitution – crisp directional hit
+    const STOP_VEL = 0.25;           
+    const AIR_DRAG = 0.992;          // low drag so coins travel with power
     
     function applyFriction(obj) {
       if(obj.static) return;
@@ -369,10 +370,10 @@
       const minX = board.x + 20, maxX = board.x + board.w - 20;
       const minY = board.y + 20, maxY = board.y + board.h - 20;
       let bounced = false;
-      if(c.x - c.r < minX) { c.x = minX + c.r; c.vx = -c.vx * 0.87; bounced = true; }
-      if(c.x + c.r > maxX) { c.x = maxX - c.r; c.vx = -c.vx * 0.87; bounced = true; }
-      if(c.y - c.r < minY) { c.y = minY + c.r; c.vy = -c.vy * 0.87; bounced = true; }
-      if(c.y + c.r > maxY) { c.y = maxY - c.r; c.vy = -c.vy * 0.87; bounced = true; }
+      if(c.x - c.r < minX) { c.x = minX + c.r; c.vx = -c.vx * 0.88; bounced = true; }
+      if(c.x + c.r > maxX) { c.x = maxX - c.r; c.vx = -c.vx * 0.88; bounced = true; }
+      if(c.y - c.r < minY) { c.y = minY + c.r; c.vy = -c.vy * 0.88; bounced = true; }
+      if(c.y + c.r > maxY) { c.y = maxY - c.r; c.vy = -c.vy * 0.88; bounced = true; }
       if(bounced) applyFriction(c);
     }
     
@@ -388,11 +389,12 @@
     }
     
     function addParticles(x,y,color) {
-      for(let i=0;i<12;i++) {
-        particles.push({ x, y, r: Math.random()*2.5+1, vx: (Math.random()-0.5)*4, vy: (Math.random()-0.5)*4, a: 1, color });
+      for(let i=0;i<14;i++) {
+        particles.push({ x, y, r: Math.random()*3+1, vx: (Math.random()-0.5)*5, vy: (Math.random()-0.5)*5, a: 1, color });
       }
     }
     
+    // Impulse-based collision with high restitution
     function resolveCollision(a, b) {
       if(!a.alive || !b.alive) return;
       const dx = b.x - a.x, dy = b.y - a.y;
@@ -471,7 +473,8 @@
         }
       }
       
-      for(let iter=0; iter<2; iter++) {
+      // Three iterations for stable stacking and directional transfer
+      for(let iter=0; iter<3; iter++) {
         for(let i=0;i<allObjects.length;i++) {
           for(let j=i+1;j<allObjects.length;j++) {
             resolveCollision(allObjects[i], allObjects[j]);
@@ -488,7 +491,7 @@
       
       let stillMoving = false;
       for(let obj of allObjects) {
-        if(!obj.static && (Math.abs(obj.vx) > 0.12 || Math.abs(obj.vy) > 0.12)) {
+        if(!obj.static && (Math.abs(obj.vx) > 0.15 || Math.abs(obj.vy) > 0.15)) {
           stillMoving = true;
           break;
         }
@@ -503,7 +506,7 @@
       let hasPocket = pocketedThisShot.length > 0;
       let foul = strikerFoulThisShot;
       if(hasPocket && !foul) {
-        setGameMessage(`Great hit! Another turn!`);
+        setGameMessage(`💪 Perfect hit! Another turn!`);
       } else {
         const total = currentPlayersCount();
         if(mode === 'bot' && currentPlayer === 1) currentPlayer = 0;
@@ -527,13 +530,13 @@
       if(!winner && isBotTurn()) setTimeout(botPlay, 400);
     }
     
-    // INCREASED STRIKING FORCE: min 8.0, max 19.0
+    // MASSIVE FORCE RANGE: min 11, max 26 – direct, heavy hits
     function shootWithDirection(dirX, dirY, powerVal) {
       if(activeShot || aimingMode === false) return false;
       const len = Math.hypot(dirX, dirY);
       if(len < 0.01) return false;
       const normX = dirX / len, normY = dirY / len;
-      const force = 8.0 + powerVal * 11.0;   // range 8.0 → 19.0 (much more powerful)
+      const force = 11.0 + powerVal * 15.0;   // 11 → 26 (huge increase)
       striker.vx = normX * force;
       striker.vy = normY * force;
       striker.static = false;
@@ -541,7 +544,7 @@
       aimingMode = false;
       shotCounter++;
       updateUI();
-      setGameMessage(`⚡ POWERFUL SHOT! ${Math.round(powerVal*100)}% — CRISP IMPACT!`);
+      setGameMessage(`💥 CRUSHING STRIKE! ${Math.round(powerVal*100)}% — Coins fly straight!`);
       return true;
     }
     
@@ -556,19 +559,19 @@
       const dy = target.y - striker.y;
       const length = Math.hypot(dx,dy);
       if(length < 0.01) return;
-      const powerVal = 0.7;   // 70% power → ~15.7 force
+      const powerVal = 0.72;   // ~21.8 force
       const normX = dx/length, normY = dy/length;
-      const force = 8.0 + powerVal * 11.0;
+      const force = 11.0 + powerVal * 15.0;
       striker.vx = normX * force;
       striker.vy = normY * force;
       striker.static = false;
       activeShot = true;
       aimingMode = false;
-      setGameMessage(`🤖 Bot strikes with increased force!`);
+      setGameMessage(`🤖 Bot SMASHES with heavy force!`);
       updateUI();
     }
     
-    // raycast & pocket prediction for green guide
+    // raycast and pocket guide (green arrow)
     function raycastFirstCoin(fromX, fromY, dirX, dirY) {
       let closest = null, minDist = Infinity;
       for(let coin of coins) {
@@ -671,27 +674,26 @@
       const len = Math.hypot(toX-fromX, toY-fromY);
       if(len < 5) return;
       const dirX = (toX-fromX)/len, dirY = (toY-fromY)/len;
-      const arrowEndX = fromX + dirX * 100;
-      const arrowEndY = fromY + dirY * 100;
+      const arrowEndX = fromX + dirX * 110;
+      const arrowEndY = fromY + dirY * 110;
       ctx.beginPath(); ctx.moveTo(fromX, fromY); ctx.lineTo(arrowEndX, arrowEndY);
       ctx.strokeStyle = '#ffcc77';
-      ctx.lineWidth = 4;
+      ctx.lineWidth = 5;
       ctx.setLineDash([6, 8]);
       ctx.stroke();
       ctx.setLineDash([]);
       const angle = Math.atan2(dirY, dirX);
       ctx.beginPath(); ctx.moveTo(arrowEndX, arrowEndY);
-      ctx.lineTo(arrowEndX - 11*Math.cos(angle-0.6), arrowEndY - 11*Math.sin(angle-0.6));
-      ctx.lineTo(arrowEndX - 11*Math.cos(angle+0.6), arrowEndY - 11*Math.sin(angle+0.6));
+      ctx.lineTo(arrowEndX - 12*Math.cos(angle-0.6), arrowEndY - 12*Math.sin(angle-0.6));
+      ctx.lineTo(arrowEndX - 12*Math.cos(angle+0.6), arrowEndY - 12*Math.sin(angle+0.6));
       ctx.fillStyle = '#ffaa33';
       ctx.fill();
       
-      // Green pocket guide
       const firstCoin = raycastFirstCoin(fromX, fromY, dirX, dirY);
       if(firstCoin && firstCoin.alive && firstCoin.color !== 'striker') {
-        ctx.beginPath(); ctx.arc(firstCoin.x, firstCoin.y, firstCoin.r+5, 0, Math.PI*2);
-        ctx.strokeStyle = '#22ff88';
-        ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.arc(firstCoin.x, firstCoin.y, firstCoin.r+6, 0, Math.PI*2);
+        ctx.strokeStyle = '#33ff99';
+        ctx.lineWidth = 3.5;
         ctx.setLineDash([4, 4]);
         ctx.stroke();
         ctx.setLineDash([]);
@@ -699,15 +701,15 @@
         const targetPocket = nearestPocket(firstCoin);
         if(targetPocket) {
           ctx.beginPath(); ctx.moveTo(firstCoin.x, firstCoin.y); ctx.lineTo(targetPocket.x, targetPocket.y);
-          ctx.strokeStyle = '#44ff88';
-          ctx.lineWidth = 3.5;
+          ctx.strokeStyle = '#66ff99';
+          ctx.lineWidth = 4;
           ctx.setLineDash([6, 8]);
           ctx.stroke();
-          ctx.beginPath(); ctx.arc(targetPocket.x, targetPocket.y, 14, 0, Math.PI*2);
-          ctx.fillStyle = '#88ffaa44';
+          ctx.beginPath(); ctx.arc(targetPocket.x, targetPocket.y, 15, 0, Math.PI*2);
+          ctx.fillStyle = '#88ffaa66';
           ctx.fill();
-          ctx.beginPath(); ctx.arc(targetPocket.x, targetPocket.y, 8, 0, Math.PI*2);
-          ctx.fillStyle = '#aaffcc';
+          ctx.beginPath(); ctx.arc(targetPocket.x, targetPocket.y, 9, 0, Math.PI*2);
+          ctx.fillStyle = '#bbffcc';
           ctx.fill();
           ctx.setLineDash([]);
         }
@@ -735,7 +737,7 @@
       }
       scorePanelDiv.innerHTML = html;
       turnNameSpan.innerText = players[currentPlayer].name;
-      phaseLabelSpan.innerText = activeShot ? '⚡ IN MOTION ⚡' : (aimingMode ? '🎯 AIM (green path ready)' : 'READY');
+      phaseLabelSpan.innerText = activeShot ? '⚡ HEAVY HIT IN PROGRESS ⚡' : (aimingMode ? '🎯 AIM (green path)' : 'READY');
       let qText = queenCovered ? `Covered (P${queenCoveredBy+1})` : (queenPocketed ? 'Pocketed 🔴' : 'On board 👑');
       queenStatusSpan.innerText = qText;
       let powerVal = powerSlider.value / 100;
@@ -753,14 +755,14 @@
       let x = (e.clientX - rect.left) * scaleX;
       let y = (e.clientY - rect.top) * scaleY;
       const bounds = getBaselineBounds();
-      let onStriker = distance(x,y, striker.x, striker.y) < striker.r + 10;
+      let onStriker = distance(x,y, striker.x, striker.y) < striker.r + 12;
       let onBaseline = false;
       if(bounds.axis === 'x') onBaseline = Math.abs(y - bounds.yFixed) < 22 && x > bounds.xMin-8 && x < bounds.xMax+8;
       else onBaseline = Math.abs(x - bounds.xFixed) < 22 && y > bounds.yMin-8 && y < bounds.yMax+8;
       if(onStriker && onBaseline && !activeShot) { draggingStrikerPos = true; return; }
-      if(distance(x,y, striker.x, striker.y) < striker.r + 25 && !activeShot && !draggingStrikerPos) {
+      if(distance(x,y, striker.x, striker.y) < striker.r + 28 && !activeShot && !draggingStrikerPos) {
         aimingMode = true;
-        aimDirection = { x: striker.x+30, y: striker.y-15 };
+        aimDirection = { x: striker.x+35, y: striker.y-20 };
       }
     }
     
@@ -783,7 +785,7 @@
       if(draggingStrikerPos) { draggingStrikerPos = false; setStrikerOnBaseline(); return; }
       if(aimingMode && !activeShot && !winner) {
         const dx = aimDirection.x - striker.x, dy = aimDirection.y - striker.y;
-        if(Math.hypot(dx,dy) > 6) {
+        if(Math.hypot(dx,dy) > 8) {
           const powerVal = powerSlider.value / 100;
           shootWithDirection(dx, dy, powerVal);
         }
@@ -801,7 +803,7 @@
       const key = e.key.toLowerCase();
       if(key === 'a' || key === 'd') {
         const bounds = getBaselineBounds();
-        let step = key === 'a' ? -18 : 18;
+        let step = key === 'a' ? -20 : 20;
         if(bounds.axis === 'x') striker.x = clamp(striker.x + step, bounds.xMin, bounds.xMax);
         else striker.y = clamp(striker.y + step, bounds.yMin, bounds.yMax);
         setStrikerOnBaseline();
@@ -811,7 +813,7 @@
         e.preventDefault();
         if(!aimingMode && !activeShot) {
           aimingMode = true;
-          aimDirection = { x: striker.x+35, y: striker.y-18 };
+          aimDirection = { x: striker.x+40, y: striker.y-22 };
         }
       }
       if(key === 'r') resetGame();
