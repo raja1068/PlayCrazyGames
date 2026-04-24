@@ -2,851 +2,383 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Carrom King - Classic Carrom Board Game | PlayCrazyGames</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pro Carrom Web</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            user-select: none;
-            -webkit-tap-highlight-color: transparent;
-        }
-
         body {
-            background: linear-gradient(135deg, #1a472a 0%, #0d2818 100%);
-            min-height: 100vh;
+            background-color: #2c3e50;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
-            padding: 20px;
+            color: white;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            overflow: hidden;
         }
-
-        .game-wrapper {
-            background: linear-gradient(135deg, #1a1a2e, #16213e);
-            border-radius: 40px;
-            padding: 20px;
-            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+        #game-container {
+            position: relative;
+            margin-top: 20px;
+            box-shadow: 0 0 50px rgba(0,0,0,0.5);
         }
-
-        .game-container {
-            background: #0d1b4a;
-            border-radius: 30px;
-            padding: 20px;
+        canvas {
+            background-color: #f3d2a2; /* Light Orange Board */
+            border: 15px solid #5d4037;
+            border-radius: 10px;
+            cursor: crosshair;
         }
-
-        h1 {
-            text-align: center;
-            color: #ffd700;
-            margin-bottom: 5px;
-            font-size: 1.8rem;
-            letter-spacing: 2px;
-        }
-
-        .subtitle {
-            text-align: center;
-            color: #ff9800;
-            font-size: 0.7rem;
-            margin-bottom: 15px;
-        }
-
-        .game-info {
+        #ui-layer {
+            position: absolute;
+            top: -40px;
+            width: 100%;
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-            padding: 10px 20px;
-            background: rgba(0,0,0,0.4);
-            border-radius: 50px;
-        }
-
-        .turn-indicator {
-            background: linear-gradient(135deg, #ff9800, #f57c00);
-            padding: 8px 20px;
-            border-radius: 30px;
-            color: #1a237e;
             font-weight: bold;
-            font-size: 1rem;
         }
-
-        .scores {
-            display: flex;
-            gap: 25px;
-        }
-
-        .score-box {
-            text-align: center;
-            background: rgba(0,0,0,0.5);
-            padding: 5px 15px;
-            border-radius: 20px;
-        }
-
-        .score-label {
-            font-size: 0.65rem;
-            color: #ffcc80;
-        }
-
-        .score-value {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #ffd700;
-        }
-
-        .target {
-            font-size: 0.6rem;
-            color: #ff9800;
-        }
-
-        canvas {
-            display: block;
-            margin: 0 auto;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
-            cursor: crosshair;
-            background: #DEB887;
-        }
-
         .controls {
-            display: flex;
-            justify-content: center;
-            gap: 12px;
-            margin-top: 18px;
-            flex-wrap: wrap;
+            margin-top: 15px;
+            background: #34495e;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
         }
-
-        .control-group {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            background: rgba(255,255,255,0.1);
-            padding: 5px 15px;
-            border-radius: 40px;
+        #power-bar-container {
+            width: 200px;
+            height: 20px;
+            background: #222;
+            border-radius: 10px;
+            margin: 10px auto;
+            display: none;
         }
-
-        .control-group label {
-            color: #ffcc80;
-            font-size: 0.8rem;
+        #power-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(to right, #2ecc71, #f1c40f, #e74c3c);
+            border-radius: 10px;
         }
-
-        input[type="range"] {
-            width: 130px;
-            height: 4px;
-            -webkit-appearance: none;
-            background: #333;
-            border-radius: 2px;
-        }
-
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 16px;
-            height: 16px;
-            background: #ff9800;
-            border-radius: 50%;
-            cursor: pointer;
-        }
-
         button {
-            padding: 8px 20px;
-            border: none;
-            border-radius: 30px;
-            font-weight: bold;
+            padding: 10px 20px;
             cursor: pointer;
-            transition: transform 0.2s, opacity 0.2s;
-        }
-
-        button:hover {
-            transform: scale(1.03);
-        }
-
-        .shoot-btn {
-            background: linear-gradient(135deg, #ff9800, #f57c00);
+            background: #e67e22;
+            border: none;
             color: white;
-        }
-
-        .reset-btn {
-            background: #2e7d32;
-            color: white;
-        }
-
-        .back-btn {
-            background: #555;
-            color: white;
-        }
-
-        .mode-btn {
-            background: rgba(255,255,255,0.2);
-            color: white;
-            padding: 6px 18px;
-            font-size: 0.8rem;
-        }
-
-        .mode-btn.active {
-            background: linear-gradient(135deg, #ff9800, #f57c00);
-        }
-
-        .status {
-            text-align: center;
-            margin-top: 12px;
-            color: #ffcc80;
-            font-size: 0.8rem;
             font-weight: bold;
-            min-height: 35px;
-        }
-
-        .power-value {
-            font-weight: bold;
-            color: #ff9800;
-            font-size: 1rem;
-            min-width: 40px;
-            text-align: center;
-        }
-
-        @media (max-width: 700px) {
-            .game-wrapper { padding: 10px; }
-            .game-container { padding: 12px; }
-            h1 { font-size: 1.3rem; }
-            .turn-indicator { padding: 5px 12px; font-size: 0.8rem; }
-            .score-value { font-size: 1.2rem; }
-            canvas { width: 100%; height: auto; }
-            .control-group { padding: 3px 10px; }
-            .control-group label { font-size: 0.7rem; }
-            button { padding: 6px 14px; font-size: 0.8rem; }
+            border-radius: 5px;
         }
     </style>
 </head>
 <body>
-    <div class="game-wrapper">
-        <div class="game-container">
-            <h1>🎯 CARROM KING</h1>
-            <div class="subtitle">Classic Carrom Board Game</div>
-            
-            <div class="game-info">
-                <div class="turn-indicator" id="turnText">⚪ PLAYER 1</div>
-                <div class="scores">
-                    <div class="score-box">
-                        <div class="score-label">PLAYER 1</div>
-                        <div class="score-value" id="score1">0</div>
-                        <div class="target">/29</div>
-                    </div>
-                    <div class="score-box">
-                        <div class="score-label" id="p2Label">BOT</div>
-                        <div class="score-value" id="score2">0</div>
-                        <div class="target">/29</div>
-                    </div>
-                </div>
-            </div>
-            
-            <canvas id="carromCanvas" width="600" height="600"></canvas>
-            
-            <div class="controls">
-                <div class="control-group">
-                    <button id="modeBot" class="mode-btn active">🤖 VS BOT</button>
-                    <button id="modeTwoPlayer" class="mode-btn">👥 TWO PLAYER</button>
-                </div>
-                <div class="control-group">
-                    <label>💪 POWER</label>
-                    <input type="range" id="powerSlider" min="0" max="100" value="0">
-                    <span id="powerVal" class="power-value">0%</span>
-                </div>
-                <button id="shootBtn" class="shoot-btn">🔫 SHOOT</button>
-                <button id="resetBtn" class="reset-btn">🔄 NEW GAME</button>
-                <button id="backBtn" class="back-btn">🏠 EXIT</button>
-            </div>
-            <div class="status" id="statusMsg">🎯 Move mouse to aim | Adjust power | First to 29 wins!</div>
+
+    <div id="game-container">
+        <div id="ui-layer">
+            <div id="p1-score">Player 1: 0</div>
+            <div id="turn-display" style="color: #e67e22;">Current Player: 1</div>
+            <div id="p2-score">Player 2: 0</div>
         </div>
+        <canvas id="carromBoard" width="600" height="600"></canvas>
     </div>
 
-    <script>
-        // =====================================================
-        // PROFESSIONAL CARROM BOARD GAME
-        // Official Carrom Rules | Striker (Not Cue) | 29 Points Win
-        // =====================================================
-        
-        const canvas = document.getElementById('carromCanvas');
-        const ctx = canvas.getContext('2d');
-        
-        // Game Mode
-        let gameMode = 'bot'; // 'bot' or 'twoPlayer'
-        let currentPlayer = 1; // 1 = Player 1 (bottom), 2 = Player 2 (top)
-        let player1Score = 0;
-        let player2Score = 0;
-        let gameActive = true;
-        let winner = null;
-        let isBotThinking = false;
-        const WIN_SCORE = 29;
-        
-        // Physics
-        let friction = 0.985;
-        let striker = {
-            x: 300, y: 540, radius: 9,
-            vx: 0, vy: 0, moving: false
-        };
-        
-        let coins = [];
-        let power = 0;
-        let aimAngle = -Math.PI / 2;
-        
-        // 4 Corner Pockets (Carrom has only corner pockets)
-        const pockets = [
-            {x: 32, y: 32}, {x: 568, y: 32},
-            {x: 32, y: 568}, {x: 568, y: 568}
-        ];
-        
-        // ========== INITIALIZE COINS (Official Carrom Setup) ==========
-        function initCoins() {
-            coins = [];
-            const cx = 300, cy = 300;
-            
-            // 1. RED QUEEN (Center) - 50 points
-            coins.push({
-                x: cx, y: cy, radius: 10,
-                color: '#e74c3c', points: 50, isQueen: true,
-                vx: 0, vy: 0, pocketed: false
-            });
-            
-            // 2. Inner Circle (6 coins around queen)
-            const innerAngles = [0, 60, 120, 180, 240, 300];
-            const innerColors = ['#2ecc71', '#3498db', '#f1c40f', '#e67e22', '#9b59b6', '#1abc9c'];
-            innerAngles.forEach((angle, i) => {
-                const rad = angle * Math.PI / 180;
-                const x = cx + Math.cos(rad) * 32;
-                const y = cy + Math.sin(rad) * 32;
-                coins.push({
-                    x: x, y: y, radius: 8.5,
-                    color: innerColors[i], points: 10, isQueen: false,
-                    vx: 0, vy: 0, pocketed: false
-                });
-            });
-            
-            // 3. Outer Circle (9 coins - Carrom standard)
-            const outerAngles = [0, 40, 80, 120, 160, 200, 240, 280, 320];
-            const outerColors = ['#2ecc71', '#e74c3c', '#3498db', '#f1c40f', '#e67e22', '#9b59b6', '#1abc9c', '#e84393', '#00cec9'];
-            outerAngles.forEach((angle, i) => {
-                const rad = angle * Math.PI / 180;
-                const x = cx + Math.cos(rad) * 62;
-                const y = cy + Math.sin(rad) * 62;
-                coins.push({
-                    x: x, y: y, radius: 8.5,
-                    color: outerColors[i], points: 10, isQueen: false,
-                    vx: 0, vy: 0, pocketed: false
-                });
+    <div class="controls">
+        <div id="power-bar-container"><div id="power-bar"></div></div>
+        <button onclick="resetGame()">Run / Reset Game</button>
+        <p>Drag Striker on baseline | Pull back to aim | Release to shoot</p>
+    </div>
+
+<script>
+    const canvas = document.getElementById('carromBoard');
+    const ctx = canvas.getContext('2d');
+    const p1Display = document.getElementById('p1-score');
+    const p2Display = document.getElementById('p2-score');
+    const turnDisplay = document.getElementById('turn-display');
+    const powerBar = document.getElementById('power-bar');
+    const powerContainer = document.getElementById('power-bar-container');
+
+    // Game Constants
+    const FRICTION = 0.985;
+    const POCKET_RADIUS = 35;
+    const COIN_RADIUS = 12;
+    const STRIKER_RADIUS = 18;
+    const BOARD_SIZE = 600;
+
+    let currentPlayer = 1;
+    let p1Score = 0;
+    let p2Score = 0;
+    let coins = [];
+    let striker;
+    let isDragging = false;
+    let isAiming = false;
+    let dragStartX, dragStartY;
+
+    class Piece {
+        constructor(x, y, radius, color, value, isStriker = false) {
+            this.x = x;
+            this.y = y;
+            this.radius = radius;
+            this.color = color;
+            this.value = value;
+            this.isStriker = isStriker;
+            this.velX = 0;
+            this.velY = 0;
+            this.inPocket = false;
+        }
+
+        draw() {
+            if (this.inPocket) return;
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+            ctx.fillStyle = this.color;
+            ctx.fill();
+            ctx.strokeStyle = "#333";
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            ctx.closePath();
+
+            // Add inner detail
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.radius * 0.7, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.closePath();
+        }
+
+        update() {
+            if (this.inPocket) return;
+
+            this.x += this.velX;
+            this.y += this.velY;
+            this.velX *= FRICTION;
+            this.velY *= FRICTION;
+
+            if (Math.abs(this.velX) < 0.1) this.velX = 0;
+            if (Math.abs(this.velY) < 0.1) this.velY = 0;
+
+            // Wall Collisions
+            if (this.x - this.radius < 0 || this.x + this.radius > BOARD_SIZE) {
+                this.velX *= -0.8;
+                this.x = this.x < this.radius ? this.radius : BOARD_SIZE - this.radius;
+            }
+            if (this.y - this.radius < 0 || this.y + this.radius > BOARD_SIZE) {
+                this.velY *= -0.8;
+                this.y = this.y < this.radius ? this.radius : BOARD_SIZE - this.radius;
+            }
+
+            // Pocket Detection
+            const pockets = [[0,0], [600,0], [0,600], [600,600]];
+            pockets.forEach(p => {
+                const dist = Math.hypot(this.x - p[0], this.y - p[1]);
+                if (dist < POCKET_RADIUS) {
+                    this.pocket();
+                }
             });
         }
+
+        pocket() {
+            this.inPocket = true;
+            this.velX = 0;
+            this.velY = 0;
+            if (!this.isStriker) {
+                if (currentPlayer === 1) p1Score += this.value;
+                else p2Score += this.value;
+                updateScore();
+            } else {
+                // Foul: Striker pocketed
+                setTimeout(() => this.resetStriker(), 500);
+            }
+        }
+
+        resetStriker() {
+            this.inPocket = false;
+            this.x = 300;
+            this.y = 485;
+            this.velX = 0;
+            this.velY = 0;
+        }
+    }
+
+    function initBoard() {
+        coins = [];
+        // Queen (Red)
+        coins.push(new Piece(300, 300, COIN_RADIUS, "#e74c3c", 5));
         
-        // ========== DRAW CARROM BOARD ==========
-        function drawBoard() {
-            // Wooden base
-            ctx.fillStyle = '#6B3E1B';
-            ctx.fillRect(0, 0, 600, 600);
-            
-            // Playing surface (Synthetic board look)
-            ctx.fillStyle = '#D2B48C';
-            ctx.fillRect(12, 12, 576, 576);
-            
-            // Wooden frame border
-            ctx.strokeStyle = '#8B4513';
-            ctx.lineWidth = 4;
-            ctx.strokeRect(12, 12, 576, 576);
-            
-            // Inner border line
-            ctx.strokeStyle = '#A0522D';
-            ctx.lineWidth = 2;
-            ctx.strokeRect(22, 22, 556, 556);
-            
-            // ===== 4 Corner Pockets =====
-            pockets.forEach(p => {
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, 18, 0, Math.PI * 2);
-                ctx.fillStyle = '#2c3e50';
-                ctx.fill();
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, 12, 0, Math.PI * 2);
-                ctx.fillStyle = '#1a1a2e';
-                ctx.fill();
-            });
-            
-            // ===== Center Circle =====
+        // Inner Circle (White and Black)
+        for (let i = 0; i < 6; i++) {
+            const angle = (i * 60) * Math.PI / 180;
+            const color = i % 2 === 0 ? "#fff" : "#333";
+            coins.push(new Piece(
+                300 + Math.cos(angle) * 35,
+                300 + Math.sin(angle) * 35,
+                COIN_RADIUS, color, 1
+            ));
+        }
+
+        striker = new Piece(300, 485, STRIKER_RADIUS, "#ecf0f1", 0, true);
+    }
+
+    function drawBoardDesign() {
+        // Pockets
+        ctx.fillStyle = "#1a1a1a";
+        [ [0,0], [600,0], [0,600], [600,600] ].forEach(p => {
             ctx.beginPath();
-            ctx.arc(300, 300, 85, 0, Math.PI * 2);
-            ctx.strokeStyle = '#8B4513';
-            ctx.lineWidth = 2;
-            ctx.stroke();
-            
-            // Red circle for queen
-            ctx.beginPath();
-            ctx.arc(300, 300, 12, 0, Math.PI * 2);
-            ctx.fillStyle = '#c0392b';
+            ctx.arc(p[0], p[1], POCKET_RADIUS, 0, Math.PI * 2);
             ctx.fill();
-            
-            // Star in center
-            ctx.fillStyle = '#f1c40f';
-            ctx.font = 'bold 14px Arial';
-            ctx.fillText('★', 294, 306);
-            
-            // ===== Cross Lines =====
+        });
+
+        // Center Design
+        ctx.strokeStyle = "#5d4037";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(300, 300, 80, 0, Math.PI * 2);
+        ctx.stroke();
+
+        // Baselines
+        ctx.beginPath();
+        ctx.rect(100, 470, 400, 30); // Player 1 bottom line
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(100, 485, 15, 0, Math.PI*2); // Left circle
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(500, 485, 15, 0, Math.PI*2); // Right circle
+        ctx.stroke();
+    }
+
+    function resolveCollision(p1, p2) {
+        const dx = p2.x - p1.x;
+        const dy = p2.y - p1.y;
+        const distance = Math.hypot(dx, dy);
+
+        if (distance < p1.radius + p2.radius) {
+            const angle = Math.atan2(dy, dx);
+            const sin = Math.sin(angle);
+            const cos = Math.cos(angle);
+
+            // Simple elastic collision
+            const vx1 = p1.velX * cos + p1.velY * sin;
+            const vy1 = p1.velY * cos - p1.velX * sin;
+            const vx2 = p2.velX * cos + p2.velY * sin;
+            const vy2 = p2.velY * cos - p2.velX * sin;
+
+            const v1Final = vx2;
+            const v2Final = vx1;
+
+            p1.velX = v1Final * cos - vy1 * sin;
+            p1.velY = vy1 * cos + v1Final * sin;
+            p2.velX = v2Final * cos - vy2 * sin;
+            p2.velY = vy2 * cos + v2Final * sin;
+
+            // Prevent overlap
+            const overlap = (p1.radius + p2.radius - distance) / 2;
+            p1.x -= overlap * cos;
+            p1.y -= overlap * sin;
+            p2.x += overlap * cos;
+            p2.y += overlap * sin;
+        }
+    }
+
+    function updateScore() {
+        p1Display.innerText = `Player 1: ${p1Score}`;
+        p2Display.innerText = `Player 2: ${p2Score}`;
+    }
+
+    function gameLoop() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        drawBoardDesign();
+
+        let allStopped = true;
+
+        striker.update();
+        striker.draw();
+        if (striker.velX !== 0 || striker.velY !== 0) allStopped = false;
+
+        coins.forEach(coin => {
+            coin.update();
+            coin.draw();
+            if (coin.velX !== 0 || coin.velY !== 0) allStopped = false;
+            resolveCollision(striker, coin);
+        });
+
+        // Nested loop for coin-to-coin collision
+        for (let i = 0; i < coins.length; i++) {
+            for (let j = i + 1; j < coins.length; j++) {
+                resolveCollision(coins[i], coins[j]);
+            }
+        }
+
+        if (isAiming) {
             ctx.beginPath();
-            ctx.moveTo(300, 215);
-            ctx.lineTo(300, 385);
-            ctx.moveTo(215, 300);
-            ctx.lineTo(385, 300);
-            ctx.moveTo(240, 240);
-            ctx.lineTo(360, 360);
-            ctx.moveTo(240, 360);
-            ctx.lineTo(360, 240);
-            ctx.strokeStyle = '#A0522D';
-            ctx.lineWidth = 1.5;
-            ctx.stroke();
-            
-            // ===== Baselines (Striker placement area) =====
-            ctx.beginPath();
-            ctx.moveTo(220, 540);
-            ctx.lineTo(380, 540);
-            ctx.moveTo(220, 60);
-            ctx.lineTo(380, 60);
-            ctx.strokeStyle = '#e67e22';
-            ctx.lineWidth = 2;
-            ctx.setLineDash([6, 6]);
+            ctx.moveTo(striker.x, striker.y);
+            ctx.lineTo(dragStartX, dragStartY);
+            ctx.strokeStyle = "rgba(255,255,255,0.5)";
+            ctx.setLineDash([5, 5]);
             ctx.stroke();
             ctx.setLineDash([]);
-            
-            // Baseline labels
-            ctx.fillStyle = '#e67e22';
-            ctx.font = '9px Arial';
-            ctx.fillText('BASELINE', 255, 530);
-            ctx.fillText('BASELINE', 255, 75);
         }
-        
-        function darkenColor(color) {
-            const map = {
-                '#2ecc71': '#1a8a4a', '#3498db': '#1a5a8a', '#f1c40f': '#a88a0a',
-                '#e67e22': '#a85a0a', '#9b59b6': '#6a2a7a', '#1abc9c': '#0a7a6a',
-                '#e74c3c': '#a82a1a', '#e84393': '#a82a5a', '#00cec9': '#0a8a8a'
-            };
-            return map[color] || '#666';
-        }
-        
-        function drawCoins() {
-            for (let coin of coins) {
-                if (!coin.pocketed) {
-                    ctx.shadowBlur = 3;
-                    ctx.shadowColor = 'rgba(0,0,0,0.3)';
-                    
-                    ctx.beginPath();
-                    ctx.arc(coin.x, coin.y, coin.radius, 0, Math.PI * 2);
-                    const grad = ctx.createRadialGradient(coin.x-2, coin.y-2, 2, coin.x, coin.y, coin.radius);
-                    grad.addColorStop(0, coin.color);
-                    grad.addColorStop(1, darkenColor(coin.color));
-                    ctx.fillStyle = grad;
-                    ctx.fill();
-                    ctx.strokeStyle = '#fff';
-                    ctx.lineWidth = 0.8;
-                    ctx.stroke();
-                    
-                    // Queen mark
-                    if (coin.isQueen) {
-                        ctx.font = 'bold 11px Arial';
-                        ctx.fillStyle = '#f1c40f';
-                        ctx.fillText('Q', coin.x-4, coin.y+4);
-                    }
-                    ctx.shadowBlur = 0;
-                }
-            }
-        }
-        
-        function drawStriker() {
-            ctx.shadowBlur = 5;
-            ctx.shadowColor = 'rgba(0,0,0,0.4)';
-            
-            ctx.beginPath();
-            ctx.arc(striker.x, striker.y, striker.radius, 0, Math.PI * 2);
-            const grad = ctx.createRadialGradient(striker.x-2, striker.y-2, 2, striker.x, striker.y, striker.radius);
-            grad.addColorStop(0, '#f5f5f5');
-            grad.addColorStop(1, '#bdc3c7');
-            ctx.fillStyle = grad;
-            ctx.fill();
-            ctx.strokeStyle = '#7f8c8d';
-            ctx.lineWidth = 1;
-            ctx.stroke();
-            
-            // Aim line
-            if (!striker.moving && gameActive && !winner) {
-                const endX = striker.x + Math.cos(aimAngle) * 75;
-                const endY = striker.y + Math.sin(aimAngle) * 75;
-                ctx.beginPath();
-                ctx.moveTo(striker.x, striker.y);
-                ctx.lineTo(endX, endY);
-                ctx.strokeStyle = `rgba(255,149,0,${Math.min(0.8, power/50)})`;
-                ctx.lineWidth = 2.5;
-                ctx.stroke();
-                
-                // Power indicator
-                const pl = power / 2.2;
-                ctx.beginPath();
-                ctx.moveTo(striker.x, striker.y);
-                ctx.lineTo(striker.x + Math.cos(aimAngle) * pl, striker.y + Math.sin(aimAngle) * pl);
-                ctx.strokeStyle = '#ff4500';
-                ctx.lineWidth = 3.5;
-                ctx.stroke();
-            }
-            ctx.shadowBlur = 0;
-        }
-        
-        function render() {
-            drawBoard();
-            drawCoins();
-            drawStriker();
-        }
-        
-        // ========== PHYSICS UPDATE ==========
-        function updatePhysics() {
-            let anyMoving = striker.moving;
-            
-            // Striker movement
-            if (striker.moving) {
-                striker.x += striker.vx;
-                striker.y += striker.vy;
-                striker.vx *= friction;
-                striker.vy *= friction;
-                
-                // Boundary collision
-                const margin = 28;
-                if (striker.x - striker.radius < margin) {
-                    striker.x = margin + striker.radius;
-                    striker.vx = -striker.vx * 0.7;
-                }
-                if (striker.x + striker.radius > 600 - margin) {
-                    striker.x = 600 - margin - striker.radius;
-                    striker.vx = -striker.vx * 0.7;
-                }
-                if (striker.y - striker.radius < margin) {
-                    striker.y = margin + striker.radius;
-                    striker.vy = -striker.vy * 0.7;
-                }
-                if (striker.y + striker.radius > 600 - margin) {
-                    striker.y = 600 - margin - striker.radius;
-                    striker.vy = -striker.vy * 0.7;
-                }
-                
-                // Stop condition
-                if (Math.abs(striker.vx) < 0.15 && Math.abs(striker.vy) < 0.15) {
-                    striker.moving = false;
-                    striker.vx = 0;
-                    striker.vy = 0;
-                    endTurn();
-                }
-                
-                // Striker pocketed -> FOUL
-                for (let p of pockets) {
-                    const dx = striker.x - p.x, dy = striker.y - p.y;
-                    if (Math.sqrt(dx*dx + dy*dy) < 16) {
-                        striker.moving = false;
-                        document.getElementById('statusMsg').innerHTML = '⚠️ FOUL! Striker pocketed! Turn changes.';
-                        currentPlayer = currentPlayer === 1 ? 2 : 1;
-                        updateUI();
-                        resetStrikerPosition();
-                        break;
-                    }
-                }
-            }
-            
-            // Update coins
-            for (let coin of coins) {
-                if (!coin.pocketed) {
-                    coin.x += coin.vx;
-                    coin.y += coin.vy;
-                    coin.vx *= friction;
-                    coin.vy *= friction;
-                    
-                    if (Math.abs(coin.vx) > 0.05 || Math.abs(coin.vy) > 0.05) anyMoving = true;
-                    
-                    // Boundary collision
-                    const cmargin = 28;
-                    if (coin.x - coin.radius < cmargin) {
-                        coin.x = cmargin + coin.radius;
-                        coin.vx = -coin.vx * 0.7;
-                    }
-                    if (coin.x + coin.radius > 600 - cmargin) {
-                        coin.x = 600 - cmargin - coin.radius;
-                        coin.vx = -coin.vx * 0.7;
-                    }
-                    if (coin.y - coin.radius < cmargin) {
-                        coin.y = cmargin + coin.radius;
-                        coin.vy = -coin.vy * 0.7;
-                    }
-                    if (coin.y + coin.radius > 600 - cmargin) {
-                        coin.y = 600 - cmargin - coin.radius;
-                        coin.vy = -coin.vy * 0.7;
-                    }
-                    
-                    // Coin pocketed
-                    for (let p of pockets) {
-                        const dx = coin.x - p.x, dy = coin.y - p.y;
-                        if (Math.sqrt(dx*dx + dy*dy) < 14) {
-                            coin.pocketed = true;
-                            let points = coin.points;
-                            
-                            // Queen rule: Must be covered (pocket after at least one other coin)
-                            if (coin.isQueen) {
-                                const otherCoins = coins.filter(c => !c.pocketed && !c.isQueen);
-                                if (otherCoins.length > 0 && otherCoins.length < 15) {
-                                    points = 50;
-                                    document.getElementById('statusMsg').innerHTML = '👑 QUEEN POCKETED! +50 points! 👑';
-                                } else {
-                                    points = 0;
-                                    document.getElementById('statusMsg').innerHTML = '❌ Queen pocketed without cover! No points!';
-                                }
-                            } else {
-                                document.getElementById('statusMsg').innerHTML = `🎯 +${points} points!`;
-                            }
-                            
-                            if (currentPlayer === 1) player1Score += points;
-                            else player2Score += points;
-                            updateUI();
-                            
-                            // Check win
-                            if (player1Score >= WIN_SCORE) winGame(1);
-                            else if (player2Score >= WIN_SCORE) winGame(2);
-                            break;
-                        }
-                    }
-                    
-                    // Coin collision with striker
-                    if (striker.moving && !coin.pocketed) {
-                        const dx = coin.x - striker.x, dy = coin.y - striker.y;
-                        const dist = Math.sqrt(dx*dx + dy*dy);
-                        if (dist < striker.radius + coin.radius) {
-                            const angle = Math.atan2(dy, dx);
-                            const speed = Math.sqrt(striker.vx*striker.vx + striker.vy*striker.vy);
-                            const force = Math.min(8, speed * 1.3);
-                            coin.vx = Math.cos(angle) * force;
-                            coin.vy = Math.sin(angle) * force;
-                        }
-                    }
-                }
-            }
-            
-            // Coin to coin collision
-            for (let i = 0; i < coins.length; i++) {
-                for (let j = i+1; j < coins.length; j++) {
-                    if (!coins[i].pocketed && !coins[j].pocketed) {
-                        const dx = coins[i].x - coins[j].x;
-                        const dy = coins[i].y - coins[j].y;
-                        const dist = Math.sqrt(dx*dx + dy*dy);
-                        if (dist < coins[i].radius + coins[j].radius) {
-                            const angle = Math.atan2(dy, dx);
-                            const overlap = coins[i].radius + coins[j].radius - dist;
-                            const mx = Math.cos(angle) * overlap / 2;
-                            const my = Math.sin(angle) * overlap / 2;
-                            coins[i].x += mx;
-                            coins[i].y += my;
-                            coins[j].x -= mx;
-                            coins[j].y -= my;
-                            
-                            const tvx = coins[i].vx, tvy = coins[i].vy;
-                            coins[i].vx = coins[j].vx;
-                            coins[i].vy = coins[j].vy;
-                            coins[j].vx = tvx;
-                            coins[j].vy = tvy;
-                        }
-                    }
-                }
-            }
-            
-            if (!anyMoving && !striker.moving && gameActive && !winner) {
-                endTurn();
-            }
-            
-            render();
-        }
-        
-        function resetStrikerPosition() {
-            striker.x = 300;
-            striker.y = currentPlayer === 1 ? 540 : 60;
-            striker.vx = 0;
-            striker.vy = 0;
-            striker.moving = false;
-            aimAngle = currentPlayer === 1 ? -Math.PI/2 : Math.PI/2;
-        }
-        
-        function endTurn() {
-            if (!gameActive || winner) return;
-            
-            // Switch player
-            currentPlayer = currentPlayer === 1 ? 2 : 1;
-            updateUI();
-            resetStrikerPosition();
-            render();
-            
-            if (gameMode === 'bot' && currentPlayer === 2 && gameActive && !winner) {
-                setTimeout(() => botMove(), 500);
+
+        requestAnimationFrame(gameLoop);
+    }
+
+    // Input Handling
+    canvas.addEventListener('mousedown', e => {
+        const rect = canvas.getBoundingClientRect();
+        const mouseX = e.clientX - rect.left;
+        const mouseY = e.clientY - rect.top;
+
+        // Position Striker
+        if (mouseY > 450 && mouseY < 520 && Math.abs(striker.velX) < 0.1) {
+            if (Math.hypot(mouseX - striker.x, mouseY - striker.y) < striker.radius) {
+                isAiming = true;
+                dragStartX = mouseX;
+                dragStartY = mouseY;
+                powerContainer.style.display = 'block';
             } else {
-                document.getElementById('statusMsg').innerHTML = `🎯 ${currentPlayer === 1 ? 'Player 1' : (gameMode === 'bot' ? 'Bot' : 'Player 2')}'s turn`;
+                striker.x = Math.max(120, Math.min(480, mouseX));
             }
         }
-        
-        function winGame(player) {
-            gameActive = false;
-            winner = player;
-            const winnerName = player === 1 ? 'PLAYER 1' : (gameMode === 'bot' ? 'BOT' : 'PLAYER 2');
-            document.getElementById('statusMsg').innerHTML = `🏆 ${winnerName} WINS THE GAME! 🏆`;
-            document.getElementById('statusMsg').style.color = '#f1c40f';
-            document.getElementById('statusMsg').style.fontSize = '1rem';
+    });
+
+    window.addEventListener('mousemove', e => {
+        if (isAiming) {
+            const rect = canvas.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+            const dist = Math.hypot(mouseX - dragStartX, mouseY - dragStartY);
+            const power = Math.min(dist / 2, 100);
+            powerBar.style.width = power + '%';
         }
-        
-        function shoot() {
-            if (!gameActive || winner) return;
-            if (striker.moving) return;
-            if (power < 8) {
-                document.getElementById('statusMsg').innerHTML = '💪 Increase power to shoot!';
-                return;
-            }
+    });
+
+    window.addEventListener('mouseup', e => {
+        if (isAiming) {
+            const rect = canvas.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
             
-            striker.vx = Math.cos(aimAngle) * power / 2.8;
-            striker.vy = Math.sin(aimAngle) * power / 2.8;
-            striker.moving = true;
-            document.getElementById('statusMsg').innerHTML = `🔫 Shot with ${Math.floor(power)}% power!`;
+            const dx = dragStartX - mouseX;
+            const dy = dragStartY - mouseY;
             
-            power = 0;
-            document.getElementById('powerSlider').value = 0;
-            document.getElementById('powerVal').innerHTML = '0%';
-        }
-        
-        function updateUI() {
-            document.getElementById('score1').innerHTML = player1Score;
-            document.getElementById('score2').innerHTML = player2Score;
-            const p2Label = document.getElementById('p2Label');
-            if (p2Label) p2Label.innerHTML = gameMode === 'bot' ? 'BOT' : 'PLAYER 2';
-            document.getElementById('turnText').innerHTML = currentPlayer === 1 ? '⚪ PLAYER 1' : (gameMode === 'bot' ? '🤖 BOT' : '🟢 PLAYER 2');
-        }
-        
-        function resetGame() {
-            initCoins();
-            player1Score = 0;
-            player2Score = 0;
-            currentPlayer = 1;
-            gameActive = true;
-            winner = null;
-            power = 0;
-            document.getElementById('powerSlider').value = 0;
-            document.getElementById('powerVal').innerHTML = '0%';
-            resetStrikerPosition();
-            updateUI();
-            document.getElementById('statusMsg').innerHTML = '🎯 Game Reset! First to 29 wins!';
-            document.getElementById('statusMsg').style.color = '#ffcc80';
-            document.getElementById('statusMsg').style.fontSize = '0.8rem';
-            render();
-        }
-        
-        // ========== BOT AI ==========
-        function botMove() {
-            if (gameMode !== 'bot' || currentPlayer !== 2 || !gameActive || winner || isBotThinking) return;
-            isBotThinking = true;
-            document.getElementById('statusMsg').innerHTML = '🤖 Bot is aiming...';
+            striker.velX = dx * 0.15;
+            striker.velY = dy * 0.15;
             
+            isAiming = false;
+            powerContainer.style.display = 'none';
+            powerBar.style.width = '0%';
+            
+            // Switch turns after a delay
             setTimeout(() => {
-                if (currentPlayer === 2 && gameActive && !winner) {
-                    const targets = coins.filter(c => !c.pocketed);
-                    if (targets.length > 0) {
-                        const target = targets[0];
-                        const dx = target.x - striker.x;
-                        const dy = target.y - striker.y;
-                        aimAngle = Math.atan2(dy, dx);
-                        const distance = Math.sqrt(dx*dx + dy*dy);
-                        power = Math.min(85, Math.max(25, distance / 3.2));
-                        document.getElementById('powerSlider').value = power;
-                        document.getElementById('powerVal').innerHTML = Math.floor(power) + '%';
-                        render();
-                        
-                        setTimeout(() => {
-                            shoot();
-                            isBotThinking = false;
-                        }, 400);
-                    } else {
-                        power = 45;
-                        document.getElementById('powerSlider').value = power;
-                        document.getElementById('powerVal').innerHTML = Math.floor(power) + '%';
-                        setTimeout(() => {
-                            shoot();
-                            isBotThinking = false;
-                        }, 300);
-                    }
-                } else {
-                    isBotThinking = false;
-                }
-            }, 500);
+                currentPlayer = currentPlayer === 1 ? 2 : 1;
+                turnDisplay.innerText = `Current Player: ${currentPlayer}`;
+            }, 2000);
         }
-        
-        // ========== EVENT HANDLERS ==========
-        function setMode(mode) {
-            gameMode = mode;
-            resetGame();
-            document.getElementById('modeBot').classList.toggle('active', mode === 'bot');
-            document.getElementById('modeTwoPlayer').classList.toggle('active', mode === 'twoPlayer');
-            updateUI();
-        }
-        
-        // Mouse aim (for Player 1 and Two Player mode)
-        canvas.addEventListener('mousemove', (e) => {
-            if (striker.moving) return;
-            if (gameMode === 'bot' && currentPlayer === 2) return;
-            if (!gameActive || winner) return;
-            
-            const rect = canvas.getBoundingClientRect();
-            const scaleX = 600 / rect.width;
-            const scaleY = 600 / rect.height;
-            const mx = (e.clientX - rect.left) * scaleX;
-            const my = (e.clientY - rect.top) * scaleY;
-            const dx = mx - striker.x;
-            const dy = my - striker.y;
-            aimAngle = Math.atan2(dy, dx);
-            render();
-        });
-        
-        // Touch aim for mobile
-        canvas.addEventListener('touchmove', (e) => {
-            e.preventDefault();
-            if (striker.moving) return;
-            if (gameMode === 'bot' && currentPlayer === 2) return;
-            if (!gameActive || winner) return;
-            
-            const rect = canvas.getBoundingClientRect();
-            const touch = e.touches[0];
-            const scaleX = 600 / rect.width;
-            const scaleY = 600 / rect.height;
-            const mx = (touch.clientX - rect.left) * scaleX;
-            const my = (touch.clientY - rect.top) * scaleY;
-            const dx = mx - striker.x;
-            const dy = my - striker.y;
-            aimAngle = Math.atan2(dy, dx);
-            render();
-        });
-        
-        // Power slider
-        document.getElementById('powerSlider').addEventListener('input', (e) => {
-            power = parseInt(e.target.value);
-            document.getElementById('powerVal').innerHTML = power + '%';
-        });
-        
-        // Buttons
-        document.getElementById('shootBtn').addEventListener('click', () => shoot());
-        document.getElementById('resetBtn').addEventListener('click', () => resetGame());
-        document.getElementById('backBtn').addEventListener('click', () => window.location.href = '../index.html');
-        document.getElementById('modeBot').addEventListener('click', () => setMode('bot'));
-        document.getElementById('modeTwoPlayer').addEventListener('click', () => setMode('twoPlayer'));
-        
-        // Initialize
-        initCoins();
-        resetGame();
-        
-        // Game loop
-        function gameLoop() {
-            updatePhysics();
-            requestAnimationFrame(gameLoop);
-        }
-        gameLoop();
-        
-        console.log('🏆 Carrom King Loaded! Classic Carrom Rules, Striker, 29 Points Win!');
-    </script>
+    });
+
+    function resetGame() {
+        p1Score = 0;
+        p2Score = 0;
+        currentPlayer = 1;
+        updateScore();
+        initBoard();
+    }
+
+    initBoard();
+    gameLoop();
+</script>
 </body>
 </html>
