@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>Carrom Pro – Precision Striker | Double Baseline & Green Pocket Guide</title>
+  <title>Carrom Pro – Sharp Impact · Dotted Aim + Green Pocket Arrow</title>
   <style>
     * {
       box-sizing: border-box;
@@ -172,7 +172,6 @@
 </head>
 <body>
 <div style="width:100%; max-width:1400px; margin:0 auto">
-  <!-- top ad space (Google AdSense can be inserted here) -->
   <div class="ad-slot" id="topAd">Advertisement Space — Google AdSense</div>
 
   <div class="game-container">
@@ -201,36 +200,34 @@
         <div class="stat-line"><span>💥 Power</span><span id="powerPercent">0%</span></div>
         <div class="power-bar">
           <span>🔋 Power Slider</span>
-          <input type="range" id="powerSlider" min="0" max="100" value="68">
+          <input type="range" id="powerSlider" min="0" max="100" value="72">
         </div>
         <div class="power-meter"><div class="power-fill" id="powerFill"></div></div>
         <div class="msg-box" id="gameMsg">
-          🎯 Drag striker along <strong>double baseline</strong> → aim direction → release.<br>
-          🟢 Green arrow: shows pocket path of first coin in striker's line.
+          🎯 <strong>Sharp impact!</strong> Drag striker → aim → release.<br>
+          ⚫ <strong>White dotted line</strong> → first coin in path.<br>
+          🟢 <strong>Green arrow</strong> → pocket direction of that coin.
         </div>
         <div class="stat-line"><span>⌨️ Shortcuts</span><span><kbd>A/D</kbd> move striker · <kbd>Space</kbd> aim</span></div>
       </div>
     </div>
   </div>
 
-  <!-- bottom ad space -->
   <div class="ad-slot" id="bottomAd">Advertisement Space — Google AdSense</div>
 </div>
 
 <script>
   (function(){
-    // ---------- Canvas Setup ----------
+    // Canvas
     const canvas = document.getElementById('carromCanvas');
     const ctx = canvas.getContext('2d');
     const W = 1000, H = 1000;
     canvas.width = W; canvas.height = H;
 
-    // board geometry – light orange tone, black sidebars
     const board = { x: 78, y: 78, w: 844, h: 844, pocketR: 36 };
     const center = { x: W/2, y: H/2 };
 
-    // game config
-    let mode = '2';           // '2','4','bot'
+    let mode = '2';
     let currentPlayer = 0;
     let activeShot = false;
     let aiming = false;
@@ -240,16 +237,15 @@
     let strikerFoul = false;
     let queenPocketed = false;
     let queenCoveredBy = null;
-    let matchWinner = null;
     let particles = [];
 
     const COIN_RADIUS = 11;
     const STRIKER_RADIUS = 22;
     let coins = [];
     let striker = null;
-
     let aimVector = { x: 0, y: 0 };
     
+    // DOM refs
     const powerSlider = document.getElementById('powerSlider');
     const powerPercentSpan = document.getElementById('powerPercent');
     const powerFillDiv = document.getElementById('powerFill');
@@ -260,10 +256,10 @@
     const gameMsgSpan = document.getElementById('gameMsg');
     
     let players = [
-      { name: 'Player 1', score: 0, pocketedRed: false, side: 'bottom' },
-      { name: 'Player 2', score: 0, pocketedRed: false, side: 'top' },
-      { name: 'Player 3', score: 0, pocketedRed: false, side: 'left' },
-      { name: 'Player 4', score: 0, pocketedRed: false, side: 'right' }
+      { name: 'Player 1', score: 0, pocketedRed: false },
+      { name: 'Player 2', score: 0, pocketedRed: false },
+      { name: 'Player 3', score: 0, pocketedRed: false },
+      { name: 'Player 4', score: 0, pocketedRed: false }
     ];
     
     function clamp(v, min, max) { return Math.min(max, Math.max(min, v)); }
@@ -294,7 +290,6 @@
     
     function initCoins() {
       coins = [];
-      const rCoin = COIN_RADIUS;
       const layout = [
         [0,0,'red'],
         [28,0,'white'], [-28,0,'black'], [0,28,'white'], [0,-28,'black'],
@@ -303,21 +298,20 @@
         [36,36,'white'], [-36,-36,'black'], [36,-36,'white'], [-36,36,'black']
       ];
       layout.forEach(([dx,dy,col]) => {
-        coins.push({ x: center.x+dx, y: center.y+dy, vx:0, vy:0, r: rCoin, color: col, alive: true, static: false, mass: 1.0 });
+        coins.push({ x: center.x+dx, y: center.y+dy, vx:0, vy:0, r: COIN_RADIUS, color: col, alive: true, static: false, mass: 1.0 });
       });
     }
     
     function initStriker() {
       striker = {
         x: center.x, y: board.y+board.h-32, vx:0, vy:0, r: STRIKER_RADIUS,
-        color: 'striker', alive: true, static: true, mass: 1.9
+        color: 'striker', alive: true, static: true, mass: 1.85   // heavier for impact
       };
       setStrikerOnBaseline();
     }
     
     function resetMatch() {
       winnerDeclared = false;
-      matchWinner = null;
       currentPlayer = 0;
       activeShot = false;
       aiming = false;
@@ -334,13 +328,14 @@
       initCoins();
       initStriker();
       updateUI();
-      setMessage("🎯 New Carrom! Slide striker on baseline, use power slider & green pocket guide.");
+      setMessage("⚡ Sharp impact physics! Dotted line → target coin, green arrow → pocket direction.");
       if(isBotTurn()) setTimeout(botAimAndShoot, 500);
     }
     
-    const COLLISION_E = 0.88;
+    // ========== SHARP IMPACT PHYSICS (crisp collision, moderate drag) ==========
+    const COLLISION_E = 0.92;        // high restitution = sharp bounce
     const STOP_VEL = 0.28;
-    const AIR_DRAG = 0.985;
+    const AIR_DRAG = 0.986;
     
     function applyFriction(obj) {
       if(obj.static) return;
@@ -356,10 +351,10 @@
       const minX = board.x+18, maxX = board.x+board.w-18;
       const minY = board.y+18, maxY = board.y+board.h-18;
       let bounce = false;
-      if(c.x - c.r < minX) { c.x = minX + c.r; c.vx = -c.vx * 0.87; bounce = true; }
-      if(c.x + c.r > maxX) { c.x = maxX - c.r; c.vx = -c.vx * 0.87; bounce = true; }
-      if(c.y - c.r < minY) { c.y = minY + c.r; c.vy = -c.vy * 0.87; bounce = true; }
-      if(c.y + c.r > maxY) { c.y = maxY - c.r; c.vy = -c.vy * 0.87; bounce = true; }
+      if(c.x - c.r < minX) { c.x = minX + c.r; c.vx = -c.vx * 0.86; bounce = true; }
+      if(c.x + c.r > maxX) { c.x = maxX - c.r; c.vx = -c.vx * 0.86; bounce = true; }
+      if(c.y - c.r < minY) { c.y = minY + c.r; c.vy = -c.vy * 0.86; bounce = true; }
+      if(c.y + c.r > maxY) { c.y = maxY - c.r; c.vy = -c.vy * 0.86; bounce = true; }
       if(bounce) applyFriction(c);
     }
     
@@ -410,7 +405,7 @@
         players[currentPlayer].pocketedRed = true;
         queenPocketed = true;
         queenCoveredBy = currentPlayer;
-        setMessage(`👑 Queen +5 points! (covered automatically with this pocket)`);
+        setMessage(`👑 Queen +5 points! (covered automatically)`);
         pocketedThisTurn.push('queen');
         return;
       }
@@ -455,7 +450,7 @@
       let hasPocket = pocketedThisTurn.length > 0;
       let foul = strikerFoul;
       if(hasPocket && !foul) {
-        setMessage(`🔥 Great hit! Extra turn.`);
+        setMessage(`🔥 Sharp hit! Extra turn.`);
       } else {
         const total = currentPlayerCount();
         if(mode === 'bot' && currentPlayer === 1) currentPlayer = 0;
@@ -474,31 +469,31 @@
         winnerDeclared = true;
         let bestScore = -1, bestIdx = -1;
         for(let i=0;i<currentPlayerCount();i++) if(players[i].score > bestScore) { bestScore = players[i].score; bestIdx = i; }
-        matchWinner = bestIdx;
         const remainingCoinsCount = remainingNonRed;
-        const extraRedBonus = players[matchWinner].pocketedRed ? 5 : 0;
+        const extraRedBonus = players[bestIdx].pocketedRed ? 5 : 0;
         const finalPoints = remainingCoinsCount + extraRedBonus;
-        players[matchWinner].score += finalPoints;
-        setMessage(`🏆 ${players[matchWinner].name} WINS! +${finalPoints} bonus points (${remainingCoinsCount} left coins + red bonus ${extraRedBonus})`);
+        players[bestIdx].score += finalPoints;
+        setMessage(`🏆 ${players[bestIdx].name} WINS! +${finalPoints} bonus (${remainingCoinsCount} left coins + red ${extraRedBonus})`);
         activeShot = false;
       }
       updateUI();
       if(!winnerDeclared && isBotTurn()) setTimeout(botAimAndShoot, 450);
     }
     
+    // Moderate-High striking force (9 → 18) gives sharp impact without scattering
     function shootWithDirection(dirX, dirY, powerVal) {
       if(activeShot || aiming === false) return false;
       const len = Math.hypot(dirX, dirY);
       if(len < 0.01) return false;
       const normX = dirX/len, normY = dirY/len;
-      const force = 6.5 + powerVal * 7.0;
+      const force = 9.0 + powerVal * 9.0;   // 9 .. 18
       striker.vx = normX * force;
       striker.vy = normY * force;
       striker.static = false;
       activeShot = true;
       aiming = false;
       updateUI();
-      setMessage(`🎯 Shot power ${Math.round(powerVal*100)}% – guide arrow shows pocket path.`);
+      setMessage(`💥 Sharp strike! Power ${Math.round(powerVal*100)}% – crisp impact.`);
       return true;
     }
     
@@ -512,18 +507,18 @@
       const dy = target.y - striker.y;
       const len = Math.hypot(dx,dy);
       if(len<0.01) return;
-      const powerVal = 0.65;
+      const powerVal = 0.7;
       const normX = dx/len, normY = dy/len;
-      const force = 6.5 + powerVal * 7.0;
+      const force = 9.0 + powerVal * 9.0;
       striker.vx = normX * force;
       striker.vy = normY * force;
       striker.static = false;
       activeShot = true;
-      aiming = false;
-      setMessage(`🤖 Bot shoots with controlled power.`);
+      setMessage(`🤖 Bot strikes with sharp impact.`);
       updateUI();
     }
     
+    // ========== VISUAL GUIDES: DOTTED LINE TO TARGET COIN + GREEN POCKET ARROW ==========
     function raycastFirstCoin(fromX, fromY, dirX, dirY) {
       let closest = null, minDist = Infinity;
       for(let coin of coins) {
@@ -533,7 +528,7 @@
         const dot = dirX * toX + dirY * toY;
         if(Math.abs(cross) < coin.r+7 && dot > 0) {
           const d2 = Math.hypot(toX, toY);
-          if(d2 < minDist && d2 < 350) { minDist = d2; closest = coin; }
+          if(d2 < minDist && d2 < 380) { minDist = d2; closest = coin; }
         }
       }
       return closest;
@@ -557,6 +552,7 @@
       return bestPocket;
     }
     
+    // Drawing routines
     function drawBoard() {
       ctx.fillStyle = '#f2dca8'; ctx.fillRect(0,0,W,H);
       ctx.fillStyle = '#e7b874'; ctx.fillRect(board.x,board.y,board.w,board.h);
@@ -606,39 +602,62 @@
       ctx.beginPath(); ctx.arc(striker.x,striker.y,10,0,Math.PI*2); ctx.fillStyle='#cc9b60'; ctx.fill();
     }
     
-    function drawAimAndGreenGuide() {
+    function drawAimGuides() {
       if(!aiming || activeShot) return;
       const fromX = striker.x, fromY = striker.y;
       const toX = aimVector.x, toY = aimVector.y;
       const len = Math.hypot(toX-fromX, toY-fromY);
-      if(len<5) return;
+      if(len < 5) return;
       const dirX = (toX-fromX)/len, dirY = (toY-fromY)/len;
-      const arrowEndX = fromX + dirX*130;
-      const arrowEndY = fromY + dirY*130;
-      ctx.beginPath(); ctx.moveTo(fromX,fromY); ctx.lineTo(arrowEndX,arrowEndY);
-      ctx.strokeStyle = '#ffcd94'; ctx.lineWidth=4; ctx.setLineDash([6,8]); ctx.stroke();
+      
+      // First: find target coin along this direction
+      const targetCoin = raycastFirstCoin(fromX, fromY, dirX, dirY);
+      
+      // Draw white dotted line from striker to the target coin (if exists) or just extended line
+      if(targetCoin) {
+        ctx.beginPath(); ctx.moveTo(fromX, fromY); ctx.lineTo(targetCoin.x, targetCoin.y);
+        ctx.strokeStyle = '#ffffffcc'; ctx.lineWidth = 3.5; ctx.setLineDash([10, 12]);
+        ctx.stroke();
+        ctx.setLineDash([]);
+      } else {
+        // just extended dotted line to show direction
+        const farX = fromX + dirX * 250;
+        const farY = fromY + dirY * 250;
+        ctx.beginPath(); ctx.moveTo(fromX, fromY); ctx.lineTo(farX, farY);
+        ctx.strokeStyle = '#dddddd'; ctx.lineWidth = 3; ctx.setLineDash([10, 12]);
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
+      
+      // Draw yellow aiming arrow (from striker direction)
+      const arrowEndX = fromX + dirX * 110;
+      const arrowEndY = fromY + dirY * 110;
+      ctx.beginPath(); ctx.moveTo(fromX, fromY); ctx.lineTo(arrowEndX, arrowEndY);
+      ctx.strokeStyle = '#ffcc77'; ctx.lineWidth = 4.5; ctx.setLineDash([6, 8]); ctx.stroke();
       ctx.setLineDash([]);
-      const angle = Math.atan2(dirY,dirX);
-      ctx.beginPath(); ctx.moveTo(arrowEndX,arrowEndY);
+      const angle = Math.atan2(dirY, dirX);
+      ctx.beginPath(); ctx.moveTo(arrowEndX, arrowEndY);
       ctx.lineTo(arrowEndX-12*Math.cos(angle-0.6), arrowEndY-12*Math.sin(angle-0.6));
       ctx.lineTo(arrowEndX-12*Math.cos(angle+0.6), arrowEndY-12*Math.sin(angle+0.6));
-      ctx.fillStyle='#ffaa44'; ctx.fill();
+      ctx.fillStyle = '#ffaa33'; ctx.fill();
       
-      const firstCoin = raycastFirstCoin(fromX, fromY, dirX, dirY);
-      if(firstCoin && firstCoin.alive && firstCoin.color !== 'striker') {
-        ctx.beginPath(); ctx.arc(firstCoin.x, firstCoin.y, firstCoin.r+5, 0, Math.PI*2);
-        ctx.strokeStyle = '#33ff99'; ctx.lineWidth=3; ctx.setLineDash([4,4]); ctx.stroke();
+      // GREEN POCKET ARROW from target coin to pocket
+      if(targetCoin && targetCoin.alive && targetCoin.color !== 'striker') {
+        // highlight target coin with green ring
+        ctx.beginPath(); ctx.arc(targetCoin.x, targetCoin.y, targetCoin.r+5, 0, Math.PI*2);
+        ctx.strokeStyle = '#33ff99'; ctx.lineWidth = 3; ctx.setLineDash([4,4]); ctx.stroke();
         ctx.setLineDash([]);
-        const pocket = getStraightPocketFromCoin(firstCoin, dirX, dirY);
+        
+        const pocket = getStraightPocketFromCoin(targetCoin, dirX, dirY);
         if(pocket) {
-          ctx.beginPath(); ctx.moveTo(firstCoin.x, firstCoin.y); ctx.lineTo(pocket.x, pocket.y);
-          ctx.strokeStyle = '#66ff99'; ctx.lineWidth=4; ctx.setLineDash([8,10]);
+          ctx.beginPath(); ctx.moveTo(targetCoin.x, targetCoin.y); ctx.lineTo(pocket.x, pocket.y);
+          ctx.strokeStyle = '#66ff99'; ctx.lineWidth = 4.5; ctx.setLineDash([8,10]);
           ctx.stroke();
           ctx.beginPath(); ctx.arc(pocket.x, pocket.y, 16, 0, Math.PI*2);
           ctx.fillStyle = '#88ffaa88'; ctx.fill();
           ctx.beginPath(); ctx.arc(pocket.x, pocket.y, 9, 0, Math.PI*2);
           ctx.fillStyle = '#ccffbb'; ctx.fill();
-          const pAngle = Math.atan2(pocket.y - firstCoin.y, pocket.x - firstCoin.x);
+          const pAngle = Math.atan2(pocket.y - targetCoin.y, pocket.x - targetCoin.x);
           const tipX = pocket.x - 12*Math.cos(pAngle);
           const tipY = pocket.y - 12*Math.sin(pAngle);
           ctx.beginPath(); ctx.moveTo(pocket.x, pocket.y);
@@ -646,10 +665,11 @@
           ctx.lineTo(tipX-7*Math.cos(pAngle+0.7), tipY-7*Math.sin(pAngle+0.7));
           ctx.fillStyle = '#aaff99'; ctx.fill();
         } else {
-          const extX = firstCoin.x + dirX*170;
-          const extY = firstCoin.y + dirY*170;
-          ctx.beginPath(); ctx.moveTo(firstCoin.x, firstCoin.y); ctx.lineTo(extX, extY);
-          ctx.strokeStyle = '#99ff99'; ctx.lineWidth=3; ctx.setLineDash([8,8]); ctx.stroke();
+          // extended green line
+          const extX = targetCoin.x + dirX * 160;
+          const extY = targetCoin.y + dirY * 160;
+          ctx.beginPath(); ctx.moveTo(targetCoin.x, targetCoin.y); ctx.lineTo(extX, extY);
+          ctx.strokeStyle = '#88ff88'; ctx.lineWidth = 3.5; ctx.setLineDash([8,8]); ctx.stroke();
         }
         ctx.setLineDash([]);
       }
@@ -663,7 +683,7 @@
         ctx.fillStyle = p.color || '#ffbf77';
         ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fill();
       }
-      ctx.globalAlpha=1;
+      ctx.globalAlpha = 1;
     }
     
     function updateUI() {
@@ -675,7 +695,7 @@
       }
       scorePanelDiv.innerHTML = html;
       turnNameSpan.innerText = players[currentPlayer].name;
-      phaseLabelSpan.innerText = activeShot ? '⚡ SHOT ⚡' : (aiming ? '🎯 AIM (green path)' : 'READY');
+      phaseLabelSpan.innerText = activeShot ? '⚡ IMPACT ⚡' : (aiming ? '🎯 AIM (dotted → coin, green → pocket)' : 'READY');
       let qText = queenPocketed ? `Pocketed by P${queenCoveredBy+1}` : 'On board 👑';
       queenStatusSpan.innerText = qText;
       let pwr = powerSlider.value/100;
@@ -685,6 +705,7 @@
     
     function setMessage(msg) { gameMsgSpan.innerHTML = msg; }
     
+    // Event handlers
     function handleStart(e) {
       if(winnerDeclared || activeShot) return;
       const rect = canvas.getBoundingClientRect();
@@ -774,7 +795,7 @@
       drawBoard();
       coins.forEach(drawCoin);
       drawStriker();
-      drawAimAndGreenGuide();
+      drawAimGuides();
       drawParticles();
       requestAnimationFrame(animate);
     }
