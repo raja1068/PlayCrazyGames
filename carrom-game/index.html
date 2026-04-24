@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>Carrom · Powerful Strikes · Green Pocket Direction Guide</title>
+  <title>Carrom · Precision Control · Moderate Striking Force</title>
   <style>
     * {
       box-sizing: border-box;
@@ -179,12 +179,12 @@
       <div class="stat-row"><span>💥 Power</span><span id="powerPercent">0%</span></div>
       <div class="power-area">
         <span>🔋 Power Slider</span>
-        <input type="range" id="powerSlider" min="0" max="100" value="80">
+        <input type="range" id="powerSlider" min="0" max="100" value="70">
       </div>
       <div class="power-meter-bg"><div class="power-fill" id="powerFill"></div></div>
       <div class="msg-box" id="gameMsg">
-        🎯 Drag striker → aim → release. <strong>Green arrow shows coin's pocket path</strong><br>
-        💪 Increased striking force – coins travel straight to pocket!
+        🎯 Controlled striking force – You decide the direction and power.<br>
+        🟢 Green arrow shows predicted pocket path for the first coin.
       </div>
       <div class="stat-row"><span>💡 Shortcuts</span><span><kbd>A/D</kbd> move · <kbd>Space</kbd> aim · <kbd>R</kbd> restart</span></div>
     </div>
@@ -275,7 +275,7 @@
         coins.push({ x: center.x+dx, y: center.y+dy, vx:0, vy:0, r: rCoin, color: col, alive: true, static: false, mass: 1.0 });
       });
       striker = {
-        x: center.x, y: board.y+board.h-28, vx:0, vy:0, r: 16.5, color: 'striker', alive: true, static: true, mass: 1.7
+        x: center.x, y: board.y+board.h-28, vx:0, vy:0, r: 16.5, color: 'striker', alive: true, static: true, mass: 1.4
       };
       setStrikerOnBaseline();
     }
@@ -295,14 +295,14 @@
       for(let i=0;i<players.length;i++) players[i].score = 0;
       initCoinsAndStriker();
       updateUI();
-      setMessage("💪 Increased POWER! Drag striker, aim, release – green line shows pocket path.");
+      setMessage("🎯 Moderate force – aim carefully! Green line shows pocket path.");
       if(isBotTurn()) setTimeout(botPlay, 500);
     }
     
-    // ========== PHYSICS: CRISP HITS, HIGH FORCE TRANSFER ==========
-    const COLLISION_E = 0.94;        // high elasticity for straight shots
+    // ========== PHYSICS: CONTROLLED, MODERATE FORCE ==========
+    const COLLISION_E = 0.88;        // slightly lower for predictable roll
     const STOP_THRESH = 0.28;
-    const AIR_DRAG = 0.985;
+    const AIR_DRAG = 0.986;
     
     function applyFriction(obj) {
       if(obj.static) return;
@@ -318,10 +318,10 @@
       const minX = board.x+20, maxX = board.x+board.w-20;
       const minY = board.y+20, maxY = board.y+board.h-20;
       let bounce = false;
-      if(c.x - c.r < minX) { c.x = minX + c.r; c.vx = -c.vx * 0.86; bounce = true; }
-      if(c.x + c.r > maxX) { c.x = maxX - c.r; c.vx = -c.vx * 0.86; bounce = true; }
-      if(c.y - c.r < minY) { c.y = minY + c.r; c.vy = -c.vy * 0.86; bounce = true; }
-      if(c.y + c.r > maxY) { c.y = maxY - c.r; c.vy = -c.vy * 0.86; bounce = true; }
+      if(c.x - c.r < minX) { c.x = minX + c.r; c.vx = -c.vx * 0.88; bounce = true; }
+      if(c.x + c.r > maxX) { c.x = maxX - c.r; c.vx = -c.vx * 0.88; bounce = true; }
+      if(c.y - c.r < minY) { c.y = minY + c.r; c.vy = -c.vy * 0.88; bounce = true; }
+      if(c.y + c.r > maxY) { c.y = maxY - c.r; c.vy = -c.vy * 0.88; bounce = true; }
       if(bounce) applyFriction(c);
     }
     
@@ -334,7 +334,7 @@
     }
     
     function addSparks(x,y,col) {
-      for(let i=0;i<12;i++) particles.push({ x, y, r: Math.random()*3+1, vx: (Math.random()-0.5)*5, vy: (Math.random()-0.5)*5, a:1, color:col });
+      for(let i=0;i<10;i++) particles.push({ x, y, r: Math.random()*2.5+1, vx: (Math.random()-0.5)*4, vy: (Math.random()-0.5)*4, a:1, color:col });
     }
     
     function resolveCollision(a,b) {
@@ -422,7 +422,7 @@
       let hasPocket = pocketedThisShot.length > 0;
       let foul = strikerFoul;
       if(hasPocket && !foul) {
-        setMessage(`🔥 Perfect hit! Another turn!`);
+        setMessage(`👍 Nice shot! Another turn!`);
       } else {
         const total = currentPlayerCount();
         if(mode === 'bot' && currentPlayer === 1) currentPlayer = 0;
@@ -445,20 +445,20 @@
       if(!winner && isBotTurn()) setTimeout(botPlay, 450);
     }
     
-    // INCREASED FORCE RANGE: min 11, max 23 (hard hitting but controlled)
+    // CONTROLLED FORCE RANGE: min 7.5, max 14 (players can aim delicately)
     function shootWithDirection(dirX, dirY, powerVal) {
       if(activeShot || aiming === false) return false;
       const len = Math.hypot(dirX, dirY);
       if(len < 0.01) return false;
       const normX = dirX/len, normY = dirY/len;
-      const force = 11.0 + powerVal * 12.0;   // 11 → 23
+      const force = 7.5 + powerVal * 6.5;   // 7.5 → 14
       striker.vx = normX * force;
       striker.vy = normY * force;
       striker.static = false;
       activeShot = true;
       aiming = false;
       updateUI();
-      setMessage(`💥 POWERFUL STRIKE! ${Math.round(powerVal*100)}% — Coins fly straight to pocket!`);
+      setMessage(`🎯 Shot power: ${Math.round(powerVal*100)}% — Control your direction!`);
       return true;
     }
     
@@ -472,19 +472,19 @@
       const dx = target.x - striker.x, dy = target.y - striker.y;
       const len = Math.hypot(dx,dy);
       if(len<0.01) return;
-      const powerVal = 0.75;
+      const powerVal = 0.65;
       const normX = dx/len, normY = dy/len;
-      const force = 11.0 + powerVal * 12.0;
+      const force = 7.5 + powerVal * 6.5;
       striker.vx = normX * force;
       striker.vy = normY * force;
       striker.static = false;
       activeShot = true;
       aiming = false;
-      setMessage(`🤖 Bot CRUSHES with heavy force!`);
+      setMessage(`🤖 Bot aims with moderate force.`);
       updateUI();
     }
     
-    // ========== GREEN POCKET DIRECTION GUIDE (shows straight path from coin along striker's direction) ==========
+    // ========== GREEN DIRECTION GUIDE (shows predicted pocket path) ==========
     function raycastFirstCoin(fromX, fromY, dirX, dirY) {
       let closest = null, minDist = Infinity;
       for(let coin of coins) {
@@ -494,33 +494,28 @@
         const dot = dirX * toX + dirY * toY;
         if(Math.abs(cross) < coin.r+6 && dot > 0) {
           const d2 = Math.hypot(toX, toY);
-          if(d2 < minDist && d2 < 320) { minDist = d2; closest = coin; }
+          if(d2 < minDist && d2 < 300) { minDist = d2; closest = coin; }
         }
       }
       return closest;
     }
     
-    // find where the line (coin + direction) first hits a pocket
     function getPocketAlongDirection(coin, dirX, dirY) {
       const pockets = [
         {x: board.x, y: board.y}, {x: board.x+board.w, y: board.y},
         {x: board.x, y: board.y+board.h}, {x: board.x+board.w, y: board.y+board.h}
       ];
       let bestPocket = null;
-      let bestIntersectDist = Infinity;
-      // extended ray from coin
-      const rayEndX = coin.x + dirX * 700;
-      const rayEndY = coin.y + dirY * 700;
+      let bestProj = Infinity;
       for(let p of pockets) {
-        // find intersection of segment (coin -> rayEnd) with a small radius around pocket
         const toPocketX = p.x - coin.x, toPocketY = p.y - coin.y;
-        const proj = (toPocketX * dirX + toPocketY * dirY);
+        const proj = toPocketX * dirX + toPocketY * dirY;
         if(proj > 0) {
-          const closestPointX = coin.x + dirX * proj;
-          const closestPointY = coin.y + dirY * proj;
-          const distToPocket = distance(closestPointX, closestPointY, p.x, p.y);
-          if(distToPocket < 28 && proj < bestIntersectDist) {
-            bestIntersectDist = proj;
+          const closestX = coin.x + dirX * proj;
+          const closestY = coin.y + dirY * proj;
+          const distToPocket = distance(closestX, closestY, p.x, p.y);
+          if(distToPocket < 28 && proj < bestProj) {
+            bestProj = proj;
             bestPocket = p;
           }
         }
@@ -574,58 +569,52 @@
       ctx.beginPath(); ctx.arc(striker.x,striker.y,5,0,Math.PI*2); ctx.fillStyle='#ab8a5a'; ctx.fill();
     }
     
-    function drawAimAndGreenGuide() {
+    function drawAimAndGuide() {
       if(!aiming || activeShot) return;
       const fromX = striker.x, fromY = striker.y;
       const toX = aimVector.x, toY = aimVector.y;
       const len = Math.hypot(toX-fromX, toY-fromY);
       if(len < 5) return;
       const dirX = (toX-fromX)/len, dirY = (toY-fromY)/len;
-      const arrowEndX = fromX + dirX*110;
-      const arrowEndY = fromY + dirY*110;
+      const arrowEndX = fromX + dirX*100;
+      const arrowEndY = fromY + dirY*100;
       ctx.beginPath(); ctx.moveTo(fromX,fromY); ctx.lineTo(arrowEndX,arrowEndY);
-      ctx.strokeStyle = '#ffcc77'; ctx.lineWidth = 5; ctx.setLineDash([6,8]); ctx.stroke();
+      ctx.strokeStyle = '#ffcc77'; ctx.lineWidth = 4; ctx.setLineDash([6,8]); ctx.stroke();
       ctx.setLineDash([]);
       const angle = Math.atan2(dirY,dirX);
       ctx.beginPath(); ctx.moveTo(arrowEndX,arrowEndY);
-      ctx.lineTo(arrowEndX-12*Math.cos(angle-0.6), arrowEndY-12*Math.sin(angle-0.6));
-      ctx.lineTo(arrowEndX-12*Math.cos(angle+0.6), arrowEndY-12*Math.sin(angle+0.6));
+      ctx.lineTo(arrowEndX-11*Math.cos(angle-0.6), arrowEndY-11*Math.sin(angle-0.6));
+      ctx.lineTo(arrowEndX-11*Math.cos(angle+0.6), arrowEndY-11*Math.sin(angle+0.6));
       ctx.fillStyle='#ffaa33'; ctx.fill();
       
-      // Find first coin hit by the striker's direction
       const firstCoin = raycastFirstCoin(fromX, fromY, dirX, dirY);
       if(firstCoin && firstCoin.alive && firstCoin.color !== 'striker') {
-        // highlight target coin
-        ctx.beginPath(); ctx.arc(firstCoin.x, firstCoin.y, firstCoin.r+6, 0, Math.PI*2);
-        ctx.strokeStyle = '#33ff99'; ctx.lineWidth = 3.5; ctx.setLineDash([4,4]); ctx.stroke();
+        ctx.beginPath(); ctx.arc(firstCoin.x, firstCoin.y, firstCoin.r+5, 0, Math.PI*2);
+        ctx.strokeStyle = '#33ff99'; ctx.lineWidth = 3; ctx.setLineDash([4,4]); ctx.stroke();
         ctx.setLineDash([]);
         
-        // Draw GREEN PATH from the coin along the same direction (straight to pocket)
         const pocket = getPocketAlongDirection(firstCoin, dirX, dirY);
         if(pocket) {
           ctx.beginPath(); ctx.moveTo(firstCoin.x, firstCoin.y); ctx.lineTo(pocket.x, pocket.y);
-          ctx.strokeStyle = '#66ff99'; ctx.lineWidth = 4.5; ctx.setLineDash([8,10]);
+          ctx.strokeStyle = '#66ff99'; ctx.lineWidth = 4; ctx.setLineDash([8,10]);
           ctx.stroke();
-          // glowing pocket
-          ctx.beginPath(); ctx.arc(pocket.x, pocket.y, 16, 0, Math.PI*2);
+          ctx.beginPath(); ctx.arc(pocket.x, pocket.y, 14, 0, Math.PI*2);
           ctx.fillStyle = '#88ffaa88'; ctx.fill();
-          ctx.beginPath(); ctx.arc(pocket.x, pocket.y, 10, 0, Math.PI*2);
+          ctx.beginPath(); ctx.arc(pocket.x, pocket.y, 9, 0, Math.PI*2);
           ctx.fillStyle = '#ccffbb'; ctx.fill();
-          // arrowhead at pocket end
           const pAngle = Math.atan2(pocket.y - firstCoin.y, pocket.x - firstCoin.x);
-          const tipX = pocket.x - 14*Math.cos(pAngle);
-          const tipY = pocket.y - 14*Math.sin(pAngle);
+          const tipX = pocket.x - 12*Math.cos(pAngle);
+          const tipY = pocket.y - 12*Math.sin(pAngle);
           ctx.beginPath(); ctx.moveTo(pocket.x, pocket.y);
-          ctx.lineTo(tipX - 8*Math.cos(pAngle-0.8), tipY - 8*Math.sin(pAngle-0.8));
-          ctx.lineTo(tipX - 8*Math.cos(pAngle+0.8), tipY - 8*Math.sin(pAngle+0.8));
+          ctx.lineTo(tipX - 6*Math.cos(pAngle-0.7), tipY - 6*Math.sin(pAngle-0.7));
+          ctx.lineTo(tipX - 6*Math.cos(pAngle+0.7), tipY - 6*Math.sin(pAngle+0.7));
           ctx.fillStyle = '#aaff99'; ctx.fill();
           ctx.setLineDash([]);
         } else {
-          // if no pocket immediate, just show extended line
-          const extX = firstCoin.x + dirX * 200;
-          const extY = firstCoin.y + dirY * 200;
+          const extX = firstCoin.x + dirX * 150;
+          const extY = firstCoin.y + dirY * 150;
           ctx.beginPath(); ctx.moveTo(firstCoin.x, firstCoin.y); ctx.lineTo(extX, extY);
-          ctx.strokeStyle = '#88ff88'; ctx.lineWidth = 3; ctx.setLineDash([8,8]); ctx.stroke();
+          ctx.strokeStyle = '#88ff88'; ctx.lineWidth = 2.5; ctx.setLineDash([8,8]); ctx.stroke();
           ctx.setLineDash([]);
         }
       }
@@ -652,7 +641,7 @@
       }
       scorePanel.innerHTML = html;
       turnNameSpan.innerText = players[currentPlayer].name;
-      phaseLabelSpan.innerText = activeShot ? '⚡ HARD HIT ⚡' : (aiming ? '🎯 AIM (green path to pocket)' : 'READY');
+      phaseLabelSpan.innerText = activeShot ? '⚡ SHOT MOVING ⚡' : (aiming ? '🎯 AIM (green path)' : 'READY');
       let qText = queenCovered ? `Covered (P${queenCoveredBy+1})` : (queenPocketed ? 'Pocketed 🔴' : 'On board 👑');
       queenStatusSpan.innerText = qText;
       let powerVal = powerSlider.value / 100;
@@ -716,7 +705,7 @@
       const key = e.key.toLowerCase();
       if(key === 'a' || key === 'd') {
         const bounds = baselineBounds();
-        let step = key === 'a' ? -22 : 22;
+        let step = key === 'a' ? -20 : 20;
         if(bounds.axis === 'x') striker.x = clamp(striker.x+step, bounds.xMin, bounds.xMax);
         else striker.y = clamp(striker.y+step, bounds.yMin, bounds.yMax);
         setStrikerOnBaseline();
@@ -726,7 +715,7 @@
         e.preventDefault();
         if(!aiming && !activeShot) {
           aiming = true;
-          aimVector = { x: striker.x+45, y: striker.y-22 };
+          aimVector = { x: striker.x+35, y: striker.y-18 };
         }
       }
       if(key === 'r') resetGame();
@@ -757,7 +746,7 @@
       drawBoard();
       coins.forEach(drawCoin);
       drawStriker();
-      drawAimAndGreenGuide();
+      drawAimAndGuide();
       drawParticles();
       requestAnimationFrame(animate);
     }
