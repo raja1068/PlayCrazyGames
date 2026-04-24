@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-  <title>Carrom · Heavy Impact · Directional Strikes</title>
+  <title>Carrom · Fixed Physics · Powerful Straight Hits</title>
   <style>
     * {
       box-sizing: border-box;
@@ -152,6 +152,21 @@
       border-bottom: 1px solid #d4a37355;
     }
 
+    .power-meter-bg {
+      background: #4d321c;
+      border-radius: 20px;
+      height: 12px;
+      margin: 8px 0;
+      overflow: hidden;
+    }
+
+    .power-meter-fill {
+      width: 0%;
+      height: 100%;
+      background: linear-gradient(90deg, #ffb347, #ff6a00);
+      border-radius: 20px;
+    }
+
     .msg-area {
       background: #00000055;
       border-radius: 28px;
@@ -209,10 +224,12 @@
         <span>🔋 Power Slider</span>
         <input type="range" id="powerSlider" min="0" max="100" value="75">
       </div>
+      <div class="power-meter-bg"><div class="power-meter-fill" id="powerMeterFill"></div></div>
       <div class="stat-row"><span>🏆 Score (Red=5, Coin=1)</span><span id="scoreHint"></span></div>
       <div class="msg-area" id="gameMsg">
-        🎯 Increased striking force! Now you can hit coins to force it move on a straight direction with real power.<br>
-        🔥 Green arrow shows pocket trajectory for the first coin if it goes to pocket on the straight direction of striker movement, in line.</div>
+        💥 FIXED PHYSICS! Striker delivers HEAVY straight hits – coins fly without sliding.<br>
+        🔥 Green arrow shows pocket trajectory for the first coin in path.
+      </div>
       <div class="shortcut-help">
         ⌨️ <kbd>A/D</kbd> move striker · <kbd>Space</kbd> quick aim · <kbd>R</kbd> restart
       </div>
@@ -310,7 +327,7 @@
       for(let i=0; i<players.length; i++) players[i].score = 0;
       initCoinsAndStriker();
       updateUI();
-      setGameMessage("🔥 MASSIVE HIT FORCE! Striker smashes coins straight ahead.");
+      setGameMessage("🔥 FIXED PHYSICS! Striker hits with real power – coins fly straight.");
       if(isBotTurn()) setTimeout(botPlay, 600);
     }
     
@@ -326,17 +343,17 @@
       offsets.forEach(([dx,dy,clr]) => {
         coins.push({ x: center.x + dx, y: center.y + dy, vx:0, vy:0, r: rCoin, color: clr, alive: true, static: false, mass: 1.0 });
       });
-      // Striker mass increased to 2.0 for heavy impact
+      // Heavy striker for powerful impact
       striker = {
-        x: center.x, y: board.y + board.h - 28, vx:0, vy:0, r: 16.5, color: 'striker', alive: true, static: true, mass: 2.0
+        x: center.x, y: board.y + board.h - 28, vx:0, vy:0, r: 16.5, color: 'striker', alive: true, static: true, mass: 1.8
       };
       setStrikerOnBaseline();
     }
     
-    // =========== HEAVY IMPACT PHYSICS ==========
-    const COLLISION_E = 0.94;        // high restitution – crisp directional hit
-    const STOP_VEL = 0.25;           
-    const AIR_DRAG = 1.55;          // low drag so coins travel with power
+    // =========== CORRECTED PHYSICS (no acceleration, realistic hits) ==========
+    const COLLISION_E = 0.92;        // high restitution for crisp hit
+    const STOP_VEL = 0.28;           
+    const AIR_DRAG = 0.985;          // less than 1 → deceleration (fixed!)
     
     function applyFriction(obj) {
       if(obj.static) return;
@@ -353,10 +370,10 @@
       const minX = board.x + 20, maxX = board.x + board.w - 20;
       const minY = board.y + 20, maxY = board.y + board.h - 20;
       let bounced = false;
-      if(c.x - c.r < minX) { c.x = minX + c.r; c.vx = -c.vx * 0.88; bounced = true; }
-      if(c.x + c.r > maxX) { c.x = maxX - c.r; c.vx = -c.vx * 0.88; bounced = true; }
-      if(c.y - c.r < minY) { c.y = minY + c.r; c.vy = -c.vy * 0.88; bounced = true; }
-      if(c.y + c.r > maxY) { c.y = maxY - c.r; c.vy = -c.vy * 0.88; bounced = true; }
+      if(c.x - c.r < minX) { c.x = minX + c.r; c.vx = -c.vx * 0.86; bounced = true; }
+      if(c.x + c.r > maxX) { c.x = maxX - c.r; c.vx = -c.vx * 0.86; bounced = true; }
+      if(c.y - c.r < minY) { c.y = minY + c.r; c.vy = -c.vy * 0.86; bounced = true; }
+      if(c.y + c.r > maxY) { c.y = maxY - c.r; c.vy = -c.vy * 0.86; bounced = true; }
       if(bounced) applyFriction(c);
     }
     
@@ -377,7 +394,7 @@
       }
     }
     
-    // Impulse-based collision with high restitution
+    // Impulse-based collision with mass ratio
     function resolveCollision(a, b) {
       if(!a.alive || !b.alive) return;
       const dx = b.x - a.x, dy = b.y - a.y;
@@ -387,6 +404,7 @@
       
       const nx = dx/dist, ny = dy/dist;
       const overlap = minDist - dist;
+      // separate
       a.x -= nx * overlap/2;
       a.y -= ny * overlap/2;
       b.x += nx * overlap/2;
@@ -405,6 +423,7 @@
       b.vx += impX / m2;
       b.vy += impY / m2;
       
+      // prevent micro-movement
       applyFriction(a);
       applyFriction(b);
     }
@@ -417,7 +436,7 @@
       if(coin.color === 'striker') {
         strikerFoulThisShot = true;
         players[currentPlayer].score = Math.max(0, players[currentPlayer].score - 2);
-        setGameMessage(`FOUL! Striker pocketed. -1 points, turn lost.`);
+        setGameMessage(`FOUL! Striker pocketed. -2 points, turn lost.`);
         return;
       }
       if(coin.color === 'red') {
@@ -456,7 +475,7 @@
         }
       }
       
-      // Three iterations for stable stacking and directional transfer
+      // multiple iterations for stable stacking & direction transfer
       for(let iter=0; iter<3; iter++) {
         for(let i=0;i<allObjects.length;i++) {
           for(let j=i+1;j<allObjects.length;j++) {
@@ -465,6 +484,7 @@
         }
       }
       
+      // queen cover check
       if(queenPocketed && !queenCovered && pocketedThisShot.length > 0 && !strikerFoulThisShot) {
         queenCovered = true;
         queenCoveredBy = currentPlayer;
@@ -513,13 +533,13 @@
       if(!winner && isBotTurn()) setTimeout(botPlay, 400);
     }
     
-    // MASSIVE FORCE RANGE: min 11, max 26 – direct, heavy hits
+    // BALANCED FORCE: min 9, max 19 (strong but not crazy)
     function shootWithDirection(dirX, dirY, powerVal) {
       if(activeShot || aimingMode === false) return false;
       const len = Math.hypot(dirX, dirY);
       if(len < 0.01) return false;
       const normX = dirX / len, normY = dirY / len;
-      const force = 11.0 + powerVal * 15.0;   // 11 → 26 (huge increase)
+      const force = 9.0 + powerVal * 10.0;   // 9 → 19
       striker.vx = normX * force;
       striker.vy = normY * force;
       striker.static = false;
@@ -527,7 +547,7 @@
       aimingMode = false;
       shotCounter++;
       updateUI();
-      setGameMessage(`💥 CRUSHING STRIKE! ${Math.round(powerVal*100)}% — Coins fly straight!`);
+      setGameMessage(`💥 POWERFUL STRIKE! ${Math.round(powerVal*100)}% — Coins explode forward!`);
       return true;
     }
     
@@ -542,19 +562,19 @@
       const dy = target.y - striker.y;
       const length = Math.hypot(dx,dy);
       if(length < 0.01) return;
-      const powerVal = 0.72;   // ~21.8 force
+      const powerVal = 0.7;
       const normX = dx/length, normY = dy/length;
-      const force = 11.0 + powerVal * 15.0;
+      const force = 9.0 + powerVal * 10.0;
       striker.vx = normX * force;
       striker.vy = normY * force;
       striker.static = false;
       activeShot = true;
       aimingMode = false;
-      setGameMessage(`🤖 Bot SMASHES with heavy force!`);
+      setGameMessage(`🤖 Bot delivers heavy straight hit!`);
       updateUI();
     }
     
-    // raycast and pocket guide (green arrow)
+    // raycast & pocket guide (green directional arrow)
     function raycastFirstCoin(fromX, fromY, dirX, dirY) {
       let closest = null, minDist = Infinity;
       for(let coin of coins) {
