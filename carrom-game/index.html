@@ -2,65 +2,830 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Carrom Game</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Carrom Pro – Master Board | Precision Striker & Green Pocket Guide</title>
   <style>
-    body { font-family: Arial, sans-serif; background: #ddd; text-align: center; }
-    #menu { margin: 10px; }
-    button { margin: 5px; padding: 10px 20px; }
-    #settings { display: none; background: #fff; border: 1px solid #333; padding: 20px; margin: 20px auto; width: 300px; }
-    canvas { background: #f5deb3; border: 10px solid #8b4513; border-radius: 10px; }
+    * {
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      margin: 0;
+      background: linear-gradient(145deg, #21170e, #140f08);
+      font-family: 'Segoe UI', 'Poppins', system-ui, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    /* ad top / bottom placeholders */
+    .ad-slot {
+      background: rgba(0,0,0,0.2);
+      text-align: center;
+      font-size: 12px;
+      color: #aaa;
+      padding: 12px;
+      margin: 10px 0;
+      border-radius: 28px;
+      backdrop-filter: blur(4px);
+    }
+
+    .game-container {
+      max-width: 1300px;
+      width: 100%;
+      background: rgba(0, 0, 0, 0.35);
+      border-radius: 56px;
+      padding: 18px 20px;
+      backdrop-filter: blur(4px);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+    }
+
+    .top-bar {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      background: #2c1d10cc;
+      border-radius: 70px;
+      padding: 10px 24px;
+      margin-bottom: 18px;
+      gap: 12px;
+    }
+
+    .score-panel {
+      display: flex;
+      gap: 18px;
+      flex-wrap: wrap;
+    }
+
+    .player-badge {
+      background: #211407;
+      padding: 6px 22px;
+      border-radius: 60px;
+      font-weight: bold;
+      color: #ffdfb8;
+      box-shadow: inset 0 1px 2px rgba(0,0,0,0.3), 0 3px 6px rgba(0,0,0,0.2);
+      transition: all 0.12s;
+      font-size: 1rem;
+    }
+
+    .player-badge.active {
+      background: #f5a623;
+      color: #251a0c;
+      box-shadow: 0 0 0 3px #ffdf88;
+    }
+
+    .controls {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    select, button {
+      background: #3a2a1b;
+      border: none;
+      padding: 8px 22px;
+      border-radius: 50px;
+      font-weight: bold;
+      color: #ffe2c4;
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: 0.07s linear;
+    }
+
+    button.primary {
+      background: #1f7a3a;
+      color: white;
+    }
+
+    .power-bar {
+      background: #2f2215;
+      border-radius: 60px;
+      padding: 5px 22px;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+    }
+
+    input[type="range"] {
+      width: 170px;
+      height: 5px;
+      border-radius: 15px;
+      background: #e2a442;
+    }
+
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1fr 290px;
+      gap: 22px;
+    }
+
+    .board-frame {
+      background: #5a371b;
+      border-radius: 38px;
+      padding: 16px;
+      box-shadow: 0 12px 28px black;
+    }
+
+    canvas {
+      width: 100%;
+      height: auto;
+      display: block;
+      border-radius: 28px;
+      touch-action: none;
+      cursor: crosshair;
+      background: #f3deba;
+    }
+
+    .info-panel {
+      background: #2d1f12e0;
+      backdrop-filter: blur(12px);
+      border-radius: 36px;
+      padding: 18px;
+      color: #ffeedd;
+    }
+
+    .stat-line {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid #cb9e6b55;
+    }
+
+    .power-meter {
+      background: #3f2e1c;
+      border-radius: 20px;
+      height: 12px;
+      margin: 8px 0;
+      overflow: hidden;
+    }
+
+    .power-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #ffbc6e, #ff7700);
+    }
+
+    .msg-box {
+      background: #00000066;
+      border-radius: 36px;
+      padding: 12px;
+      margin-top: 18px;
+      font-size: 0.85rem;
+    }
+
+    kbd {
+      background: #241e16;
+      border-radius: 12px;
+      padding: 4px 12px;
+      font-family: monospace;
+      margin: 0 3px;
+      font-weight: bold;
+    }
+
+    @media (max-width: 880px) {
+      .main-grid { grid-template-columns: 1fr; }
+    }
   </style>
 </head>
 <body>
-  <h1>Carrom Lite Clone</h1>
-  <div id="menu">
-    <button onclick="startGame()">Start</button>
-    <button onclick="pauseGame()">Pause</button>
-    <button onclick="resetGame()">Reset</button>
-    <button onclick="toggleSettings()">Settings</button>
-  </div>
-  <div id="settings">
-    <h3>Game Settings</h3>
-    <label>Striker Power: <input type="range" id="power" min="1" max="10" value="5"></label><br>
-    <label>Coin Speed: <input type="range" id="speed" min="1" max="10" value="5"></label><br>
-    <button onclick="toggleSettings()">Close</button>
-  </div>
-  <canvas id="board" width="600" height="600"></canvas>
+<div style="width:100%; max-width:1400px; margin:0 auto">
+  <!-- top ad space -->
+  <div class="ad-slot" id="topAd">Advertisement Space (Google AdSense)</div>
 
-  <script>
-    const canvas = document.getElementById("board");
-    const ctx = canvas.getContext("2d");
-    let running = false;
+  <div class="game-container">
+    <div class="top-bar">
+      <div class="score-panel" id="scorePanel"></div>
+      <div class="controls">
+        <select id="modeSelect">
+          <option value="2">👥 2 Players</option>
+          <option value="4">👥 4 Players</option>
+          <option value="bot">🤖 vs Bot</option>
+        </select>
+        <button id="restartBtn" class="primary">🔄 New Match</button>
+        <button id="saveBtn">💾 Save</button>
+        <button id="loadBtn">📂 Load</button>
+      </div>
+    </div>
 
+    <div class="main-grid">
+      <div class="board-frame">
+        <canvas id="carromCanvas" width="1000" height="1000"></canvas>
+      </div>
+      <div class="info-panel">
+        <div class="stat-line"><span>🎯 Turn</span><span id="turnName">Player 1</span></div>
+        <div class="stat-line"><span>⚡ Phase</span><span id="phaseLabel">Ready</span></div>
+        <div class="stat-line"><span>👑 Queen</span><span id="queenStatus">On board</span></div>
+        <div class="stat-line"><span>💥 Power</span><span id="powerPercent">0%</span></div>
+        <div class="power-bar">
+          <span>🔋 Power Slider</span>
+          <input type="range" id="powerSlider" min="0" max="100" value="68">
+        </div>
+        <div class="power-meter"><div class="power-fill" id="powerFill"></div></div>
+        <div class="msg-box" id="gameMsg">
+          🎯 Drag striker along <strong>double baseline</strong> → aim direction → release.<br>
+          🟢 Green arrow: shows pocket path of first coin in striker's line.
+        </div>
+        <div class="stat-line"><span>⌨️ Shortcuts</span><span><kbd>A/D</kbd> move striker · <kbd>Space</kbd> aim</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- bottom ad space -->
+  <div class="ad-slot" id="bottomAd">Advertisement Space (Google AdSense)</div>
+</div>
+
+<script>
+  (function(){
+    // ---------- Canvas Setup ----------
+    const canvas = document.getElementById('carromCanvas');
+    const ctx = canvas.getContext('2d');
+    const W = 1000, H = 1000;
+    canvas.width = W; canvas.height = H;
+
+    // board geometry – light orange tone, black sidebars
+    const board = { x: 78, y: 78, w: 844, h: 844, pocketR: 36 };
+    const center = { x: W/2, y: H/2 };
+
+    // game config
+    let mode = '2';           // '2','4','bot'
+    let currentPlayer = 0;
+    let activeShot = false;
+    let aiming = false;
+    let draggingStriker = false;
+    let winnerDeclared = false;
+    let pocketedThisTurn = [];
+    let strikerFoul = false;
+    let queenPocketed = false;
+    let queenCoveredBy = null;
+    let matchWinner = null;       // stores winner object when all coins pocketed
+    let particles = [];
+
+    // coins & striker (double size striker: radius 22 vs coin radius 11)
+    const COIN_RADIUS = 11;
+    const STRIKER_RADIUS = 22;
+    let coins = [];
+    let striker = null;
+
+    // aim data
+    let aimVector = { x: 0, y: 0 };
+    
+    // DOM elements
+    const powerSlider = document.getElementById('powerSlider');
+    const powerPercentSpan = document.getElementById('powerPercent');
+    const powerFillDiv = document.getElementById('powerFill');
+    const scorePanelDiv = document.getElementById('scorePanel');
+    const turnNameSpan = document.getElementById('turnName');
+    const phaseLabelSpan = document.getElementById('phaseLabel');
+    const queenStatusSpan = document.getElementById('queenStatus');
+    const gameMsgSpan = document.getElementById('gameMsg');
+    
+    let players = [
+      { name: 'Player 1', score: 0, pocketedRed: false, side: 'bottom' },
+      { name: 'Player 2', score: 0, pocketedRed: false, side: 'top' },
+      { name: 'Player 3', score: 0, pocketedRed: false, side: 'left' },
+      { name: 'Player 4', score: 0, pocketedRed: false, side: 'right' }
+    ];
+    
+    // helpers
+    function clamp(v, min, max) { return Math.min(max, Math.max(min, v)); }
+    function distance(x1,y1,x2,y2) { return Math.hypot(x2-x1, y2-y1); }
+    function currentPlayerCount() { return mode === '4' ? 4 : 2; }
+    function isBotTurn() { return mode === 'bot' && currentPlayer === 1 && !activeShot && !aiming && !winnerDeclared; }
+    
+    // baseline bounds (double parallel lines) for each player side
+    function baselineBounds() {
+      const p = currentPlayer;
+      if(p === 0) return { xMin: board.x+54, xMax: board.x+board.w-54, yFixed: board.y+board.h-32, axis: 'x' };
+      if(p === 1) return { xMin: board.x+54, xMax: board.x+board.w-54, yFixed: board.y+32, axis: 'x' };
+      if(p === 2) return { yMin: board.y+54, yMax: board.y+board.h-54, xFixed: board.x+32, axis: 'y' };
+      return { yMin: board.y+54, yMax: board.y+board.h-54, xFixed: board.x+board.w-32, axis: 'y' };
+    }
+    
+    function setStrikerOnBaseline() {
+      const bounds = baselineBounds();
+      if(bounds.axis === 'x') {
+        striker.x = clamp(striker.x, bounds.xMin, bounds.xMax);
+        striker.y = bounds.yFixed;
+      } else {
+        striker.y = clamp(striker.y, bounds.yMin, bounds.yMax);
+        striker.x = bounds.xFixed;
+      }
+      striker.vx = striker.vy = 0;
+      striker.static = true;
+    }
+    
+    // initialize coins: 8 white, 8 black, 1 red (total 17)
+    function initCoins() {
+      coins = [];
+      const rCoin = COIN_RADIUS;
+      const layout = [
+        // red center
+        [0,0,'red'],
+        // inner ring (8 coins: 4 white, 4 black)
+        [28,0,'white'], [-28,0,'black'], [0,28,'white'], [0,-28,'black'],
+        [20,20,'black'], [-20,-20,'white'], [20,-20,'black'], [-20,20,'white'],
+        // outer ring (remaining 8 coins alternating)
+        [50,0,'black'], [-50,0,'white'], [0,50,'black'], [0,-50,'white'],
+        [36,36,'white'], [-36,-36,'black'], [36,-36,'white'], [-36,36,'black']
+      ];
+      layout.forEach(([dx,dy,col]) => {
+        coins.push({ x: center.x+dx, y: center.y+dy, vx:0, vy:0, r: rCoin, color: col, alive: true, static: false, mass: 1.0 });
+      });
+    }
+    
+    function initStriker() {
+      striker = {
+        x: center.x, y: board.y+board.h-32, vx:0, vy:0, r: STRIKER_RADIUS,
+        color: 'striker', alive: true, static: true, mass: 1.9
+      };
+      setStrikerOnBaseline();
+    }
+    
+    // reset full match
+    function resetMatch() {
+      winnerDeclared = false;
+      matchWinner = null;
+      currentPlayer = 0;
+      activeShot = false;
+      aiming = false;
+      draggingStriker = false;
+      queenPocketed = false;
+      queenCoveredBy = null;
+      pocketedThisTurn = [];
+      strikerFoul = false;
+      particles = [];
+      for(let i=0;i<players.length;i++) {
+        players[i].score = 0;
+        players[i].pocketedRed = false;
+      }
+      initCoins();
+      initStriker();
+      updateUI();
+      setMessage("🎯 New Carrom! Slide striker on baseline, use power slider & green pocket guide.");
+      if(isBotTurn()) setTimeout(botAimAndShoot, 500);
+    }
+    
+    // ========== PHYSICS (realistic but moderate force) ==========
+    const COLLISION_E = 0.88;
+    const STOP_VEL = 0.28;
+    const AIR_DRAG = 0.985;
+    
+    function applyFriction(obj) {
+      if(obj.static) return;
+      obj.vx *= AIR_DRAG;
+      obj.vy *= AIR_DRAG;
+      if(Math.abs(obj.vx) < STOP_VEL && Math.abs(obj.vy) < STOP_VEL && !activeShot) {
+        obj.vx = 0; obj.vy = 0; obj.static = true;
+      } else if(Math.abs(obj.vx) < 0.02) obj.vx = 0;
+      else if(Math.abs(obj.vy) < 0.02) obj.vy = 0;
+    }
+    
+    function wallBoundary(c) {
+      const minX = board.x+18, maxX = board.x+board.w-18;
+      const minY = board.y+18, maxY = board.y+board.h-18;
+      let bounce = false;
+      if(c.x - c.r < minX) { c.x = minX + c.r; c.vx = -c.vx * 0.87; bounce = true; }
+      if(c.x + c.r > maxX) { c.x = maxX - c.r; c.vx = -c.vx * 0.87; bounce = true; }
+      if(c.y - c.r < minY) { c.y = minY + c.r; c.vy = -c.vy * 0.87; bounce = true; }
+      if(c.y + c.r > maxY) { c.y = maxY - c.r; c.vy = -c.vy * 0.87; bounce = true; }
+      if(bounce) applyFriction(c);
+    }
+    
+    function isPocketed(c) {
+      const pockets = [[board.x,board.y],[board.x+board.w,board.y],[board.x,board.y+board.h],[board.x+board.w,board.y+board.h]];
+      for(let [px,py] of pockets) {
+        if(distance(c.x,c.y,px,py) < board.pocketR - 7) return true;
+      }
+      return false;
+    }
+    
+    function addParticles(x,y,col) {
+      for(let i=0;i<12;i++) particles.push({ x, y, r: Math.random()*3+1, vx: (Math.random()-0.5)*4, vy: (Math.random()-0.5)*4, a:1, color:col });
+    }
+    
+    function resolveCollision(a,b) {
+      if(!a.alive || !b.alive) return;
+      const dx = b.x - a.x, dy = b.y - a.y;
+      const dist = Math.hypot(dx,dy);
+      const minDist = a.r + b.r;
+      if(dist === 0 || dist >= minDist) return;
+      const nx = dx/dist, ny = dy/dist;
+      const overlap = minDist - dist;
+      a.x -= nx * overlap/2; a.y -= ny * overlap/2;
+      b.x += nx * overlap/2; b.y += ny * overlap/2;
+      const vrelx = a.vx - b.vx, vrely = a.vy - b.vy;
+      const velAlong = vrelx * nx + vrely * ny;
+      if(velAlong > 0) return;
+      const m1 = a.mass || 1, m2 = b.mass || 1;
+      const imp = -(1 + COLLISION_E) * velAlong / ((1/m1)+(1/m2));
+      a.vx -= imp * nx / m1; a.vy -= imp * ny / m1;
+      b.vx += imp * nx / m2; b.vy += imp * ny / m2;
+      applyFriction(a); applyFriction(b);
+    }
+    
+    function handlePocket(coin) {
+      if(!coin.alive) return;
+      coin.alive = false;
+      addParticles(coin.x, coin.y, coin.color === 'black' ? '#2d2d2d' : (coin.color==='white'?'#fcf9f2':'#e07040'));
+      if(coin.color === 'striker') {
+        strikerFoul = true;
+        players[currentPlayer].score = Math.max(0, players[currentPlayer].score - 2);
+        setMessage(`Foul! Striker pocketed. -2 points, turn lost.`);
+        return;
+      }
+      if(coin.color === 'red') {
+        players[currentPlayer].score += 5;
+        players[currentPlayer].pocketedRed = true;
+        queenPocketed = true;
+        queenCoveredBy = currentPlayer;
+        setMessage(`👑 Queen +5 points! (covered automatically with this pocket)`);
+        pocketedThisTurn.push('queen');
+        return;
+      }
+      // white/black coin
+      players[currentPlayer].score += 1;
+      pocketedThisTurn.push(coin.color);
+      setMessage(`Pocketed ${coin.color} coin! +1 point.`);
+    }
+    
+    function updatePhysics() {
+      if(!activeShot) return;
+      const allObjects = [striker, ...coins.filter(c=>c.alive)];
+      for(let obj of allObjects) {
+        if(!obj.static) {
+          obj.x += obj.vx;
+          obj.y += obj.vy;
+          applyFriction(obj);
+          wallBoundary(obj);
+          if(isPocketed(obj)) {
+            handlePocket(obj);
+            if(obj.color === 'striker') {
+              activeShot = false;
+              endTurn();
+              return;
+            }
+          }
+        }
+      }
+      for(let iter=0;iter<2;iter++) {
+        for(let i=0;i<allObjects.length;i++) {
+          for(let j=i+1;j<allObjects.length;j++) resolveCollision(allObjects[i], allObjects[j]);
+        }
+      }
+      let moving = false;
+      for(let obj of allObjects) if(!obj.static && (Math.abs(obj.vx)>0.1 || Math.abs(obj.vy)>0.1)) { moving=true; break; }
+      if(!moving && activeShot) {
+        activeShot = false;
+        endTurn();
+      }
+    }
+    
+    function endTurn() {
+      let hasPocket = pocketedThisTurn.length > 0;
+      let foul = strikerFoul;
+      if(hasPocket && !foul) {
+        setMessage(`🔥 Great hit! Extra turn.`);
+      } else {
+        const total = currentPlayerCount();
+        if(mode === 'bot' && currentPlayer === 1) currentPlayer = 0;
+        else currentPlayer = (currentPlayer + 1) % total;
+        setMessage(`Turn → ${players[currentPlayer].name}`);
+      }
+      pocketedThisTurn = [];
+      strikerFoul = false;
+      aiming = false;
+      draggingStriker = false;
+      striker.static = true;
+      setStrikerOnBaseline();
+      
+      // check win condition : no white/black coins left
+      const remainingNonRed = coins.filter(c=>c.alive && c.color !== 'red').length;
+      if(remainingNonRed === 0 && !winnerDeclared) {
+        winnerDeclared = true;
+        // determine winner (player with highest score? but based on loose coins rule: winner gets opponent leftovers)
+        let bestScore = -1, bestIdx = -1;
+        for(let i=0;i<currentPlayerCount();i++) if(players[i].score > bestScore) { bestScore = players[i].score; bestIdx = i; }
+        matchWinner = bestIdx;
+        const remainingCoinsCount = remainingNonRed;
+        const extraRedBonus = players[matchWinner].pocketedRed ? 5 : 0;
+        const finalPoints = remainingCoinsCount + extraRedBonus;
+        players[matchWinner].score += finalPoints;
+        setMessage(`🏆 ${players[matchWinner].name} WINS! +${finalPoints} bonus points (${remainingCoinsCount} left coins + red bonus ${extraRedBonus})`);
+        activeShot = false;
+      }
+      updateUI();
+      if(!winnerDeclared && isBotTurn()) setTimeout(botAimAndShoot, 450);
+    }
+    
+    // moderate force (6.5 to 13.5) to keep control
+    function shootWithDirection(dirX, dirY, powerVal) {
+      if(activeShot || aiming === false) return false;
+      const len = Math.hypot(dirX, dirY);
+      if(len < 0.01) return false;
+      const normX = dirX/len, normY = dirY/len;
+      const force = 6.5 + powerVal * 7.0;   // 6.5 → 13.5
+      striker.vx = normX * force;
+      striker.vy = normY * force;
+      striker.static = false;
+      activeShot = true;
+      aiming = false;
+      updateUI();
+      setMessage(`🎯 Shot power ${Math.round(powerVal*100)}% – guide arrow shows pocket path.`);
+      return true;
+    }
+    
+    // bot logic: aim at random white/black coin or queen and shoot
+    function botAimAndShoot() {
+      if(winnerDeclared || activeShot || aiming) return;
+      setStrikerOnBaseline();
+      let targets = coins.filter(c=>c.alive && c.color !== 'striker');
+      if(targets.length === 0) return;
+      const target = targets[Math.floor(Math.random()*targets.length)];
+      const dx = target.x - striker.x;
+      const dy = target.y - striker.y;
+      const len = Math.hypot(dx,dy);
+      if(len<0.01) return;
+      const powerVal = 0.65;
+      const normX = dx/len, normY = dy/len;
+      const force = 6.5 + powerVal * 7.0;
+      striker.vx = normX * force;
+      striker.vy = normY * force;
+      striker.static = false;
+      activeShot = true;
+      aiming = false;
+      setMessage(`🤖 Bot shoots with controlled power.`);
+      updateUI();
+    }
+    
+    // ---------- GREEN POCKET GUIDE (raycast + directional path) ----------
+    function raycastFirstCoin(fromX, fromY, dirX, dirY) {
+      let closest = null, minDist = Infinity;
+      for(let coin of coins) {
+        if(!coin.alive) continue;
+        const toX = coin.x - fromX, toY = coin.y - fromY;
+        const cross = dirX * toY - dirY * toX;
+        const dot = dirX * toX + dirY * toY;
+        if(Math.abs(cross) < coin.r+7 && dot > 0) {
+          const d2 = Math.hypot(toX, toY);
+          if(d2 < minDist && d2 < 350) { minDist = d2; closest = coin; }
+        }
+      }
+      return closest;
+    }
+    
+    function getStraightPocketFromCoin(coin, dirX, dirY) {
+      const pockets = [[board.x,board.y],[board.x+board.w,board.y],[board.x,board.y+board.h],[board.x+board.w,board.y+board.h]];
+      let bestPocket = null, bestProj = Infinity;
+      for(let p of pockets) {
+        const toX = p.x - coin.x, toY = p.y - coin.y;
+        const proj = toX*dirX + toY*dirY;
+        if(proj > 0) {
+          const closestX = coin.x + dirX*proj;
+          const closestY = coin.y + dirY*proj;
+          if(distance(closestX,closestY,p.x,p.y) < 28 && proj < bestProj) {
+            bestProj = proj;
+            bestPocket = p;
+          }
+        }
+      }
+      return bestPocket;
+    }
+    
+    // ========== DRAWING ==========
     function drawBoard() {
-      ctx.clearRect(0,0,canvas.width,canvas.height);
-      ctx.fillStyle = "#f5deb3";
-      ctx.fillRect(0,0,canvas.width,canvas.height);
-      // pockets
-      ctx.fillStyle = "black";
-      [0, canvas.width].forEach(x => [0, canvas.height].forEach(y => {
-        ctx.beginPath();
-        ctx.arc(x, y, 20, 0, Math.PI*2);
-        ctx.fill();
-      }));
+      ctx.fillStyle = '#f2dca8'; ctx.fillRect(0,0,W,H);
+      ctx.fillStyle = '#e7b874'; ctx.fillRect(board.x,board.y,board.w,board.h);
+      ctx.strokeStyle = '#111'; ctx.lineWidth = 10; ctx.strokeRect(board.x,board.y,board.w,board.h);
+      ctx.strokeStyle = '#684f32'; ctx.lineWidth = 2; ctx.strokeRect(board.x+14,board.y+14,board.w-28,board.h-28);
+      const pockets = [[board.x,board.y],[board.x+board.w,board.y],[board.x,board.y+board.h],[board.x+board.w,board.y+board.h]];
+      pockets.forEach(([px,py]) => {
+        ctx.beginPath(); ctx.arc(px,py,board.pocketR-2,0,Math.PI*2); ctx.fillStyle='#111'; ctx.fill();
+        ctx.beginPath(); ctx.arc(px,py,board.pocketR-9,0,Math.PI*2); ctx.fillStyle='#1e1a14'; ctx.fill();
+      });
+      
+      // double parallel baselines (visible all sides)
+      ctx.save();
+      ctx.strokeStyle = '#5e4530'; ctx.lineWidth = 3.5;
+      const yBot = board.y+board.h-30;
+      ctx.beginPath(); ctx.moveTo(board.x+50, yBot); ctx.lineTo(board.x+board.w-50, yBot); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(board.x+50, yBot-12); ctx.lineTo(board.x+board.w-50, yBot-12); ctx.stroke();
+      const yTop = board.y+30;
+      ctx.beginPath(); ctx.moveTo(board.x+50, yTop); ctx.lineTo(board.x+board.w-50, yTop); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(board.x+50, yTop+12); ctx.lineTo(board.x+board.w-50, yTop+12); ctx.stroke();
+      const xLeft = board.x+30;
+      ctx.beginPath(); ctx.moveTo(xLeft, board.y+50); ctx.lineTo(xLeft, board.y+board.h-50); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(xLeft+12, board.y+50); ctx.lineTo(xLeft+12, board.y+board.h-50); ctx.stroke();
+      const xRight = board.x+board.w-30;
+      ctx.beginPath(); ctx.moveTo(xRight, board.y+50); ctx.lineTo(xRight, board.y+board.h-50); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(xRight-12, board.y+50); ctx.lineTo(xRight-12, board.y+board.h-50); ctx.stroke();
+      ctx.restore();
+      ctx.beginPath(); ctx.arc(center.x,center.y,48,0,Math.PI*2); ctx.strokeStyle='#ad825a'; ctx.stroke();
+      ctx.beginPath(); ctx.arc(center.x,center.y,14,0,Math.PI*2); ctx.fillStyle='#c53a2b'; ctx.fill();
     }
-
-    function startGame() { running = true; loop(); }
-    function pauseGame() { running = false; }
-    function resetGame() { drawBoard(); }
-    function toggleSettings() {
-      const s = document.getElementById("settings");
-      s.style.display = s.style.display === "none" ? "block" : "none";
+    
+    function drawCoin(c) {
+      if(!c.alive) return;
+      ctx.beginPath(); ctx.arc(c.x,c.y,c.r,0,Math.PI*2);
+      let fill = '#e8cf9e';
+      if(c.color === 'white') fill = '#fef7e0';
+      else if(c.color === 'black') fill = '#23201c';
+      else if(c.color === 'red') fill = '#da4a38';
+      else fill = '#f3deba';
+      ctx.fillStyle = fill; ctx.fill();
+      ctx.strokeStyle = '#5d4632'; ctx.lineWidth=1.8; ctx.stroke();
+      ctx.beginPath(); ctx.arc(c.x,c.y,c.r*0.35,0,Math.PI*2); ctx.fillStyle='#b78654'; ctx.fill();
     }
-
-    function loop() {
-      if (!running) return;
+    
+    function drawStriker() {
+      ctx.beginPath(); ctx.arc(striker.x,striker.y,striker.r,0,Math.PI*2);
+      ctx.fillStyle = '#fff3e0'; ctx.fill();
+      ctx.strokeStyle = '#ab7a48'; ctx.lineWidth=3; ctx.stroke();
+      ctx.beginPath(); ctx.arc(striker.x,striker.y,10,0,Math.PI*2); ctx.fillStyle='#cc9b60'; ctx.fill();
+    }
+    
+    function drawAimAndGreenGuide() {
+      if(!aiming || activeShot) return;
+      const fromX = striker.x, fromY = striker.y;
+      const toX = aimVector.x, toY = aimVector.y;
+      const len = Math.hypot(toX-fromX, toY-fromY);
+      if(len<5) return;
+      const dirX = (toX-fromX)/len, dirY = (toY-fromY)/len;
+      const arrowEndX = fromX + dirX*130;
+      const arrowEndY = fromY + dirY*130;
+      ctx.beginPath(); ctx.moveTo(fromX,fromY); ctx.lineTo(arrowEndX,arrowEndY);
+      ctx.strokeStyle = '#ffcd94'; ctx.lineWidth=4; ctx.setLineDash([6,8]); ctx.stroke();
+      ctx.setLineDash([]);
+      const angle = Math.atan2(dirY,dirX);
+      ctx.beginPath(); ctx.moveTo(arrowEndX,arrowEndY);
+      ctx.lineTo(arrowEndX-12*Math.cos(angle-0.6), arrowEndY-12*Math.sin(angle-0.6));
+      ctx.lineTo(arrowEndX-12*Math.cos(angle+0.6), arrowEndY-12*Math.sin(angle+0.6));
+      ctx.fillStyle='#ffaa44'; ctx.fill();
+      
+      const firstCoin = raycastFirstCoin(fromX, fromY, dirX, dirY);
+      if(firstCoin && firstCoin.alive && firstCoin.color !== 'striker') {
+        ctx.beginPath(); ctx.arc(firstCoin.x, firstCoin.y, firstCoin.r+5, 0, Math.PI*2);
+        ctx.strokeStyle = '#33ff99'; ctx.lineWidth=3; ctx.setLineDash([4,4]); ctx.stroke();
+        ctx.setLineDash([]);
+        const pocket = getStraightPocketFromCoin(firstCoin, dirX, dirY);
+        if(pocket) {
+          ctx.beginPath(); ctx.moveTo(firstCoin.x, firstCoin.y); ctx.lineTo(pocket.x, pocket.y);
+          ctx.strokeStyle = '#66ff99'; ctx.lineWidth=4; ctx.setLineDash([8,10]);
+          ctx.stroke();
+          ctx.beginPath(); ctx.arc(pocket.x, pocket.y, 16, 0, Math.PI*2);
+          ctx.fillStyle = '#88ffaa88'; ctx.fill();
+          ctx.beginPath(); ctx.arc(pocket.x, pocket.y, 9, 0, Math.PI*2);
+          ctx.fillStyle = '#ccffbb'; ctx.fill();
+          const pAngle = Math.atan2(pocket.y - firstCoin.y, pocket.x - firstCoin.x);
+          const tipX = pocket.x - 12*Math.cos(pAngle);
+          const tipY = pocket.y - 12*Math.sin(pAngle);
+          ctx.beginPath(); ctx.moveTo(pocket.x, pocket.y);
+          ctx.lineTo(tipX-7*Math.cos(pAngle-0.7), tipY-7*Math.sin(pAngle-0.7));
+          ctx.lineTo(tipX-7*Math.cos(pAngle+0.7), tipY-7*Math.sin(pAngle+0.7));
+          ctx.fillStyle = '#aaff99'; ctx.fill();
+        } else {
+          const extX = firstCoin.x + dirX*170;
+          const extY = firstCoin.y + dirY*170;
+          ctx.beginPath(); ctx.moveTo(firstCoin.x, firstCoin.y); ctx.lineTo(extX, extY);
+          ctx.strokeStyle = '#99ff99'; ctx.lineWidth=3; ctx.setLineDash([8,8]); ctx.stroke();
+        }
+        ctx.setLineDash([]);
+      }
+    }
+    
+    function drawParticles() {
+      particles = particles.filter(p=> (p.a-=0.04)>0);
+      for(let p of particles) {
+        p.x += p.vx; p.y += p.vy;
+        ctx.globalAlpha = p.a;
+        ctx.fillStyle = p.color || '#ffbf77';
+        ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fill();
+      }
+      ctx.globalAlpha=1;
+    }
+    
+    function updateUI() {
+      const cnt = currentPlayerCount();
+      let html = '';
+      for(let i=0;i<cnt;i++) {
+        let activeClass = (currentPlayer === i && !winnerDeclared) ? 'active' : '';
+        html += `<div class="player-badge ${activeClass}">${players[i].name}: ${players[i].score}</div>`;
+      }
+      scorePanelDiv.innerHTML = html;
+      turnNameSpan.innerText = players[currentPlayer].name;
+      phaseLabelSpan.innerText = activeShot ? '⚡ SHOT ⚡' : (aiming ? '🎯 AIM (green path)' : 'READY');
+      let qText = queenPocketed ? `Pocketed by P${queenCoveredBy+1}` : 'On board 👑';
+      queenStatusSpan.innerText = qText;
+      let pwr = powerSlider.value/100;
+      powerPercentSpan.innerText = `${Math.round(pwr*100)}%`;
+      powerFillDiv.style.width = `${pwr*100}%`;
+    }
+    
+    function setMessage(msg) { gameMsgSpan.innerHTML = msg; }
+    
+    // ----- EVENT HANDLERS -----
+    function handleStart(e) {
+      if(winnerDeclared || activeShot) return;
+      const rect = canvas.getBoundingClientRect();
+      const sx = canvas.width/rect.width, sy = canvas.height/rect.height;
+      let x = (e.clientX - rect.left)*sx, y = (e.clientY - rect.top)*sy;
+      const bounds = baselineBounds();
+      let onStriker = distance(x,y, striker.x, striker.y) < striker.r+13;
+      let onBase = false;
+      if(bounds.axis === 'x') onBase = Math.abs(y - bounds.yFixed) < 28 && x > bounds.xMin-12 && x < bounds.xMax+12;
+      else onBase = Math.abs(x - bounds.xFixed) < 28 && y > bounds.yMin-12 && y < bounds.yMax+12;
+      if(onStriker && onBase && !activeShot) { draggingStriker = true; return; }
+      if(distance(x,y, striker.x, striker.y) < striker.r+32 && !activeShot && !draggingStriker) {
+        aiming = true;
+        aimVector = { x: striker.x+40, y: striker.y-20 };
+      }
+    }
+    
+    function handleMove(e) {
+      if(winnerDeclared) return;
+      const rect = canvas.getBoundingClientRect();
+      const sx = canvas.width/rect.width, sy = canvas.height/rect.height;
+      let x = (e.clientX - rect.left)*sx, y = (e.clientY - rect.top)*sy;
+      if(draggingStriker && !activeShot) {
+        const bounds = baselineBounds();
+        if(bounds.axis === 'x') striker.x = clamp(x, bounds.xMin, bounds.xMax);
+        else striker.y = clamp(y, bounds.yMin, bounds.yMax);
+        setStrikerOnBaseline();
+      }
+      if(aiming && !activeShot) aimVector = { x, y };
+    }
+    
+    function handleEnd(e) {
+      if(draggingStriker) { draggingStriker = false; setStrikerOnBaseline(); return; }
+      if(aiming && !activeShot && !winnerDeclared) {
+        const dx = aimVector.x - striker.x, dy = aimVector.y - striker.y;
+        if(Math.hypot(dx,dy) > 10) {
+          const powerVal = powerSlider.value / 100;
+          shootWithDirection(dx, dy, powerVal);
+        }
+        aiming = false;
+        updateUI();
+      }
+    }
+    
+    canvas.addEventListener('pointerdown', handleStart);
+    canvas.addEventListener('pointermove', handleMove);
+    canvas.addEventListener('pointerup', handleEnd);
+    
+    window.addEventListener('keydown', e => {
+      if(winnerDeclared || activeShot) return;
+      const key = e.key.toLowerCase();
+      if(key === 'a' || key === 'd') {
+        const bounds = baselineBounds();
+        let step = key === 'a' ? -24 : 24;
+        if(bounds.axis === 'x') striker.x = clamp(striker.x+step, bounds.xMin, bounds.xMax);
+        else striker.y = clamp(striker.y+step, bounds.yMin, bounds.yMax);
+        setStrikerOnBaseline();
+        e.preventDefault();
+      }
+      if(key === ' ') {
+        e.preventDefault();
+        if(!aiming && !activeShot) { aiming = true; aimVector = { x: striker.x+45, y: striker.y-24 }; }
+      }
+      if(key === 'r') resetMatch();
+    });
+    
+    document.getElementById('restartBtn').onclick = resetMatch;
+    document.getElementById('saveBtn').onclick = () => {
+      localStorage.setItem('carrom_save', JSON.stringify({players, currentPlayer, queenPocketed, queenCoveredBy, coins: coins.map(c=>({...c, alive:c.alive})), striker}));
+      setMessage('Game saved');
+    };
+    document.getElementById('loadBtn').onclick = () => {
+      const data = localStorage.getItem('carrom_save');
+      if(data) {
+        const s = JSON.parse(data);
+        players = s.players; currentPlayer = s.currentPlayer; queenPocketed = s.queenPocketed; queenCoveredBy = s.queenCoveredBy;
+        coins = s.coins; striker = s.striker; setStrikerOnBaseline();
+        winnerDeclared = false; activeShot = false; aiming = false;
+        updateUI(); setMessage('Loaded');
+      } else setMessage('No save');
+    };
+    document.getElementById('modeSelect').onchange = e => { mode = e.target.value; resetMatch(); };
+    powerSlider.addEventListener('input', () => updateUI());
+    
+    function animate() {
+      updatePhysics();
       drawBoard();
-      // TODO: add striker + coins + physics
-      requestAnimationFrame(loop);
+      coins.forEach(drawCoin);
+      drawStriker();
+      drawAimAndGreenGuide();
+      drawParticles();
+      requestAnimationFrame(animate);
     }
-
-    drawBoard();
-  </script>
+    
+    resetMatch();
+    animate();
+  })();
+</script>
 </body>
 </html>
