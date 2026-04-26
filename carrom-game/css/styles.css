@@ -111,6 +111,12 @@ html, body {
     box-shadow: 0 6px 20px rgba(244, 208, 63, 0.5);
 }
 
+button {
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+
 .game-rules {
     color: #aaa;
     font-size: 14px;
