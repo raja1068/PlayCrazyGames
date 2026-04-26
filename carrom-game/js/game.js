@@ -1,6 +1,7 @@
 /**
  * Carrom Game - Complete Implementation
  * Physics engine, board, coins, striker, and UI manager
+ * Fixed: Single Player vs Bot & Local 2 Players modes working
  */
 
 // ============ UTILITIES ============
@@ -20,7 +21,7 @@ const Utils = {
     allBodiesStopped(bodies, threshold = 0.15) {
         if (!bodies || bodies.length === 0) return true;
         for (let body of bodies) {
-            if (body && (Math.abs(body.vx) > threshold || Math.abs(body.vy) > threshold)) {
+            if (body && body.active && (Math.abs(body.vx) > threshold || Math.abs(body.vy) > threshold)) {
                 return false;
             }
         }
@@ -42,6 +43,8 @@ class PhysicsEngine {
         this.gravity = 0;
         this.friction = 0.985;
         this.bounce = 0.92;
+        this.bounds = null;
+        this.pockets = [];
     }
     
     init(canvas, width, height) {
@@ -49,16 +52,16 @@ class PhysicsEngine {
         this.width = width;
         this.height = height;
         this.bounds = {
-            minX: 45,
-            maxX: width - 45,
-            minY: 45,
-            maxY: height - 45
+            minX: 42,
+            maxX: width - 42,
+            minY: 42,
+            maxY: height - 42
         };
         this.pockets = [
-            { x: 45, y: 45, radius: 18 },
-            { x: width - 45, y: 45, radius: 18 },
-            { x: 45, y: height - 45, radius: 18 },
-            { x: width - 45, y: height - 45, radius: 18 }
+            { x: 42, y: 42, radius: 18 },
+            { x: width - 42, y: 42, radius: 18 },
+            { x: 42, y: height - 42, radius: 18 },
+            { x: width - 42, y: height - 42, radius: 18 }
         ];
     }
     
@@ -223,8 +226,9 @@ class CarromBoard {
     }
     
     getStrikerPosition(sliderPercent, player) {
-        const minX = 100;
-        const maxX = this.size - 100;
+        const margin = 80;
+        const minX = margin;
+        const maxX = this.size - margin;
         const x = minX + (sliderPercent / 100) * (maxX - minX);
         const y = player === 1 ? this.size - 55 : 55;
         return { x, y };
@@ -232,8 +236,8 @@ class CarromBoard {
     
     isInPocket(x, y, radius) {
         const pockets = [
-            { x: 45, y: 45 }, { x: this.size - 45, y: 45 },
-            { x: 45, y: this.size - 45 }, { x: this.size - 45, y: this.size - 45 }
+            { x: 42, y: 42 }, { x: this.size - 42, y: 42 },
+            { x: 42, y: this.size - 42 }, { x: this.size - 42, y: this.size - 42 }
         ];
         for (let p of pockets) {
             if (Math.hypot(x - p.x, y - p.y) < 20) return true;
@@ -267,7 +271,7 @@ class CarromBoard {
         ctx.stroke();
         
         // Draw pockets
-        const pockets = [[45,45], [this.size-45,45], [45,this.size-45], [this.size-45,this.size-45]];
+        const pockets = [[42,42], [this.size-42,42], [42,this.size-42], [this.size-42,this.size-42]];
         for (let [x, y] of pockets) {
             ctx.beginPath();
             ctx.arc(x, y, 18, 0, Math.PI * 2);
@@ -303,14 +307,14 @@ class CoinManager {
         const center = this.size / 2;
         const positions = [
             { x: center, y: center, type: 'queen', score: 50 },
-            { x: center - 25, y: center - 25, type: 'black', score: 10 },
-            { x: center + 25, y: center - 25, type: 'white', score: 10 },
-            { x: center - 25, y: center + 25, type: 'white', score: 10 },
-            { x: center + 25, y: center + 25, type: 'black', score: 10 },
-            { x: center - 50, y: center, type: 'black', score: 10 },
-            { x: center + 50, y: center, type: 'white', score: 10 },
-            { x: center, y: center - 50, type: 'white', score: 10 },
-            { x: center, y: center + 50, type: 'black', score: 10 }
+            { x: center - 28, y: center - 28, type: 'black', score: 10 },
+            { x: center + 28, y: center - 28, type: 'white', score: 10 },
+            { x: center - 28, y: center + 28, type: 'white', score: 10 },
+            { x: center + 28, y: center + 28, type: 'black', score: 10 },
+            { x: center - 55, y: center, type: 'black', score: 10 },
+            { x: center + 55, y: center, type: 'white', score: 10 },
+            { x: center, y: center - 55, type: 'white', score: 10 },
+            { x: center, y: center + 55, type: 'black', score: 10 }
         ];
         
         for (let i = 0; i < positions.length; i++) {
@@ -321,12 +325,13 @@ class CoinManager {
                 y: p.y,
                 vx: 0,
                 vy: 0,
-                radius: 12,
+                radius: 11,
                 mass: 1,
                 type: p.type,
                 score: p.score,
                 active: true,
-                pocketed: false
+                pocketed: false,
+                processed: false
             };
             this.coins.push(coin);
             this.physics.addBody(coin);
@@ -527,8 +532,8 @@ class Controls {
         
         if (length > 10 && this.onShoot) {
             const power = Math.min(1, length / 150);
-            const vx = (dx / length) * power * 12;
-            const vy = (dy / length) * power * 12;
+            const vx = (dx / length) * power * 13;
+            const vy = (dy / length) * power * 13;
             this.onShoot(vx, vy);
         }
     }
@@ -553,12 +558,12 @@ class Controls {
     }
     
     renderAimLine(ctx) {
-        if (this.isAiming && this.striker.body && !this.striker.hasBeenShot) {
+        if (this.isAiming && this.striker.body && !this.striker.hasBeenShot && this.enabled) {
             ctx.beginPath();
             ctx.moveTo(this.striker.body.x, this.striker.body.y);
             ctx.lineTo(this.aimEnd.x, this.aimEnd.y);
             ctx.strokeStyle = '#ffcc44';
-            ctx.lineWidth = 3;
+            ctx.lineWidth = 4;
             ctx.setLineDash([8, 6]);
             ctx.stroke();
             ctx.setLineDash([]);
@@ -567,7 +572,10 @@ class Controls {
             const power = Math.min(100, Math.floor(length / 1.5));
             ctx.fillStyle = '#ffffff';
             ctx.font = 'bold 14px monospace';
-            ctx.fillText(`⚡${power}%`, this.striker.body.x + 15, this.striker.body.y - 10);
+            ctx.shadowBlur = 4;
+            ctx.shadowColor = 'black';
+            ctx.fillText(`⚡${power}%`, this.striker.body.x + 15, this.striker.body.y - 12);
+            ctx.shadowBlur = 0;
         }
     }
 }
@@ -590,6 +598,7 @@ class UIManager {
         this.gameMessage = document.getElementById('game-message');
         this.messageText = document.getElementById('message-text');
         
+        // Buttons
         this.btnSinglePlayer = document.getElementById('btn-single-player');
         this.btnTwoPlayer = document.getElementById('btn-two-player');
         this.btnPause = document.getElementById('btn-pause');
@@ -690,8 +699,8 @@ class BotPlayer {
     }
     
     selectStrikerPosition(board, coins, color) {
-        // Simple: return random position between 20-80%
-        return Utils.randomRange(30, 70);
+        // Return random position between 20-80%
+        return Utils.randomRange(25, 75);
     }
     
     async calculateMove(striker, coins, board, color) {
@@ -706,7 +715,7 @@ class BotPlayer {
                 const dx = coin.x - striker.body.x;
                 const dy = coin.y - striker.body.y;
                 const dist = Math.hypot(dx, dy);
-                if (dist < minDist && dist > 10) {
+                if (dist < minDist && dist > 15) {
                     minDist = dist;
                     closest = coin;
                 }
@@ -718,20 +727,20 @@ class BotPlayer {
             const dy = closest.y - striker.body.y;
             const length = Math.hypot(dx, dy);
             if (length > 0.01) {
-                const power = Math.min(0.8, 200 / length);
+                const power = Math.min(0.9, 220 / length);
                 return {
-                    velocityX: (dx / length) * power * 10,
-                    velocityY: (dy / length) * power * 10
+                    velocityX: (dx / length) * power * 11,
+                    velocityY: (dy / length) * power * 11
                 };
             }
         }
         
-        // Random shot
-        const angle = Math.random() * Math.PI * 2;
+        // Random shot as fallback
+        const angle = (Math.random() - 0.5) * Math.PI * 1.5;
         const power = 0.5 + Math.random() * 0.7;
         return {
-            velocityX: Math.cos(angle) * power * 10,
-            velocityY: Math.sin(angle) * power * 10
+            velocityX: Math.cos(angle) * power * 12,
+            velocityY: Math.sin(angle) * power * 12
         };
     }
 }
@@ -740,16 +749,19 @@ class BotPlayer {
 class CarromGame {
     constructor() {
         this.canvas = document.getElementById('game-canvas');
+        if (!this.canvas) {
+            console.error('Canvas not found!');
+            return;
+        }
         this.ctx = this.canvas.getContext('2d');
-        this.calculateBoardSize();
         
-        this.physics = new PhysicsEngine();
-        this.board = new CarromBoard(this.physics, this.boardSize);
-        this.coinManager = new CoinManager(this.physics, this.boardSize);
-        this.striker = new Striker(this.physics, this.boardSize);
-        this.controls = new Controls(this.canvas, this.striker, this.board);
-        this.ui = new UIManager();
-        this.bot = new BotPlayer(this.boardSize);
+        this.physics = null;
+        this.board = null;
+        this.coinManager = null;
+        this.striker = null;
+        this.controls = null;
+        this.ui = null;
+        this.bot = null;
         
         this.gameMode = null;
         this.currentPlayer = 1;
@@ -761,18 +773,30 @@ class CarromGame {
         this.gameActive = false;
         this.foulStreak = { 1: 0, 2: 0 };
         this.extraTurn = false;
+        this.boardSize = 550;
         
         this.update = this.update.bind(this);
         this.render = this.render.bind(this);
         
+        // Initialize UI first
+        this.ui = new UIManager();
+        this.bot = new BotPlayer(this.boardSize);
+        
+        // Setup event listeners
         this.setupEventListeners();
         
-        this.lastTime = 0;
-        requestAnimationFrame(this.gameLoop.bind(this));
+        // Calculate board size
+        this.calculateBoardSize();
         
         // Show menu initially
         this.ui.showScreen('menu');
-        this.drawMenuPreview();
+        
+        // Draw preview
+        setTimeout(() => this.drawMenuPreview(), 100);
+        
+        // Start render loop
+        this.lastTime = 0;
+        requestAnimationFrame(this.gameLoop.bind(this));
     }
     
     calculateBoardSize() {
@@ -795,36 +819,49 @@ class CarromGame {
     }
     
     setupEventListeners() {
+        // Menu buttons - FIXED: properly bind to start game
         if (this.ui.btnSinglePlayer) {
-            this.ui.btnSinglePlayer.addEventListener('click', () => this.startGame('single'));
+            this.ui.btnSinglePlayer.onclick = (e) => {
+                e.preventDefault();
+                console.log('Single Player button clicked');
+                this.startGame('single');
+            };
         }
+        
         if (this.ui.btnTwoPlayer) {
-            this.ui.btnTwoPlayer.addEventListener('click', () => this.startGame('two'));
+            this.ui.btnTwoPlayer.onclick = (e) => {
+                e.preventDefault();
+                console.log('Two Player button clicked');
+                this.startGame('two');
+            };
         }
+        
+        // Pause menu buttons
         if (this.ui.btnPause) {
-            this.ui.btnPause.addEventListener('click', () => this.pauseGame());
+            this.ui.btnPause.onclick = () => this.pauseGame();
         }
         if (this.ui.btnResume) {
-            this.ui.btnResume.addEventListener('click', () => this.resumeGame());
+            this.ui.btnResume.onclick = () => this.resumeGame();
         }
         if (this.ui.btnRestart) {
-            this.ui.btnRestart.addEventListener('click', () => this.restartGame());
+            this.ui.btnRestart.onclick = () => this.restartGame();
         }
         if (this.ui.btnMainMenu) {
-            this.ui.btnMainMenu.addEventListener('click', () => this.goToMainMenu());
+            this.ui.btnMainMenu.onclick = () => this.goToMainMenu();
         }
         if (this.ui.btnPlayAgain) {
-            this.ui.btnPlayAgain.addEventListener('click', () => this.restartGame());
+            this.ui.btnPlayAgain.onclick = () => this.restartGame();
         }
         if (this.ui.btnBackMenu) {
-            this.ui.btnBackMenu.addEventListener('click', () => this.goToMainMenu());
+            this.ui.btnBackMenu.onclick = () => this.goToMainMenu();
         }
+        
+        // Striker slider
         if (this.ui.strikerSlider) {
-            this.ui.strikerSlider.addEventListener('input', () => this.updateStrikerPosition());
+            this.ui.strikerSlider.oninput = () => this.updateStrikerPosition();
         }
         
-        this.controls.onShoot = (vx, vy) => this.onStrikerShot(vx, vy);
-        
+        // Window resize
         window.addEventListener('resize', Utils.debounce(() => {
             if (this.gameActive) {
                 this.handleResize();
@@ -833,13 +870,22 @@ class CarromGame {
     }
     
     drawMenuPreview() {
-        if (this.board && this.ctx) {
-            this.board.render(this.ctx);
-            this.coinManager.render(this.ctx);
+        if (this.ctx && this.boardSize) {
+            // Create temporary board for preview
+            const tempPhysics = new PhysicsEngine();
+            tempPhysics.init(this.canvas, this.boardSize, this.boardSize);
+            const tempBoard = new CarromBoard(tempPhysics, this.boardSize);
+            const tempCoinManager = new CoinManager(tempPhysics, this.boardSize);
+            tempCoinManager.createCoins();
+            
+            tempBoard.render(this.ctx);
+            tempCoinManager.render(this.ctx);
         }
     }
     
     startGame(mode) {
+        console.log('Starting game in mode:', mode);
+        
         this.gameMode = mode;
         this.currentPlayer = 1;
         this.scores = { 1: 0, 2: 0 };
@@ -850,30 +896,39 @@ class CarromGame {
         this.gameActive = true;
         this.isProcessingTurn = false;
         
+        // Set player names
         if (mode === 'single') {
             this.ui.setPlayerNames('Player', 'Bot');
         } else {
             this.ui.setPlayerNames('Player 1', 'Player 2');
         }
         
+        // Initialize physics and game components
         this.calculateBoardSize();
+        this.physics = new PhysicsEngine();
         this.physics.init(this.canvas, this.boardSize, this.boardSize);
         
         this.board = new CarromBoard(this.physics, this.boardSize);
         this.coinManager = new CoinManager(this.physics, this.boardSize);
         this.striker = new Striker(this.physics, this.boardSize);
         this.controls = new Controls(this.canvas, this.striker, this.board);
+        
+        // Set up shoot callback
         this.controls.onShoot = (vx, vy) => this.onStrikerShot(vx, vy);
         
+        // Create coins
         this.coinManager.createCoins();
         
+        // Start physics
         this.physics.start();
         
+        // Show game screen
         this.ui.showScreen('game');
         this.ui.updateScores(0, 0);
         this.ui.setActivePlayer(1);
         this.ui.updateTurnIndicator('Player 1');
         
+        // Start first turn
         this.startTurn();
     }
     
@@ -886,38 +941,48 @@ class CarromGame {
         const pos = this.board.getStrikerPosition(50, this.currentPlayer);
         this.striker.create(pos.x, pos.y);
         
+        // Check if it's bot's turn
         if (this.gameMode === 'single' && this.currentPlayer === 2) {
             this.ui.disableSlider();
             this.controls.disable();
             this.ui.updateTurnIndicator('Bot', true);
-            setTimeout(() => this.executeBotTurn(), 400);
+            setTimeout(() => this.executeBotTurn(), 500);
         } else {
             this.ui.enableSlider();
             this.controls.enable();
             const playerName = this.gameMode === 'single' ? 'Player' : `Player ${this.currentPlayer}`;
             this.ui.updateTurnIndicator(playerName);
+            this.ui.showMessage(`${playerName}'s turn - Aim and shoot!`, 1500);
         }
     }
     
     async executeBotTurn() {
         if (!this.gameActive || this.currentPlayer !== 2) return;
         
-        await new Promise(resolve => setTimeout(resolve, 300));
+        // Wait before bot moves
+        await new Promise(resolve => setTimeout(resolve, 400));
         
+        if (!this.gameActive) return;
+        
+        // Select striker position
         const sliderPos = this.bot.selectStrikerPosition(this.board, this.coinManager.coins, this.playerColors[2]);
         this.ui.setSliderValue(sliderPos);
         this.updateStrikerPosition();
         
-        await new Promise(resolve => setTimeout(resolve, 200));
+        await new Promise(resolve => setTimeout(resolve, 300));
         
-        if (this.striker.body && !this.striker.hasBeenShot) {
-            const dx = (Math.random() - 0.5) * 2;
-            const dy = Math.random() * 1.5 + 0.5;
-            const len = Math.hypot(dx, dy);
-            const power = 0.6 + Math.random() * 0.6;
-            const vx = (dx / len) * power * 11;
-            const vy = (dy / len) * power * 11;
-            this.onStrikerShot(vx, vy);
+        if (this.striker.body && !this.striker.hasBeenShot && this.gameActive) {
+            // Calculate shot direction
+            const shot = await this.bot.calculateMove(
+                this.striker,
+                this.coinManager.coins,
+                this.board,
+                this.playerColors[2]
+            );
+            
+            if (shot) {
+                this.onStrikerShot(shot.velocityX, shot.velocityY);
+            }
         }
     }
     
@@ -962,7 +1027,7 @@ class CarromGame {
         let scoredQueen = false;
         
         for (let coin of pocketed) {
-            if (coin.type === this.playerColors[this.currentPlayer] || coin.type === 'coin') {
+            if (coin.type === this.playerColors[this.currentPlayer] || (coin.type !== 'queen' && coin.type !== 'black' && coin.type !== 'white')) {
                 scoredOwn = true;
                 pointsEarned += coin.score;
             }
@@ -972,17 +1037,19 @@ class CarromGame {
             }
         }
         
+        // Queen logic
         if (scoredQueen && this.queenPocketedBy === null) {
             this.queenPocketedBy = this.currentPlayer;
             this.ui.showMessage('👑 Queen pocketed! Cover it with your coin next turn!');
         }
         
-        if (this.queenPocketedBy === this.currentPlayer && scoredOwn && !scoredQueen) {
+        if (this.queenPocketedBy === this.currentPlayer && scoredOwn && !scoredQueen && pointsEarned > 0) {
             this.queenCovered = true;
             pointsEarned += 50;
             this.ui.showMessage('✨ Queen covered! +50 points! ✨');
         }
         
+        // Foul handling
         if (strikerPocketed) {
             pointsEarned = 0;
             this.scores[this.currentPlayer] = Math.max(0, this.scores[this.currentPlayer] - 1);
@@ -998,52 +1065,64 @@ class CarromGame {
             this.foulStreak[this.currentPlayer] = 0;
         }
         
+        // Add points
         if (pointsEarned > 0) {
             this.scores[this.currentPlayer] += pointsEarned;
             this.ui.updateScores(this.scores[1], this.scores[2]);
+            if (pointsEarned >= 10) {
+                this.ui.showMessage(`🎯 +${pointsEarned} points!`);
+            }
         }
         
-        if (this.queenPocketedBy === this.currentPlayer && !this.queenCovered && !scoredOwn && pocketed.length > 0) {
+        // Return queen if not covered
+        if (this.queenPocketedBy === this.currentPlayer && !this.queenCovered && pocketed.length > 0 && !scoredOwn) {
             this.coinManager.returnQueen();
             this.queenPocketedBy = null;
             this.ui.showMessage('Queen returned! Failed to cover.');
         }
         
+        // Remove striker
         this.striker.remove();
         
+        // Check game over
         if (this.checkGameOver()) return;
         
-        const keepTurn = (pointsEarned > 0 && !strikerPocketed) || scoredOwn;
+        // Determine if player gets extra turn
+        const keepTurn = (pointsEarned > 0 && !strikerPocketed) && !scoredQueen;
         
         setTimeout(() => {
             if (!keepTurn) {
                 this.currentPlayer = this.currentPlayer === 1 ? 2 : 1;
                 this.ui.setActivePlayer(this.currentPlayer);
+                this.ui.showMessage(`Switch to ${this.currentPlayer === 1 ? 'Player 1' : (this.gameMode === 'single' && this.currentPlayer === 2 ? 'Bot' : 'Player 2')}'s turn`);
             } else if (pointsEarned > 0) {
                 this.ui.showMessage('🎯 Extra turn! Keep shooting!');
             }
             this.startTurn();
-        }, 1200);
+        }, 1500);
     }
     
     checkGameOver() {
         const blackRemaining = this.coinManager.hasCoinsRemaining('black');
         const whiteRemaining = this.coinManager.hasCoinsRemaining('white');
         
-        if (!blackRemaining || !whiteRemaining) {
-            let winner;
-            if (this.scores[1] > this.scores[2]) {
+        // Check win condition - first to 7 points or clear all coins of one color
+        if (this.scores[1] >= 7 || this.scores[2] >= 7 || !blackRemaining || !whiteRemaining) {
+            let winner = null;
+            if (this.scores[1] >= 7 || (!whiteRemaining && this.scores[1] > this.scores[2])) {
+                winner = this.gameMode === 'single' ? 'Player' : 'Player 1';
+            } else if (this.scores[2] >= 7 || (!blackRemaining && this.scores[2] > this.scores[1])) {
+                winner = this.gameMode === 'single' ? 'Bot' : 'Player 2';
+            } else if (this.scores[1] > this.scores[2]) {
                 winner = this.gameMode === 'single' ? 'Player' : 'Player 1';
             } else if (this.scores[2] > this.scores[1]) {
                 winner = this.gameMode === 'single' ? 'Bot' : 'Player 2';
-            } else {
-                winner = null;
             }
             
             setTimeout(() => {
                 this.gameActive = false;
-                this.physics.stop();
-                this.controls.disable();
+                if (this.physics) this.physics.stop();
+                if (this.controls) this.controls.disable();
                 this.ui.showGameOver(winner, this.scores[1], this.scores[2], winner === null);
             }, 500);
             return true;
@@ -1052,32 +1131,38 @@ class CarromGame {
     }
     
     pauseGame() {
-        if (this.gameActive) {
+        if (this.gameActive && this.physics) {
             this.physics.stop();
-            this.controls.disable();
+            if (this.controls) this.controls.disable();
             this.ui.showScreen('pause');
         }
     }
     
     resumeGame() {
-        this.physics.start();
-        if (this.gameActive && !this.isProcessingTurn) {
-            this.controls.enable();
+        if (this.physics) this.physics.start();
+        if (this.gameActive && !this.isProcessingTurn && this.controls) {
+            if (!(this.gameMode === 'single' && this.currentPlayer === 2)) {
+                this.controls.enable();
+            }
         }
         this.ui.showScreen('game');
     }
     
     restartGame() {
-        this.physics.stop();
-        this.physics.clear();
+        if (this.physics) {
+            this.physics.stop();
+            this.physics.clear();
+        }
         this.startGame(this.gameMode);
     }
     
     goToMainMenu() {
         this.gameActive = false;
-        this.physics.stop();
-        this.physics.clear();
-        this.controls.disable();
+        if (this.physics) {
+            this.physics.stop();
+            this.physics.clear();
+        }
+        if (this.controls) this.controls.disable();
         this.ui.showScreen('menu');
         this.drawMenuPreview();
     }
@@ -1090,24 +1175,25 @@ class CarromGame {
         if (this.gameActive) {
             this.update();
             this.render();
-        } else if (!this.gameActive && this.ui.screens.menu && !this.ui.screens.menu.classList.contains('hidden')) {
+        } else if (!this.gameActive && this.ui && this.ui.screens.menu && !this.ui.screens.menu.classList.contains('hidden')) {
             this.drawMenuPreview();
         }
         requestAnimationFrame(this.gameLoop.bind(this));
     }
     
     render() {
-        if (this.ctx && this.board) {
+        if (this.ctx && this.board && this.boardSize > 0) {
             this.ctx.clearRect(0, 0, this.boardSize, this.boardSize);
             this.board.render(this.ctx);
-            this.coinManager.render(this.ctx);
-            this.striker.render(this.ctx);
-            this.controls.renderAimLine(this.ctx);
+            if (this.coinManager) this.coinManager.render(this.ctx);
+            if (this.striker) this.striker.render(this.ctx);
+            if (this.controls) this.controls.renderAimLine(this.ctx);
         }
     }
 }
 
 // Initialize game when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM loaded, initializing CarromGame...');
     window.game = new CarromGame();
 });
