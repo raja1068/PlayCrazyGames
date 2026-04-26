@@ -34,6 +34,9 @@ class CarromGame {
         
         // Setup event listeners
         this.setupEventListeners();
+        this.ui.btnSinglePlayer.addEventListener('click', () => this.startGame('single'));
+        this.ui.btnTwoPlayer.addEventListener('click', () => this.startGame('two'));
+
         
         // Start render loop
         this.lastTime = 0;
