@@ -1,925 +1,647 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Carrom Clash - 2 Player Strike Board Game</title>
-    <style>
-        /* === Reset & Base === */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
+/* Reset & Base */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
 
-        html, body {
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            font-family: 'Segoe UI', Roboto, Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            user-select: none;
-            -webkit-user-select: none;
-            touch-action: none;
-        }
+html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: none;
+}
 
-        /* Ad Containers (placeholder style) */
-        .ad-container {
-            width: 100%;
-            height: 50px;
-            background: linear-gradient(90deg, #2d2d2d 0%, #3d3d3d 50%, #2d2d2d 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-            border-bottom: 1px solid #444;
-        }
+/* Ad Containers */
+.ad-container {
+    width: 100%;
+    height: 50px;
+    background: linear-gradient(90deg, #2d2d2d 0%, #3d3d3d 50%, #2d2d2d 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    border-bottom: 1px solid #444;
+}
 
-        #ad-bottom {
-            border-top: 1px solid #444;
-            border-bottom: none;
-        }
+#ad-bottom {
+    border-top: 1px solid #444;
+    border-bottom: none;
+}
 
-        .ad-placeholder {
-            color: #aaa;
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            font-weight: 500;
-        }
+.ad-placeholder {
+    color: #888;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
 
-        /* Game Wrapper */
-        #game-wrapper {
-            width: 100%;
-            height: calc(100vh - 100px);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            overflow: hidden;
-        }
+/* Game Wrapper - Centers between ads */
+#game-wrapper {
+    width: 100%;
+    height: calc(100vh - 100px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+}
 
-        /* Menu Screens */
-        .menu-screen {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: rgba(0, 0, 0, 0.92);
-            backdrop-filter: blur(2px);
-            z-index: 200;
-        }
+/* Menu Screens */
+.menu-screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.92);
+    backdrop-filter: blur(4px);
+    z-index: 200;
+}
 
-        .menu-screen.hidden {
-            display: none !important;
-        }
+.menu-screen.hidden {
+    display: none !important;
+}
 
-        .menu-content {
-            text-align: center;
-            padding: 24px 20px;
-            max-width: 400px;
-            width: 90%;
-            background: rgba(20, 20, 40, 0.7);
-            border-radius: 32px;
-            backdrop-filter: blur(8px);
-            border: 1px solid rgba(244, 208, 63, 0.3);
-        }
+.menu-content {
+    text-align: center;
+    padding: 30px;
+    max-width: 400px;
+    width: 90%;
+    background: rgba(20, 20, 40, 0.6);
+    border-radius: 32px;
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(244, 208, 63, 0.3);
+}
 
-        .game-title {
-            font-size: 48px;
-            color: #f4d03f;
-            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.5);
-            margin-bottom: 32px;
-            letter-spacing: 6px;
-            font-weight: 800;
-        }
+.game-title {
+    font-size: 48px;
+    color: #f4d03f;
+    text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.5);
+    margin-bottom: 40px;
+    letter-spacing: 8px;
+    font-weight: 800;
+}
 
-        .menu-buttons {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-            margin-bottom: 28px;
-        }
+.menu-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 30px;
+}
 
-        .menu-btn {
-            padding: 14px 28px;
-            font-size: 18px;
-            font-weight: bold;
-            color: #1a1a2e;
-            background: linear-gradient(135deg, #f4d03f 0%, #e0b82b 100%);
-            border: none;
-            border-radius: 60px;
-            cursor: pointer;
-            transition: transform 0.15s, box-shadow 0.2s;
-            box-shadow: 0 6px 0 #b47c00;
-            font-weight: 700;
-        }
+.menu-btn {
+    padding: 15px 30px;
+    font-size: 18px;
+    font-weight: bold;
+    color: #1a1a2e;
+    background: linear-gradient(180deg, #f4d03f 0%, #d4a830 100%);
+    border: none;
+    border-radius: 60px;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.2s;
+    box-shadow: 0 5px 0 #8B6914;
+}
 
-        .menu-btn:active {
-            transform: translateY(2px);
-            box-shadow: 0 3px 0 #b47c00;
-        }
+.menu-btn:hover, .menu-btn:active {
+    transform: translateY(-2px);
+    box-shadow: 0 7px 0 #8B6914;
+}
 
-        .game-rules {
-            color: #ccc;
-            font-size: 13px;
-            background: rgba(0,0,0,0.5);
-            border-radius: 20px;
-            padding: 12px;
-        }
+button {
+    pointer-events: auto;
+    cursor: pointer;
+}
 
-        .game-rules h3 {
-            color: #f4d03f;
-            margin-bottom: 8px;
-            font-size: 16px;
-        }
+.game-rules {
+    color: #aaa;
+    font-size: 14px;
+    background: rgba(0,0,0,0.5);
+    border-radius: 20px;
+    padding: 12px;
+}
 
-        .rule-note {
-            font-size: 11px;
-            color: #aaa;
-            margin-top: 8px;
-        }
+.game-rules h3 {
+    color: #f4d03f;
+    margin-bottom: 10px;
+}
 
-        /* Game Screen */
-        #game-screen {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            position: relative;
-        }
+.rule-note {
+    font-size: 12px;
+    color: #888;
+    margin-top: 10px;
+    font-style: italic;
+}
 
-        /* Score Board */
-        #score-board {
-            width: 100%;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px 18px;
-            background: linear-gradient(180deg, #2d2d2d 0%, #1a1a1a 100%);
-            flex-shrink: 0;
-            border-bottom: 2px solid #f4d03f30;
-        }
+/* Game Screen */
+#game-screen {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+}
 
-        .player-score {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 6px 14px;
-            border-radius: 40px;
-            transition: 0.2s;
-            min-width: 90px;
-            background: #00000040;
-        }
+/* Score Board */
+#score-board {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px;
+    background: linear-gradient(180deg, #2d2d2d 0%, #1a1a1a 100%);
+    flex-shrink: 0;
+    border-bottom: 2px solid #f4d03f40;
+}
 
-        .player-score.active {
-            background: rgba(244, 208, 63, 0.25);
-            box-shadow: 0 0 12px rgba(244, 208, 63, 0.6);
-            border: 1px solid #f4d03f;
-        }
+.player-score {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 8px 15px;
+    border-radius: 40px;
+    transition: all 0.3s;
+    min-width: 80px;
+    background: rgba(0,0,0,0.3);
+}
 
-        .player-name {
-            font-size: 13px;
-            color: #ddd;
-            font-weight: 600;
-            letter-spacing: 1px;
-        }
+.player-score.active {
+    background: rgba(244, 208, 63, 0.25);
+    box-shadow: 0 0 15px rgba(244, 208, 63, 0.4);
+    border: 1px solid #f4d03f;
+}
 
-        .score-value {
-            font-size: 28px;
-            font-weight: 800;
-            color: #ffea9e;
-            line-height: 1;
-        }
+.player-name {
+    font-size: 12px;
+    color: #ccc;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 600;
+}
 
-        .coin-indicator {
-            font-size: 14px;
-            margin-top: 4px;
-            color: #f4d03f;
-            font-weight: bold;
-        }
+.score-value {
+    font-size: 28px;
+    font-weight: bold;
+    color: #ffde9e;
+    line-height: 1.2;
+}
 
-        #turn-indicator {
-            background: #00000060;
-            padding: 5px 14px;
-            border-radius: 40px;
-        }
+.coin-indicator {
+    font-size: 14px;
+    margin-top: 2px;
+    color: #f4d03f;
+}
 
-        #current-turn {
-            color: #f4d03f;
-            font-size: 14px;
-            font-weight: bold;
-        }
+#turn-indicator {
+    text-align: center;
+    background: rgba(0,0,0,0.5);
+    padding: 6px 18px;
+    border-radius: 40px;
+}
 
-        /* Canvas Container */
-        #canvas-container {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-            position: relative;
-            background: #0a0c1a;
-        }
+#current-turn {
+    color: #f4d03f;
+    font-size: 14px;
+    font-weight: bold;
+}
 
-        #game-canvas {
-            display: block;
-            box-shadow: 0 0 0 4px #b87c2e, 0 10px 25px rgba(0,0,0,0.5);
-            border-radius: 12px;
-            touch-action: none;
-            cursor: grab;
-        }
+/* Canvas Container */
+#canvas-container {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+    background: #0a0c1a;
+    padding: 15px;
+}
 
-        /* Striker Controls */
-        #striker-controls {
-            width: 100%;
-            padding: 12px 20px;
-            background: linear-gradient(0deg, #111118, #1f1f2c);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            flex-shrink: 0;
-            border-top: 1px solid #f4d03f30;
-        }
+#game-canvas {
+    display: block;
+    touch-action: none;
+    border-radius: 24px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    cursor: crosshair;
+}
 
-        #striker-slider {
-            width: 80%;
-            max-width: 320px;
-            height: 6px;
-            -webkit-appearance: none;
-            appearance: none;
-            background: linear-gradient(90deg, #3d3d4a, #7a7150);
-            border-radius: 10px;
-            outline: none;
-        }
+/* Striker Controls */
+#striker-controls {
+    width: 100%;
+    padding: 15px 20px;
+    background: linear-gradient(180deg, #1a1a1a 0%, #2d2d2d 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
+    border-top: 1px solid #f4d03f30;
+}
 
-        #striker-slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 34px;
-            height: 34px;
-            background: radial-gradient(circle, #f5e56b, #d4a017);
-            border-radius: 50%;
-            cursor: pointer;
-            box-shadow: 0 2px 10px black;
-            border: 2px solid #fff9cf;
-        }
+#striker-slider {
+    width: 80%;
+    max-width: 350px;
+    height: 6px;
+    -webkit-appearance: none;
+    appearance: none;
+    background: linear-gradient(90deg, #3d3d3d 0%, #6a6a6a 50%, #3d3d3d 100%);
+    border-radius: 10px;
+    outline: none;
+}
 
-        #slider-label {
-            color: #bbb;
-            font-size: 11px;
-            margin-top: 8px;
-            font-weight: 500;
-            letter-spacing: 1px;
-        }
+#striker-slider:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
 
-        /* Game Messages overlay */
-        #game-message {
-            position: absolute;
-            top: 40%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: #000000dd;
-            padding: 14px 28px;
-            border-radius: 60px;
-            z-index: 150;
-            border-left: 6px solid #f4d03f;
-            border-right: 6px solid #f4d03f;
-            pointer-events: none;
-            white-space: nowrap;
-        }
+#striker-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 32px;
+    height: 32px;
+    background: radial-gradient(circle, #f4d03f, #d4a830);
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    border: 2px solid #fff3bf;
+}
 
-        #message-text {
-            color: #f4d03f;
-            font-size: 18px;
-            font-weight: bold;
-        }
+#striker-slider::-moz-range-thumb {
+    width: 32px;
+    height: 32px;
+    background: radial-gradient(circle, #f4d03f, #d4a830);
+    border-radius: 50%;
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    border: 2px solid #fff3bf;
+}
 
-        /* Pause Button */
-        #btn-pause {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            width: 44px;
-            height: 44px;
-            background: #000000aa;
-            border: 2px solid #f4d03f;
-            border-radius: 30px;
-            color: #f4d03f;
-            font-size: 22px;
-            cursor: pointer;
-            z-index: 80;
-            backdrop-filter: blur(4px);
-            font-weight: bold;
-        }
+#slider-label {
+    color: #aaa;
+    font-size: 11px;
+    margin-top: 8px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 600;
+}
 
-        /* Game Over / Pause overlay */
-        .overlay-panel {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.85);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 180;
-            flex-direction: column;
-        }
+/* Game Messages */
+#game-message {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.9);
+    padding: 16px 32px;
+    border-radius: 60px;
+    z-index: 150;
+    border-left: 5px solid #f4d03f;
+    border-right: 5px solid #f4d03f;
+    white-space: nowrap;
+    pointer-events: none;
+}
 
-        .overlay-panel.hidden {
-            display: none;
-        }
+#message-text {
+    color: #f4d03f;
+    font-size: 18px;
+    font-weight: bold;
+    text-align: center;
+}
 
-        .overlay-card {
-            background: #1e1e2f;
-            padding: 25px;
-            border-radius: 36px;
-            text-align: center;
-            min-width: 260px;
-            border: 1px solid gold;
-        }
+/* Pause Button */
+#btn-pause {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    width: 45px;
+    height: 45px;
+    background: rgba(0, 0, 0, 0.6);
+    border: 2px solid #f4d03f;
+    border-radius: 50%;
+    color: #f4d03f;
+    font-size: 22px;
+    cursor: pointer;
+    z-index: 80;
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.1s;
+}
 
-        .winner-name {
-            font-size: 32px;
-            color: #f4d03f;
-            margin: 15px 0;
-        }
+#btn-pause:active {
+    transform: scale(0.95);
+}
 
-        .restart-btn {
-            background: #f4d03f;
-            border: none;
-            padding: 12px 28px;
-            border-radius: 40px;
-            font-weight: bold;
-            margin-top: 20px;
-            font-size: 18px;
-        }
+/* Overlay Panels (Pause, Game Over) */
+.overlay-panel {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.88);
+    backdrop-filter: blur(6px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 180;
+}
 
-        .hidden {
-            display: none !important;
-        }
+.overlay-panel.hidden {
+    display: none !important;
+}
 
-        @media (max-width: 500px) {
-            .score-value { font-size: 22px; }
-            .player-score { min-width: 70px; padding: 4px 8px; }
-            #striker-slider { width: 90%; }
-        }
-    </style>
-</head>
-<body>
+.overlay-card {
+    background: #1e1e2f;
+    padding: 32px 28px;
+    border-radius: 48px;
+    text-align: center;
+    min-width: 280px;
+    border: 1px solid #f4d03f;
+    box-shadow: 0 20px 35px rgba(0,0,0,0.5);
+}
 
-<div class="ad-container" id="ad-top">
-    <div class="ad-placeholder">✦ AD SPACE ✦</div>
-</div>
+.overlay-card h2 {
+    color: #ffde9e;
+    margin-bottom: 20px;
+    font-size: 28px;
+}
 
-<div id="game-wrapper">
-    <!-- Main Menu Screen -->
-    <div id="main-menu" class="menu-screen">
-        <div class="menu-content">
-            <div class="game-title">CARROM CLASH</div>
-            <div class="menu-buttons">
-                <button class="menu-btn" id="btn-start-game">▶ START 2P GAME</button>
-                <button class="menu-btn" id="btn-rules">📜 RULES</button>
-            </div>
-            <div class="game-rules" id="rules-text" style="display: none;">
-                <h3>⚡ How to Play</h3>
-                <p>1. Drag slider → set power.<br>2. Drag on board → aim direction.<br>3. Release arrow → shoot striker!<br>🎯 Pocket coins = +1 point.<br>🃏 If you pocket, extra turn!<br>🏆 First to 7 points wins.</p>
-                <div class="rule-note">*Striker can't pocket. Pocket striker = -1 & turn ends.</div>
-            </div>
-        </div>
-    </div>
+.overlay-card .winner-name {
+    font-size: 28px;
+    color: #f4d03f;
+    margin: 15px 0;
+    font-weight: bold;
+}
 
-    <!-- Game Screen -->
-    <div id="game-screen" style="display: none;">
-        <div id="score-board">
-            <div class="player-score" id="player1-score-area">
-                <span class="player-name">🟡 PLAYER 1</span>
-                <span class="score-value" id="score-p1">0</span>
-                <span class="coin-indicator">⚫</span>
-            </div>
-            <div id="turn-indicator">
-                <div id="current-turn">P1 TURN</div>
-            </div>
-            <div class="player-score" id="player2-score-area">
-                <span class="player-name">🔴 PLAYER 2</span>
-                <span class="score-value" id="score-p2">0</span>
-                <span class="coin-indicator">⚫</span>
-            </div>
-        </div>
-        <div id="canvas-container">
-            <canvas id="game-canvas" width="800" height="600" style="width:100%; height:auto; max-width:800px; aspect-ratio:800/600;"></canvas>
-        </div>
-        <div id="striker-controls">
-            <input type="range" id="striker-slider" min="0" max="100" value="40">
-            <div id="slider-label">⚡ POWER: <span id="power-val">40</span>%</div>
-        </div>
-        <button id="btn-pause">⏸</button>
-        <div id="game-message" class="hidden">
-            <div id="message-text"></div>
-        </div>
-        <!-- Pause overlay -->
-        <div id="pause-overlay" class="overlay-panel hidden">
-            <div class="overlay-card">
-                <h2>⏸ PAUSED</h2>
-                <button class="restart-btn" id="resume-game">RESUME</button>
-                <button class="restart-btn" id="quit-to-menu">QUIT</button>
-            </div>
-        </div>
-        <!-- Game over overlay -->
-        <div id="gameover-overlay" class="overlay-panel hidden">
-            <div class="overlay-card">
-                <div id="final-winner" class="winner-name">WINNER</div>
-                <div id="final-scores-detail"></div>
-                <button class="restart-btn" id="restart-from-overlay">PLAY AGAIN</button>
-                <button class="restart-btn" id="menu-from-overlay">MAIN MENU</button>
-            </div>
-        </div>
-    </div>
-</div>
+.overlay-card .final-scores {
+    color: #ccc;
+    font-size: 18px;
+    margin: 15px 0;
+}
 
-<div class="ad-container" id="ad-bottom">
-    <div class="ad-placeholder">✦ AD SPACE ✦</div>
-</div>
+.overlay-card .restart-btn {
+    background: linear-gradient(180deg, #f4d03f, #d4a830);
+    border: none;
+    padding: 12px 28px;
+    border-radius: 40px;
+    font-weight: bold;
+    margin: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: transform 0.1s;
+    min-width: 160px;
+}
 
-<script>
-    (function(){
-        // ---------- DOM Elements ----------
-        const mainMenu = document.getElementById('main-menu');
-        const gameScreen = document.getElementById('game-screen');
-        const startBtn = document.getElementById('btn-start-game');
-        const rulesBtn = document.getElementById('btn-rules');
-        const rulesTextDiv = document.getElementById('rules-text');
-        const canvas = document.getElementById('game-canvas');
-        const ctx = canvas.getContext('2d');
-        const powerSlider = document.getElementById('striker-slider');
-        const powerSpan = document.getElementById('power-val');
-        const pauseOverlay = document.getElementById('pause-overlay');
-        const gameoverOverlay = document.getElementById('gameover-overlay');
-        const finalWinnerSpan = document.getElementById('final-winner');
-        const finalScoresDetail = document.getElementById('final-scores-detail');
-        const resumeBtn = document.getElementById('resume-game');
-        const quitToMenuBtn = document.getElementById('quit-to-menu');
-        const restartOverlayBtn = document.getElementById('restart-from-overlay');
-        const menuOverlayBtn = document.getElementById('menu-from-overlay');
-        const pauseBtn = document.getElementById('btn-pause');
-        const msgDiv = document.getElementById('game-message');
-        const msgText = document.getElementById('message-text');
-        
-        // Score displays
-        const scoreP1Span = document.getElementById('score-p1');
-        const scoreP2Span = document.getElementById('score-p2');
-        const turnIndicator = document.getElementById('current-turn');
-        const p1Area = document.getElementById('player1-score-area');
-        const p2Area = document.getElementById('player2-score-area');
-        
-        // Game state
-        let gameActive = false;     // whether game is running (not paused, not gameover)
-        let turn = 1;               // 1 = Player1, 2 = Player2
-        let scores = [0,0];         // index 0 for P1, 1 for P2
-        let extraTurnFlag = false;   // if last shot pocketed, extra turn
-        
-        // Physics & board
-        let coins = [];              // {x,y, radius, pocketed}
-        let striker = { x: 400, y: 520, radius: 10, active: false, vx:0, vy:0 };
-        let isAiming = false;
-        let aimVector = { dx:0, dy:0 };
-        let powerPercent = 0.4;      // 0..1
-        let animationId = null;
-        let animating = false;
-        
-        // Game constants
-        const POCKET_RADIUS = 18;
-        const COIN_RADIUS = 9;
-        const STRIKER_RADIUS = 11;
-        const FRICTION_AIR = 0.985;
-        const FRICTION_BOARD = 0.98;
-        const WALL_BOUNCE = 0.92;
-        
-        // Pocket positions (4 corners)
-        const pockets = [
-            { x: 35, y: 35 },     // top-left
-            { x: 765, y: 35 },    // top-right
-            { x: 35, y: 565 },    // bottom-left
-            { x: 765, y: 565 }    // bottom-right
-        ];
-        
-        // Boundary limits (strict inside pockets)
-        const bounds = { minX: 30, maxX: 770, minY: 30, maxY: 570 };
-        
-        // Resize canvas, define logical size 800x600 fixed
-        canvas.width = 800;
-        canvas.height = 600;
-        
-        // Helper: show message
-        function showMessage(msg, duration=1500){
-            msgText.innerText = msg;
-            msgDiv.classList.remove('hidden');
-            setTimeout(() => {
-                if(msgDiv) msgDiv.classList.add('hidden');
-            }, duration);
-        }
-        
-        // Update UI Scores & turn indicator highlight
-        function updateUI(){
-            scoreP1Span.innerText = scores[0];
-            scoreP2Span.innerText = scores[1];
-            if(turn === 1){
-                turnIndicator.innerText = "🔶 P1 TURN";
-                p1Area.classList.add('active');
-                p2Area.classList.remove('active');
-            } else {
-                turnIndicator.innerText = "🔴 P2 TURN";
-                p2Area.classList.add('active');
-                p1Area.classList.remove('active');
-            }
-            // coin indicator update friendly
-        }
-        
-        // Check win condition (7 points)
-        function checkWinner(){
-            if(scores[0] >= 7){
-                endGame(1);
-                return true;
-            } else if(scores[1] >= 7){
-                endGame(2);
-                return true;
-            }
-            return false;
-        }
-        
-        function endGame(winner){
-            if(!gameActive) return;
-            gameActive = false;
-            if(animationId){ cancelAnimationFrame(animationId); animationId=null; }
-            animating = false;
-            finalWinnerSpan.innerText = winner === 1 ? "🏆 PLAYER 1 WINS! 🏆" : "🏆 PLAYER 2 WINS! 🏆";
-            finalScoresDetail.innerText = `P1: ${scores[0]}  |  P2: ${scores[1]}`;
-            gameoverOverlay.classList.remove('hidden');
-        }
-        
-        // Reset game (keep hidden menus)
-        function resetGameState(){
-            scores = [0,0];
-            turn = 1;
-            extraTurnFlag = false;
-            updateUI();
-            initCoins();
-            resetStrikerPosition();
-            if(animationId){ cancelAnimationFrame(animationId); animationId=null; }
-            animating = false;
-            isAiming = false;
-            drawBoard();
-        }
-        
-        function initCoins(){
-            coins = [];
-            // 9 coins: arranged in diamond + center
-            const centerX = 400, centerY = 300;
-            const positions = [
-                [400,300], [380,280], [420,280], [400,260], [360,300], [440,300], [380,320], [420,320], [400,340]
-            ];
-            for(let i=0; i<positions.length; i++){
-                coins.push({
-                    x: positions[i][0],
-                    y: positions[i][1],
-                    radius: COIN_RADIUS,
-                    pocketed: false,
-                });
-            }
-        }
-        
-        function resetStrikerPosition(){
-            striker.x = 400;
-            striker.y = 540;
-            striker.vx = 0;
-            striker.vy = 0;
-            striker.active = false;
-        }
-        
-        // collision & physics
-        function applyPhysics(){
-            let anyMoving = (Math.hypot(striker.vx, striker.vy) > 0.2);
-            for(let c of coins){ if(!c.pocketed && (Math.hypot(c.vx, c.vy) > 0.2)) anyMoving = true; }
-            if(!anyMoving && animating){
-                animating = false;
-                if(animationId){ cancelAnimationFrame(animationId); animationId=null; }
-                endTurnAfterShot();
-                drawBoard();
-                return;
-            }
-            
-            // striker movement
-            if(striker.active){
-                striker.x += striker.vx;
-                striker.y += striker.vy;
-                striker.vx *= FRICTION_BOARD;
-                striker.vy *= FRICTION_BOARD;
-                // boundary & pockets
-                handleBoundaryAndPocket(striker, STRIKER_RADIUS, true);
-                // Check striker pocketed (foul)
-                if(striker.pocketedFlag){
-                    striker.pocketedFlag = false;
-                    // foul: lose 1 point, turn ends
-                    if(turn === 1) scores[0] = Math.max(0, scores[0]-1);
-                    else scores[1] = Math.max(0, scores[1]-1);
-                    updateUI();
-                    showMessage("❌ Striker pocketed! -1 point & turn ends", 1200);
-                    resetStrikerPosition();
-                    striker.active = false;
-                    extraTurnFlag = false;
-                    animating = false;
-                    if(animationId) cancelAnimationFrame(animationId);
-                    endTurnAfterShot();
-                    drawBoard();
-                    return;
-                }
-                if(Math.hypot(striker.vx, striker.vy) < 0.5 && striker.active){
-                    striker.vx=0; striker.vy=0;
-                    striker.active=false;
-                }
-            }
-            
-            // Coins movement & collisions
-            for(let i=0;i<coins.length;i++){
-                let c = coins[i];
-                if(c.pocketed) continue;
-                if(c.vx !== undefined){
-                    c.x += c.vx;
-                    c.y += c.vy;
-                    c.vx *= FRICTION_BOARD;
-                    c.vy *= FRICTION_BOARD;
-                    handleBoundaryAndPocket(c, COIN_RADIUS, false);
-                    if(c.pocketed){
-                        // scoring
-                        if(!c.scored){
-                            c.scored = true;
-                            if(turn === 1) scores[0]++;
-                            else scores[1]++;
-                            updateUI();
-                            showMessage(`💰 +1 point! ${turn===1?"P1":"P2"} scores!`, 800);
-                            extraTurnFlag = true; // extra turn
-                            if(checkWinner()) return;
-                        }
-                        continue;
-                    }
-                } else { c.vx = 0; c.vy = 0; }
-            }
-            
-            // Coin collisions with striker
-            for(let i=0;i<coins.length;i++){
-                let c = coins[i];
-                if(c.pocketed) continue;
-                if(striker.active && !c.pocketed && distance(striker, c) < STRIKER_RADIUS + COIN_RADIUS){
-                    resolveCollision(striker, c, STRIKER_RADIUS, COIN_RADIUS);
-                }
-            }
-            // coin-coin collisions
-            for(let i=0;i<coins.length;i++){
-                for(let j=i+1;j<coins.length;j++){
-                    if(coins[i].pocketed || coins[j].pocketed) continue;
-                    if(distance(coins[i], coins[j]) < COIN_RADIUS*2){
-                        resolveCoinCoin(coins[i], coins[j], COIN_RADIUS);
-                    }
-                }
-            }
-            drawBoard();
-            if(anyMoving) animationId = requestAnimationFrame(applyPhysics);
-            else {
-                animating = false;
-                if(animationId){ cancelAnimationFrame(animationId); animationId=null; }
-                endTurnAfterShot();
-                drawBoard();
-            }
-        }
-        
-        function handleBoundaryAndPocket(obj, rad, isStriker){
-            // pocket check
-            for(let p of pockets){
-                if(distance(obj, p) < POCKET_RADIUS){
-                    if(isStriker){
-                        obj.pocketedFlag = true;
-                        obj.active = false;
-                        return;
-                    } else {
-                        obj.pocketed = true;
-                        obj.vx = 0; obj.vy = 0;
-                        return;
-                    }
-                }
-            }
-            // boundary bounce
-            if(obj.x - rad < bounds.minX){ obj.x = bounds.minX + rad; obj.vx = -obj.vx * WALL_BOUNCE; }
-            if(obj.x + rad > bounds.maxX){ obj.x = bounds.maxX - rad; obj.vx = -obj.vx * WALL_BOUNCE; }
-            if(obj.y - rad < bounds.minY){ obj.y = bounds.minY + rad; obj.vy = -obj.vy * WALL_BOUNCE; }
-            if(obj.y + rad > bounds.maxY){ obj.y = bounds.maxY - rad; obj.vy = -obj.vy * WALL_BOUNCE; }
-        }
-        
-        function resolveCollision(objA, objB, rA, rB){
-            const dx = objB.x - objA.x, dy = objB.y - objA.y;
-            const dist = Math.hypot(dx,dy);
-            const overlap = (rA+rB) - dist;
-            if(overlap>0){
-                const angle = Math.atan2(dy,dx);
-                const pushX = Math.cos(angle)*overlap*0.5;
-                const pushY = Math.sin(angle)*overlap*0.5;
-                if(!objA.pocketed){ objA.x -= pushX; objA.y -= pushY; }
-                if(!objB.pocketed){ objB.x += pushX; objB.y += pushY; }
-            }
-            const nx = dx/dist, ny = dy/dist;
-            const vrelx = objB.vx - objA.vx, vrely = objB.vy - objA.vy;
-            const velAlong = vrelx*nx + vrely*ny;
-            if(velAlong > 0) return;
-            const e = 0.7;
-            const m1 = 1.2, m2 = 0.9;
-            const imp = (1+e)*velAlong / ( (1/m1)+(1/m2) );
-            objA.vx += imp * nx / m1;
-            objA.vy += imp * ny / m1;
-            objB.vx -= imp * nx / m2;
-            objB.vy -= imp * ny / m2;
-        }
-        
-        function resolveCoinCoin(c1,c2,r){
-            const dx = c2.x - c1.x, dy = c2.y - c1.y;
-            const dist = Math.hypot(dx,dy);
-            const overlap = (2*r) - dist;
-            if(overlap>0){
-                const angle = Math.atan2(dy,dx);
-                const push = overlap*0.5;
-                c1.x -= Math.cos(angle)*push;
-                c1.y -= Math.sin(angle)*push;
-                c2.x += Math.cos(angle)*push;
-                c2.y += Math.sin(angle)*push;
-            }
-            const nx = dx/dist, ny = dy/dist;
-            let vrelx = c2.vx - c1.vx, vrely = c2.vy - c1.vy;
-            const velAlong = vrelx*nx + vrely*ny;
-            if(velAlong > 0) return;
-            const e = 0.7;
-            const m = 1;
-            const imp = (1+e)*velAlong / 2;
-            c1.vx += imp * nx;
-            c1.vy += imp * ny;
-            c2.vx -= imp * nx;
-            c2.vy -= imp * ny;
-        }
-        
-        function shootStriker(aimDx, aimDy, power){
-            if(animating) { showMessage("Wait! Shot in progress", 800); return false; }
-            if(!gameActive) return false;
-            resetStrikerPosition();
-            striker.active = true;
-            striker.pocketedFlag = false;
-            const norm = Math.hypot(aimDx, aimDy);
-            if(norm<0.01) return false;
-            const dirX = aimDx/norm, dirY = aimDy/norm;
-            const speed = Math.min(18, power * 16);
-            striker.vx = dirX * speed;
-            striker.vy = dirY * speed;
-            animating = true;
-            extraTurnFlag = false;
-            if(animationId) cancelAnimationFrame(animationId);
-            animationId = requestAnimationFrame(applyPhysics);
-            return true;
-        }
-        
-        function endTurnAfterShot(){
-            if(!gameActive) return;
-            if(checkWinner()) return;
-            if(extraTurnFlag){
-                showMessage(`✨ EXTRA TURN! ${turn===1?"P1":"P2"} shoots again ✨`, 1000);
-                extraTurnFlag = false;
-                drawBoard();
-                return;
-            }
-            // switch turn
-            turn = (turn === 1) ? 2 : 1;
-            updateUI();
-            showMessage(`➡️ ${turn===1?"Player 1":"Player 2"} turn`, 800);
-            drawBoard();
-        }
-        
-        // Drawing
-        function drawBoard(){
-            ctx.clearRect(0,0,800,600);
-            ctx.fillStyle = "#d4b87a";
-            ctx.fillRect(0,0,800,600);
-            ctx.strokeStyle = "#5a3e1b";
-            ctx.lineWidth = 6;
-            ctx.strokeRect(20,20,760,560);
-            for(let p of pockets){
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, POCKET_RADIUS-4, 0, Math.PI*2);
-                ctx.fillStyle = "#2c1a0c";
-                ctx.fill();
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, POCKET_RADIUS-6, 0, Math.PI*2);
-                ctx.fillStyle = "#000000aa";
-                ctx.fill();
-            }
-            for(let c of coins){
-                if(c.pocketed) continue;
-                ctx.beginPath();
-                ctx.arc(c.x, c.y, COIN_RADIUS-1, 0, Math.PI*2);
-                ctx.fillStyle = "#111111";
-                ctx.fill();
-                ctx.beginPath();
-                ctx.arc(c.x, c.y, COIN_RADIUS-2, 0, Math.PI*2);
-                ctx.fillStyle = "#e0b036";
-                ctx.fill();
-                ctx.fillStyle = "#a5671a";
-                ctx.font = "bold 12px monospace";
-                ctx.fillText("●", c.x-4, c.y+4);
-            }
-            ctx.beginPath();
-            ctx.arc(striker.x, striker.y, STRIKER_RADIUS-1, 0, Math.PI*2);
-            ctx.fillStyle = "#ac8e54";
-            ctx.fill();
-            ctx.beginPath();
-            ctx.arc(striker.x, striker.y, STRIKER_RADIUS-3, 0, Math.PI*2);
-            ctx.fillStyle = "#f3d572";
-            ctx.fill();
-            
-            if(isAiming && !animating && gameActive){
-                const fromX = striker.x, fromY = striker.y;
-                const toX = striker.x + aimVector.dx*40, toY = striker.y + aimVector.dy*40;
-                ctx.beginPath();
-                ctx.moveTo(fromX,fromY);
-                ctx.lineTo(toX,toY);
-                ctx.strokeStyle = "#ffd966";
-                ctx.lineWidth = 4;
-                ctx.stroke();
-                ctx.fillStyle = "white";
-                ctx.font = "bold 14px";
-                ctx.fillText(`⚡${Math.round(powerPercent*100)}%`, striker.x+10, striker.y-8);
-            }
-        }
-        
-        // Aiming handlers
-        function getMouseCoord(e){
-            const rect = canvas.getBoundingClientRect();
-            const scaleX = canvas.width / rect.width;
-            const scaleY = canvas.height / rect.height;
-            let clientX, clientY;
-            if(e.touches){
-                clientX = e.touches[0].clientX;
-                clientY = e.touches[0].clientY;
-                e.preventDefault();
-            } else {
-                clientX = e.clientX;
-                clientY = e.clientY;
-            }
-            let canvasX = (clientX - rect.left) * scaleX;
-            let canvasY = (clientY - rect.top) * scaleY;
-            canvasX = Math.min(Math.max(20,canvasX),780);
-            canvasY = Math.min(Math.max(20,canvasY),580);
-            return {x:canvasX, y:canvasY};
-        }
-        
-        function onPointerStart(e){
-            if(!gameActive || animating) return;
-            e.preventDefault();
-            isAiming = true;
-            const {x,y} = getMouseCoord(e);
-            aimVector.dx = x - striker.x;
-            aimVector.dy = y - striker.y;
-            drawBoard();
-        }
-        function onPointerMove(e){
-            if(!isAiming || !gameActive || animating) return;
-            e.preventDefault();
-            const {x,y} = getMouseCoord(e);
-            aimVector.dx = x - striker.x;
-            aimVector.dy = y - striker.y;
-            drawBoard();
-        }
-        function onPointerEnd(e){
-            if(!isAiming || !gameActive || animating) { isAiming=false; drawBoard(); return; }
-            e.preventDefault();
-            let len = Math.hypot(aimVector.dx, aimVector.dy);
-            if(len > 3 && gameActive && !animating){
-                let normX = aimVector.dx/len;
-                let normY = aimVector.dy/len;
-                shootStriker(normX, normY, powerPercent);
-            }
-            isAiming = false;
-            drawBoard();
-        }
-        
-        function attachEvents(){
-            canvas.addEventListener('mousedown', onPointerStart);
-            window.addEventListener('mousemove', onPointerMove);
-            window.addEventListener('mouseup', onPointerEnd);
-            canvas.addEventListener('touchstart', onPointerStart, {passive:false});
-            window.addEventListener('touchmove', onPointerMove, {passive:false});
-            window.addEventListener('touchend', onPointerEnd);
-        }
-        
-        function startGame
+.overlay-card .restart-btn:active {
+    transform: scale(0.96);
+}
+
+.overlay-card .restart-btn.secondary {
+    background: linear-gradient(180deg, #3a3a4a, #2a2a3a);
+    color: #ffde9e;
+}
+
+/* Game Over Screen legacy support */
+#final-scores {
+    margin: 20px 0;
+    color: #fff;
+    font-size: 18px;
+}
+
+#final-scores p {
+    margin: 10px 0;
+}
+
+#winner-text {
+    color: #f4d03f;
+    font-size: 28px;
+    margin-bottom: 10px;
+}
+
+/* Utility Classes */
+.hidden {
+    display: none !important;
+}
+
+/* Toast message */
+.toast-message {
+    position: fixed;
+    bottom: 20%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #000000cc;
+    backdrop-filter: blur(12px);
+    padding: 10px 24px;
+    border-radius: 60px;
+    color: #f4d03f;
+    font-weight: bold;
+    z-index: 300;
+    pointer-events: none;
+    white-space: nowrap;
+    font-size: 14px;
+    border-left: 4px solid #f4d03f;
+    border-right: 4px solid #f4d03f;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 550px) {
+    .game-title {
+        font-size: 36px;
+        letter-spacing: 4px;
+    }
+    
+    .menu-btn {
+        padding: 12px 24px;
+        font-size: 16px;
+    }
+    
+    #score-board {
+        padding: 8px 12px;
+    }
+    
+    .player-score {
+        padding: 5px 10px;
+        min-width: 70px;
+    }
+    
+    .score-value {
+        font-size: 22px;
+    }
+    
+    .player-name {
+        font-size: 10px;
+    }
+    
+    #current-turn {
+        font-size: 11px;
+    }
+    
+    #striker-slider {
+        width: 90%;
+    }
+    
+    #striker-slider::-webkit-slider-thumb {
+        width: 28px;
+        height: 28px;
+    }
+    
+    #game-message {
+        padding: 10px 20px;
+        white-space: nowrap;
+    }
+    
+    #message-text {
+        font-size: 14px;
+    }
+    
+    .overlay-card {
+        padding: 24px 20px;
+        min-width: 260px;
+    }
+    
+    .overlay-card .restart-btn {
+        padding: 10px 20px;
+        min-width: 140px;
+        font-size: 14px;
+    }
+}
+
+@media (max-height: 600px) {
+    .ad-container {
+        height: 40px;
+    }
+    
+    #game-wrapper {
+        height: calc(100vh - 80px);
+    }
+    
+    #score-board {
+        padding: 5px 10px;
+    }
+    
+    #striker-controls {
+        padding: 8px 15px;
+    }
+    
+    .score-value {
+        font-size: 20px;
+    }
+    
+    #canvas-container {
+        padding: 8px;
+    }
+}
+
+/* Landscape orientation adjustments */
+@media (orientation: landscape) and (max-height: 520px) {
+    .ad-container {
+        height: 32px;
+    }
+    
+    #game-wrapper {
+        height: calc(100vh - 64px);
+    }
+    
+    #score-board {
+        padding: 4px 10px;
+    }
+    
+    .player-score {
+        padding: 3px 8px;
+        min-width: 65px;
+    }
+    
+    .score-value {
+        font-size: 18px;
+    }
+    
+    .player-name {
+        font-size: 9px;
+    }
+    
+    #striker-controls {
+        padding: 6px 12px;
+    }
+    
+    #striker-slider {
+        height: 5px;
+    }
+    
+    #striker-slider::-webkit-slider-thumb {
+        width: 24px;
+        height: 24px;
+    }
+    
+    #canvas-container {
+        padding: 5px;
+    }
+    
+    .menu-content {
+        padding: 20px;
+    }
+    
+    .game-title {
+        font-size: 32px;
+        margin-bottom: 20px;
+    }
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+    .menu-btn, .restart-btn, #btn-pause {
+        cursor: default;
+    }
+    
+    #striker-slider::-webkit-slider-thumb {
+        width: 36px;
+        height: 36px;
+    }
+    
+    .menu-btn {
+        padding: 14px 28px;
+    }
+}
+
+/* High resolution screens */
+@media (min-width: 1200px) {
+    #game-canvas {
+        max-width: 650px;
+    }
+    
+    .game-title {
+        font-size: 56px;
+    }
+    
+    .menu-btn {
+        font-size: 20px;
+        padding: 16px 36px;
+    }
+}
+
+/* Animation for active turn pulse */
+@keyframes turnPulse {
+    0% { opacity: 0.7; }
+    100% { opacity: 1; text-shadow: 0 0 8px #f4d03f; }
+}
+
+#current-turn {
+    animation: turnPulse 1.2s ease-in-out infinite alternate;
+}
+
+/* Disable animations when game is not active */
+.menu-screen.hidden #current-turn {
+    animation: none;
+}
