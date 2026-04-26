@@ -67,6 +67,10 @@ html, body {
     z-index: 100;
 }
 
+.menu-screen.hidden {
+  pointer-events: none;
+}
+
 .menu-content {
     text-align: center;
     padding: 30px;
