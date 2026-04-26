@@ -2,381 +2,823 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Snakes & Ladders Premium</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Snakes & Ladders - Premium 3D | Bishop Coins | Serpentine Snakes</title>
     <style>
-        :root {
-            --gold: #d4af37;
-            --dark-bg: #121212;
-            --p1-color: #ffd700;
-            --p2-color: #e0e0e0;
-            --cell-size: 60px;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
         }
 
         body {
-            background-color: var(--dark-bg);
-            background-image: radial-gradient(circle, #1a1a1a 0%, #000 100%);
-            color: white;
-            font-family: 'Segoe UI', Roboto, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin: 0;
+            background: radial-gradient(ellipse at center, #1a1a2e 0%, #0a0a15 100%);
             min-height: 100vh;
-        }
-
-        /* UI Elements */
-        .header {
-            margin: 20px 0;
-            text-align: center;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            color: var(--gold);
-            text-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            font-family: 'Segoe UI', 'Poppins', system-ui, sans-serif;
         }
 
         .game-container {
-            position: relative;
-            padding: 15px;
-            background: linear-gradient(145deg, #2c2c2c, #000);
-            border: 4px solid var(--gold);
-            box-shadow: 0 0 50px rgba(0,0,0,1), inset 0 0 20px rgba(212,175,55,0.2);
-            border-radius: 8px;
+            background: linear-gradient(145deg, rgba(25, 20, 15, 0.95), rgba(15, 10, 8, 0.98));
+            border-radius: 48px;
+            padding: 24px;
+            box-shadow: 0 30px 50px rgba(0,0,0,0.6), inset 0 1px 2px rgba(255,215,0,0.15);
+            border: 1px solid rgba(255,215,0,0.25);
+            max-width: 1050px;
+            width: 100%;
         }
 
-        /* The Board */
-        #board {
-            display: grid;
-            grid-template-columns: repeat(10, var(--cell-size));
-            grid-template-rows: repeat(10, var(--cell-size));
-            background: #222;
-            position: relative;
+        h1 {
+            text-align: center;
+            font-size: clamp(1.5rem, 6vw, 2.2rem);
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #f3b33d, #ffd966, #c2811a);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: 2px;
         }
 
-        .cell {
-            width: var(--cell-size);
-            height: var(--cell-size);
-            border: 0.5px solid rgba(255,255,255,0.05);
+        .player-panel {
+            background: linear-gradient(145deg, #2a1f12, #1e150a);
+            border-radius: 60px;
+            padding: 12px 20px;
+            margin-bottom: 20px;
             display: flex;
+            justify-content: space-between;
             align-items: center;
-            justify-content: center;
-            font-size: 12px;
+            flex-wrap: wrap;
+            gap: 12px;
+            box-shadow: inset 0 1px 3px rgba(255,215,0,0.2), 0 8px 20px rgba(0,0,0,0.4);
+        }
+
+        .players-area {
+            display: flex;
+            gap: 20px;
+            background: #1a1208;
+            padding: 8px 24px;
+            border-radius: 50px;
+        }
+
+        .player-card {
             font-weight: bold;
-            color: rgba(255,255,255,0.3);
-            position: relative;
+            padding: 8px 20px;
+            border-radius: 40px;
+            transition: all 0.3s ease;
+            text-align: center;
+            background: linear-gradient(135deg, #2c2c2c, #1a1a1a);
+            min-width: 110px;
+            border: 1px solid rgba(255,215,0,0.3);
         }
 
-        /* ZigZag Coloring */
-        .cell:nth-child(even) { background: rgba(255,255,255,0.02); }
-
-        /* Players */
-        .player {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            position: absolute;
-            transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            z-index: 10;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        .player-card.active {
+            transform: scale(1.05);
+            box-shadow: 0 0 0 3px #ffd700, 0 0 20px rgba(255,215,0,0.5);
         }
-        #p1 { background: radial-gradient(circle at 30% 30%, #fff, var(--p1-color)); border: 2px solid gold; }
-        #p2 { background: radial-gradient(circle at 30% 30%, #fff, var(--p2-color)); border: 2px solid #999; }
+
+        .player-card .player-name { font-size: 0.8rem; letter-spacing: 1px; }
+        .player-card .player-pos { font-size: 1.3rem; font-weight: bold; margin-top: 4px; display: block; }
+
+        .player-red-bg { background: linear-gradient(135deg, #dc2626, #991b1b); color: white; }
+        .player-navy-bg { background: linear-gradient(135deg, #1e3a5f, #0f2a44); color: white; }
+
+        .turn-indicator {
+            background: linear-gradient(135deg, #ffd700, #ffb347);
+            padding: 10px 28px;
+            border-radius: 40px;
+            font-weight: bold;
+            font-size: 1rem;
+            color: #2c1a0a;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
 
         /* 3D Dice */
         .dice-area {
-            margin-top: 30px;
             display: flex;
-            gap: 40px;
+            gap: 15px;
             align-items: center;
+            background: #2a1f12;
+            padding: 5px 20px;
+            border-radius: 60px;
         }
 
-        .scene {
-            width: 60px;
-            height: 60px;
-            perspective: 600px;
+        .dice-container {
+            perspective: 500px;
+            width: 75px;
+            height: 75px;
+            cursor: pointer;
         }
 
-        .dice {
+        .dice-3d {
             width: 100%;
             height: 100%;
             position: relative;
             transform-style: preserve-3d;
-            transition: transform 1s ease-out;
+            transform: rotateX(-15deg) rotateY(15deg);
+            transition: transform 0.1s;
+        }
+
+        .dice-3d.rolling {
+            animation: dice3DRoll 0.6s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+        }
+
+        @keyframes dice3DRoll {
+            0% { transform: rotateX(-15deg) rotateY(15deg) scale(1); }
+            25% { transform: rotateX(180deg) rotateY(90deg) scale(1.1); }
+            50% { transform: rotateX(360deg) rotateY(180deg) scale(1); }
+            75% { transform: rotateX(540deg) rotateY(270deg) scale(1.05); }
+            100% { transform: rotateX(720deg) rotateY(360deg) scale(1); }
         }
 
         .dice-face {
             position: absolute;
-            width: 60px;
-            height: 60px;
+            width: 75px;
+            height: 75px;
             background: white;
-            border: 2px solid #ccc;
-            border-radius: 10px;
-            display: grid;
-            grid-template: repeat(3, 1fr) / repeat(3, 1fr);
-            padding: 5px;
-            box-sizing: border-box;
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.8rem;
+            font-weight: bold;
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.2), 0 10px 20px rgba(0,0,0,0.3);
+            border: 2px solid #ffd700;
+            backface-visibility: visible;
         }
 
-        .dot { background: #333; border-radius: 50%; margin: 2px; }
-
-        /* Dice Transforms */
-        .face-1 { transform: rotateY(0deg) translateZ(30px); }
-        .face-2 { transform: rotateY(180deg) translateZ(30px); }
-        .face-3 { transform: rotateY(90deg) translateZ(30px); }
-        .face-4 { transform: rotateY(-90deg) translateZ(30px); }
-        .face-5 { transform: rotateX(90deg) translateZ(30px); }
-        .face-6 { transform: rotateX(-90deg) translateZ(30px); }
-
-        /* Controls UI */
-        .panel {
-            background: rgba(255,255,255,0.05);
-            padding: 20px;
-            border-radius: 15px;
-            border: 1px solid rgba(255,255,255,0.1);
-            text-align: center;
-            min-width: 200px;
-        }
+        .dice-face-1 { transform: translateZ(37.5px); background: linear-gradient(145deg, #fff, #f0f0f0); }
+        .dice-face-2 { transform: rotateY(180deg) translateZ(37.5px); background: linear-gradient(145deg, #fff, #f0f0f0); }
+        .dice-face-3 { transform: rotateY(90deg) translateZ(37.5px); background: linear-gradient(145deg, #fff, #f0f0f0); }
+        .dice-face-4 { transform: rotateY(-90deg) translateZ(37.5px); background: linear-gradient(145deg, #fff, #f0f0f0); }
+        .dice-face-5 { transform: rotateX(90deg) translateZ(37.5px); background: linear-gradient(145deg, #fff, #f0f0f0); }
+        .dice-face-6 { transform: rotateX(-90deg) translateZ(37.5px); background: linear-gradient(145deg, #fff, #f0f0f0); }
 
         button {
-            background: linear-gradient(to bottom, var(--gold), #b8860b);
+            background: linear-gradient(135deg, #ffb347, #ff9800);
             border: none;
-            padding: 12px 30px;
-            border-radius: 25px;
-            color: black;
+            padding: 12px 28px;
+            border-radius: 50px;
             font-weight: bold;
+            font-size: 1rem;
             cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
-            transition: transform 0.2s;
+            box-shadow: 0 5px 0 #a45d2e;
+            color: #2c1a0a;
         }
-
-        button:active { transform: scale(0.95); }
+        button:active { transform: translateY(2px); box-shadow: 0 2px 0 #a45d2e; }
         button:disabled { opacity: 0.5; cursor: not-allowed; }
 
-        .active-turn {
-            box-shadow: 0 0 20px var(--gold);
-            border: 2px solid var(--gold);
+        .board-wrapper {
+            position: relative;
+            margin: 20px 0;
+            border-radius: 28px;
+            background: linear-gradient(145deg, #f7e1aa, #e6cfa0);
+            padding: 10px;
+            box-shadow: 0 20px 35px rgba(0,0,0,0.5), inset 0 0 0 2px #ffd700, inset 0 0 0 6px #ba7f3a;
         }
 
-        /* Connectors (Snakes/Ladders) */
-        .connector {
+        .board {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            background: #f7e1aa;
+            border-radius: 20px;
+            overflow: visible;
+            position: relative;
+            aspect-ratio: 1 / 1;
+        }
+
+        .cell {
+            aspect-ratio: 1 / 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: clamp(10px, 3vw, 14px);
+            background: linear-gradient(145deg, #fff8e7, #f5e6c8);
+            position: relative;
+            border: 1px solid #deb887;
+            color: #5a3a1a;
+            z-index: 2;
+        }
+
+        .svg-overlay {
             position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             pointer-events: none;
-            z-index: 5;
-            transform-origin: center left;
+            z-index: 10;
+        }
+
+        /* Bishop Chess Piece Style Coins */
+        .bishop-token {
+            position: absolute;
+            width: 28px;
+            height: 40px;
+            transition: all 0.45s cubic-bezier(0.34, 1.2, 0.64, 1);
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5));
+            z-index: 20;
+            transform: translate(-50%, -50%);
+            top: 45%;
+            left: 50%;
         }
         
-        .ladder {
-            background: repeating-linear-gradient(90deg, #3d2b1f 0px, #3d2b1f 5px, transparent 5px, transparent 20px),
-                        linear-gradient(to bottom, #5d4037, #3d2b1f);
-            height: 20px;
-            opacity: 0.8;
-            border-left: 5px solid #2a1b10;
-            border-right: 5px solid #2a1b10;
+        .bishop-body {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            border-radius: 8px 8px 12px 12px;
+        }
+        
+        .bishop-base {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 8px;
+            border-radius: 4px 4px 8px 8px;
+            background: linear-gradient(145deg, #ddd, #aaa);
+        }
+        
+        .bishop-mid {
+            position: absolute;
+            bottom: 6px;
+            left: 4px;
+            right: 4px;
+            height: 18px;
+            border-radius: 4px 4px 6px 6px;
+        }
+        
+        .bishop-hat {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-bottom: 14px solid;
+            border-radius: 2px;
+        }
+        
+        .bishop-slit {
+            position: absolute;
+            top: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 6px;
+            height: 8px;
+            background: #333;
+            border-radius: 2px;
+            opacity: 0.5;
+        }
+        
+        .bishop-top {
+            position: absolute;
+            top: -4px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #ffd700;
         }
 
-        .snake {
-            height: 12px;
-            background: linear-gradient(90deg, #008080, #ffd700);
-            border-radius: 10px;
-            opacity: 0.7;
-            box-shadow: 0 0 10px rgba(0,128,128,0.5);
+        .action-buttons { display: flex; justify-content: center; gap: 15px; margin: 15px 0 8px; }
+        .message-area {
+            background: #1a1208;
+            color: #ffeaaf;
+            text-align: center;
+            padding: 12px;
+            border-radius: 40px;
+            font-weight: 500;
+            margin-top: 10px;
+            font-size: 0.85rem;
         }
 
-        @media (max-width: 600px) {
-            :root { --cell-size: 35px; }
-            .player { width: 18px; height: 18px; }
+        @media (max-width: 750px) {
+            .game-container { padding: 15px; }
+            .player-card { padding: 5px 12px; min-width: 80px; }
+            .dice-container { width: 55px; height: 55px; }
+            .dice-face { width: 55px; height: 55px; font-size: 2rem; }
+            .dice-face-1 { transform: translateZ(27.5px); }
+            .dice-face-2 { transform: rotateY(180deg) translateZ(27.5px); }
+            .dice-face-3 { transform: rotateY(90deg) translateZ(27.5px); }
+            .dice-face-4 { transform: rotateY(-90deg) translateZ(27.5px); }
+            .dice-face-5 { transform: rotateX(90deg) translateZ(27.5px); }
+            .dice-face-6 { transform: rotateX(-90deg) translateZ(27.5px); }
+            .bishop-token { width: 22px; height: 32px; }
+            button { padding: 8px 18px; font-size: 0.8rem; }
         }
     </style>
 </head>
 <body>
-
-    <h1 class="header">Snakes & Ladders Premium</h1>
-
-    <div class="game-container">
-        <div id="board"></div>
-        <div id="p1" class="player"></div>
-        <div id="p2" class="player"></div>
-    </div>
-
-    <div class="dice-area">
-        <div class="panel" id="p1-panel">
-            <h3>Player 1</h3>
-            <p id="p1-pos">Position: 1</p>
-        </div>
-
-        <div class="scene">
-            <div class="dice" id="dice">
-                <div class="dice-face face-1"><div></div><div class="dot"></div></div>
-                <div class="dice-face face-2"><div class="dot"></div><div></div><div></div><div></div><div></div><div class="dot"></div></div>
-                <div class="dice-face face-3"><div class="dot"></div><div></div><div></div><div class="dot"></div><div></div><div></div><div class="dot"></div></div>
-                <div class="dice-face face-4"><div class="dot"></div><div></div><div class="dot"></div><div></div><div></div><div></div><div class="dot"></div><div></div><div class="dot"></div></div>
-                <div class="dice-face face-5"><div class="dot"></div><div></div><div class="dot"></div><div></div><div class="dot"></div><div></div><div class="dot"></div><div></div><div class="dot"></div></div>
-                <div class="dice-face face-6"><div class="dot"></div><div class="dot"></div><div class="dot"></div><div></div><div></div><div></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+<div class="game-container">
+    <h1>🐍 SNAKES & LADDERS 🪜</h1>
+    
+    <div class="player-panel">
+        <div class="players-area" id="playersArea">
+            <div class="player-card player-red-bg active" id="player0Card">
+                <div class="player-name">🔴 PLAYER 1</div>
+                <span class="player-pos" id="pos0">1</span>
+            </div>
+            <div class="player-card player-navy-bg" id="player1Card">
+                <div class="player-name">⚓ PLAYER 2</div>
+                <span class="player-pos" id="pos1">1</span>
             </div>
         </div>
-
-        <div class="panel" id="p2-panel">
-            <h3>Player 2</h3>
-            <p id="p2-pos">Position: 1</p>
+        <div class="turn-indicator" id="turnIndicator">🎲 PLAYER 1's TURN</div>
+        <div class="dice-area">
+            <div class="dice-container" id="diceContainer">
+                <div class="dice-3d" id="dice3d">
+                    <div class="dice-face dice-face-1">⚀</div>
+                    <div class="dice-face dice-face-2">⚁</div>
+                    <div class="dice-face dice-face-3">⚂</div>
+                    <div class="dice-face dice-face-4">⚃</div>
+                    <div class="dice-face dice-face-5">⚄</div>
+                    <div class="dice-face dice-face-6">⚅</div>
+                </div>
+            </div>
+            <button id="rollBtn">ROLL</button>
         </div>
     </div>
 
-    <div style="margin-top: 20px;">
-        <button id="roll-btn" onclick="playTurn()">Roll Dice</button>
-        <p id="status" style="text-align: center; margin-top: 10px; color: var(--gold);"></p>
+    <div class="board-wrapper">
+        <div class="board" id="gameBoard"></div>
+        <svg class="svg-overlay" id="svgOverlay"></svg>
     </div>
 
-    <script>
-        const board = document.getElementById('board');
-        const status = document.getElementById('status');
-        const ladders = { 3: 77, 7: 53, 15: 96, 21: 98, 54: 88 };
-        const snakes = { 99: 5, 94: 66, 70: 51, 57: 25, 45: 13 };
+    <div class="action-buttons">
+        <button id="resetGameBtn">🔄 NEW GAME</button>
+        <button id="backHubBtn">🏠 EXIT</button>
+    </div>
+    <div class="message-area" id="statusMsg">✨ Click ROLL! Roll 6 = extra turn. First to 100 wins! ✨</div>
+</div>
+
+<script>
+    // ============================================================
+    // PREMIUM SNAKES & LADDERS - BISHOP COINS | SERPENTINE SNAKES | 3D DICE
+    // ============================================================
+    (function(){
+        // Fixed Snakes & Ladders
+        const SNAKES = { 99: 5, 94: 66, 70: 51, 57: 25, 45: 13 };
+        const LADDERS = { 21: 98, 15: 96, 3: 77, 7: 53, 54: 88 };
         
+        // Players with Red and Navy Blue
         let players = [
-            { id: 'p1', pos: 1, color: 'Gold' },
-            { id: 'p2', pos: 1, color: 'Silver' }
+            { id: 0, name: "PLAYER 1", position: 1, spanId: "pos0", color: "red" },
+            { id: 1, name: "PLAYER 2", position: 1, spanId: "pos1", color: "navy" }
         ];
-        let turn = 0;
-        let isRolling = false;
-
-        // 1. Build Board Architecture
-        function createBoard() {
-            for (let row = 9; row >= 0; row--) {
-                for (let col = 0; col < 10; col++) {
-                    let cellNum;
-                    if (row % 2 === 0) {
-                        cellNum = (row * 10) + (col + 1);
-                    } else {
-                        cellNum = (row * 10) + (10 - col);
-                    }
-                    const cell = document.createElement('div');
-                    cell.className = 'cell';
-                    cell.id = 'cell-' + cellNum;
-                    cell.innerHTML = `<span>${cellNum}</span>`;
-                    board.appendChild(cell);
-                }
-            }
-            // Draw visual connectors
-            Object.keys(ladders).forEach(start => drawConnector(start, ladders[start], 'ladder'));
-            Object.keys(snakes).forEach(start => drawConnector(start, snakes[start], 'snake'));
-            updatePlayerPos(0);
-            updatePlayerPos(1);
-            updateUI();
-        }
-
-        function drawConnector(start, end, type) {
-            const startEl = document.getElementById('cell-' + start);
-            const endEl = document.getElementById('cell-' + end);
-            const rectS = startEl.getBoundingClientRect();
-            const rectE = endEl.getBoundingClientRect();
-            const boardRect = board.getBoundingClientRect();
-
-            const x1 = (rectS.left + rectS.width/2) - boardRect.left;
-            const y1 = (rectS.top + rectS.height/2) - boardRect.top;
-            const x2 = (rectE.left + rectE.width/2) - boardRect.left;
-            const y2 = (rectE.top + rectE.height/2) - boardRect.top;
-
-            const dist = Math.sqrt((x2-x1)**2 + (y2-y1)**2);
-            const angle = Math.atan2(y2-y1, x2-x1) * 180 / Math.PI;
-
-            const line = document.createElement('div');
-            line.className = `connector ${type}`;
-            line.style.width = dist + 'px';
-            line.style.left = x1 + 'px';
-            line.style.top = y1 + 'px';
-            line.style.transform = `rotate(${angle}deg)`;
-            board.appendChild(line);
-        }
-
-        // 2. Gameplay Mechanics
-        async function playTurn() {
-            if (isRolling) return;
-            isRolling = true;
-            document.getElementById('roll-btn').disabled = true;
-
-            const roll = Math.floor(Math.random() * 6) + 1;
-            await animateDice(roll);
-
-            let p = players[turn];
-            let newPos = p.pos + roll;
-
-            if (newPos <= 100) {
-                p.pos = newPos;
-                updatePlayerPos(turn);
-                
-                // Check Snakes/Ladders
-                await new Promise(r => setTimeout(r, 600));
-                if (ladders[p.pos]) {
-                    status.innerText = "Climbing a ladder!";
-                    p.pos = ladders[p.pos];
-                } else if (snakes[p.pos]) {
-                    status.innerText = "Oh no, a snake!";
-                    p.pos = snakes[p.pos];
-                }
-                updatePlayerPos(turn);
-            } else {
-                status.innerText = "Roll too high! Stay put.";
-            }
-
-            if (p.pos === 100) {
-                status.innerText = `PLAYER ${turn + 1} WINS!`;
-                return;
-            }
-
-            // Bonus turn logic
-            if (roll !== 6) {
-                turn = (turn + 1) % 2;
-            } else {
-                status.innerText = "Rolled a 6! Extra turn!";
-            }
-
-            updateUI();
-            isRolling = false;
-            document.getElementById('roll-btn').disabled = false;
-        }
-
-        function animateDice(roll) {
-            const dice = document.getElementById('dice');
-            const rotations = {
-                1: 'rotateY(0deg)',
-                2: 'rotateY(180deg)',
-                3: 'rotateY(-90deg)',
-                4: 'rotateY(90deg)',
-                5: 'rotateX(-90deg)',
-                6: 'rotateX(90deg)'
+        let currentPlayerIdx = 0;
+        let gameActive = true;
+        let winnerId = null;
+        let rolling = false;
+        
+        // DOM Elements
+        const boardDiv = document.getElementById("gameBoard");
+        const svgOverlay = document.getElementById("svgOverlay");
+        const dice3d = document.getElementById("dice3d");
+        const rollBtn = document.getElementById("rollBtn");
+        const resetBtn = document.getElementById("resetGameBtn");
+        const backBtn = document.getElementById("backHubBtn");
+        const turnSpan = document.getElementById("turnIndicator");
+        const msgDiv = document.getElementById("statusMsg");
+        
+        // Get cell center coordinates
+        function getCellCenter(cellNumber) {
+            const cell = document.getElementById(`cell-${cellNumber}`);
+            if (!cell) return null;
+            const rect = cell.getBoundingClientRect();
+            const boardRect = boardDiv.getBoundingClientRect();
+            return {
+                x: rect.left + rect.width/2 - boardRect.left,
+                y: rect.top + rect.height/2 - boardRect.top
             };
-            // Add extra spins
-            dice.style.transform = `rotateX(${Math.random()*360}deg) rotateY(${Math.random()*360}deg)`;
+        }
+        
+        // Draw serpentine snake
+        function drawSerpentineSnake(startX, startY, endX, endY) {
+            const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
+            const dx = endX - startX;
+            const dy = endY - startY;
+            const distance = Math.hypot(dx, dy);
             
-            return new Promise(resolve => {
-                setTimeout(() => {
-                    dice.style.transform = rotations[roll];
-                    resolve();
-                }, 1000);
+            let pathData = `M ${startX} ${startY}`;
+            const segments = Math.max(5, Math.floor(distance / 25));
+            
+            for (let i = 1; i <= segments; i++) {
+                const t = i / segments;
+                const x = startX + dx * t;
+                const y = startY + dy * t;
+                const offset = Math.sin(t * Math.PI * 3) * 12;
+                const perpX = -dy / distance * offset;
+                const perpY = dx / distance * offset;
+                const cx = x + perpX;
+                const cy = y + perpY;
+                const prevT = (i - 1) / segments;
+                const prevX = startX + dx * prevT;
+                const prevY = startY + dy * prevT;
+                const prevOffset = Math.sin(prevT * Math.PI * 3) * 12;
+                const prevPerpX = -dy / distance * prevOffset;
+                const prevPerpY = dx / distance * prevOffset;
+                const px = prevX + prevPerpX;
+                const py = prevY + prevPerpY;
+                pathData += ` Q ${px + (cx - px) * 0.5} ${py + (cy - py) * 0.5}, ${cx} ${cy}`;
+            }
+            
+            const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            path.setAttribute("d", pathData);
+            path.setAttribute("stroke", "url(#snakeBodyGrad)");
+            path.setAttribute("stroke-width", "16");
+            path.setAttribute("fill", "none");
+            path.setAttribute("stroke-linecap", "round");
+            group.appendChild(path);
+            
+            // Scale pattern
+            const steps = Math.floor(distance / 12);
+            for (let i = 1; i <= steps; i++) {
+                const t = i / steps;
+                const x = startX + dx * t;
+                const y = startY + dy * t;
+                const offset = Math.sin(t * Math.PI * 3) * 12;
+                const perpX = -dy / distance * offset;
+                const perpY = dx / distance * offset;
+                const scaleX = x + perpX;
+                const scaleY = y + perpY;
+                const scale = document.createElementNS("http://www.w3.org/2000/svg", "ellipse");
+                scale.setAttribute("cx", scaleX);
+                scale.setAttribute("cy", scaleY);
+                scale.setAttribute("rx", "5");
+                scale.setAttribute("ry", "3");
+                scale.setAttribute("fill", "#f1c40f");
+                scale.setAttribute("opacity", "0.8");
+                group.appendChild(scale);
+            }
+            
+            // Snake head
+            const head = document.createElementNS("http://www.w3.org/2000/svg", "ellipse");
+            head.setAttribute("cx", startX);
+            head.setAttribute("cy", startY);
+            head.setAttribute("rx", "14");
+            head.setAttribute("ry", "11");
+            head.setAttribute("fill", "#1a5a2a");
+            head.setAttribute("stroke", "#f1c40f");
+            head.setAttribute("stroke-width", "2");
+            group.appendChild(head);
+            
+            // Eyes
+            const eyeL = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            eyeL.setAttribute("cx", startX - 6);
+            eyeL.setAttribute("cy", startY - 3);
+            eyeL.setAttribute("r", "3");
+            eyeL.setAttribute("fill", "#ffff00");
+            group.appendChild(eyeL);
+            const eyeLPupil = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            eyeLPupil.setAttribute("cx", startX - 6);
+            eyeLPupil.setAttribute("cy", startY - 3);
+            eyeLPupil.setAttribute("r", "1.5");
+            eyeLPupil.setAttribute("fill", "#000");
+            group.appendChild(eyeLPupil);
+            
+            const eyeR = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            eyeR.setAttribute("cx", startX + 6);
+            eyeR.setAttribute("cy", startY - 3);
+            eyeR.setAttribute("r", "3");
+            eyeR.setAttribute("fill", "#ffff00");
+            group.appendChild(eyeR);
+            const eyeRPupil = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            eyeRPupil.setAttribute("cx", startX + 6);
+            eyeRPupil.setAttribute("cy", startY - 3);
+            eyeRPupil.setAttribute("r", "1.5");
+            eyeRPupil.setAttribute("fill", "#000");
+            group.appendChild(eyeRPupil);
+            
+            // Tongue
+            const tongue = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            tongue.setAttribute("d", `M ${startX} ${startY+5} L ${startX-7} ${startY+13} M ${startX} ${startY+5} L ${startX+7} ${startY+13}`);
+            tongue.setAttribute("stroke", "#ff4444");
+            tongue.setAttribute("stroke-width", "2");
+            tongue.setAttribute("fill", "none");
+            group.appendChild(tongue);
+            
+            // Tail
+            const tail = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            tail.setAttribute("cx", endX);
+            tail.setAttribute("cy", endY);
+            tail.setAttribute("r", "6");
+            tail.setAttribute("fill", "#c0392b");
+            tail.setAttribute("stroke", "#f1c40f");
+            tail.setAttribute("stroke-width", "1.5");
+            group.appendChild(tail);
+            
+            return group;
+        }
+        
+        function drawLadder(startX, startY, endX, endY) {
+            const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
+            const leftRail = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            leftRail.setAttribute("x1", startX - 12);
+            leftRail.setAttribute("y1", startY);
+            leftRail.setAttribute("x2", endX - 12);
+            leftRail.setAttribute("y2", endY);
+            leftRail.setAttribute("stroke", "#8B5A2B");
+            leftRail.setAttribute("stroke-width", "6");
+            leftRail.setAttribute("stroke-linecap", "round");
+            group.appendChild(leftRail);
+            
+            const rightRail = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            rightRail.setAttribute("x1", startX + 12);
+            rightRail.setAttribute("y1", startY);
+            rightRail.setAttribute("x2", endX + 12);
+            rightRail.setAttribute("y2", endY);
+            rightRail.setAttribute("stroke", "#8B5A2B");
+            rightRail.setAttribute("stroke-width", "6");
+            rightRail.setAttribute("stroke-linecap", "round");
+            group.appendChild(rightRail);
+            
+            const steps = Math.floor(Math.hypot(endX - startX, endY - startY) / 28);
+            for (let i = 1; i <= steps; i++) {
+                const t = i / (steps + 1);
+                const x = startX + (endX - startX) * t;
+                const y = startY + (endY - startY) * t;
+                const rung = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                rung.setAttribute("x1", x - 12);
+                rung.setAttribute("y1", y);
+                rung.setAttribute("x2", x + 12);
+                rung.setAttribute("y2", y);
+                rung.setAttribute("stroke", "#DAA520");
+                rung.setAttribute("stroke-width", "5");
+                rung.setAttribute("stroke-linecap", "round");
+                group.appendChild(rung);
+            }
+            return group;
+        }
+        
+        // Draw bishop token as SVG for better quality
+        function createBishopToken(color) {
+            const bishopDiv = document.createElement("div");
+            bishopDiv.className = "bishop-token";
+            
+            const body = document.createElement("div");
+            body.className = "bishop-body";
+            
+            const base = document.createElement("div");
+            base.className = "bishop-base";
+            base.style.background = color === 'red' ? 'linear-gradient(145deg, #ff6666, #cc0000)' : 'linear-gradient(145deg, #4a7a9e, #0f2a44)';
+            
+            const mid = document.createElement("div");
+            mid.className = "bishop-mid";
+            mid.style.background = color === 'red' ? 'linear-gradient(145deg, #ff4444, #b32d2d)' : 'linear-gradient(145deg, #3a6a8e, #1a3a54)';
+            
+            const hat = document.createElement("div");
+            hat.className = "bishop-hat";
+            hat.style.borderBottomColor = color === 'red' ? '#cc0000' : '#0f2a44';
+            
+            const slit = document.createElement("div");
+            slit.className = "bishop-slit";
+            
+            const top = document.createElement("div");
+            top.className = "bishop-top";
+            
+            body.appendChild(base);
+            body.appendChild(mid);
+            body.appendChild(hat);
+            body.appendChild(slit);
+            body.appendChild(top);
+            bishopDiv.appendChild(body);
+            
+            return bishopDiv;
+        }
+        
+        function drawConnections() {
+            svgOverlay.innerHTML = '';
+            const boardRect = boardDiv.getBoundingClientRect();
+            svgOverlay.setAttribute('viewBox', `0 0 ${boardRect.width} ${boardRect.height}`);
+            svgOverlay.style.width = `${boardRect.width}px`;
+            svgOverlay.style.height = `${boardRect.height}px`;
+            
+            const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
+            const snakeGrad = document.createElementNS("http://www.w3.org/2000/svg", "linearGradient");
+            snakeGrad.setAttribute("id", "snakeBodyGrad");
+            const stop1 = document.createElementNS("http://www.w3.org/2000/svg", "stop");
+            stop1.setAttribute("offset", "0%");
+            stop1.setAttribute("stop-color", "#2ecc71");
+            const stop2 = document.createElementNS("http://www.w3.org/2000/svg", "stop");
+            stop2.setAttribute("offset", "100%");
+            stop2.setAttribute("stop-color", "#1a5a2a");
+            snakeGrad.appendChild(stop1);
+            snakeGrad.appendChild(stop2);
+            defs.appendChild(snakeGrad);
+            svgOverlay.appendChild(defs);
+            
+            for (const [head, tail] of Object.entries(SNAKES)) {
+                const start = getCellCenter(parseInt(head));
+                const end = getCellCenter(tail);
+                if (start && end) {
+                    svgOverlay.appendChild(drawSerpentineSnake(start.x, start.y, end.x, end.y));
+                }
+            }
+            
+            for (const [bottom, top] of Object.entries(LADDERS)) {
+                const start = getCellCenter(parseInt(bottom));
+                const end = getCellCenter(top);
+                if (start && end) {
+                    svgOverlay.appendChild(drawLadder(start.x, start.y, end.x, end.y));
+                }
+            }
+        }
+        
+        // Build board
+        function buildBoard() {
+            boardDiv.innerHTML = "";
+            for (let row = 0; row < 10; row++) {
+                for (let col = 0; col < 10; col++) {
+                    let cellNumber;
+                    if (row === 0) cellNumber = 100 - col;
+                    else if (row === 1) cellNumber = 81 + col;
+                    else if (row === 2) cellNumber = 80 - col;
+                    else if (row === 3) cellNumber = 61 + col;
+                    else if (row === 4) cellNumber = 60 - col;
+                    else if (row === 5) cellNumber = 41 + col;
+                    else if (row === 6) cellNumber = 40 - col;
+                    else if (row === 7) cellNumber = 21 + col;
+                    else if (row === 8) cellNumber = 20 - col;
+                    else cellNumber = 1 + col;
+                    
+                    const cell = document.createElement("div");
+                    cell.className = "cell";
+                    cell.dataset.num = cellNumber;
+                    cell.id = `cell-${cellNumber}`;
+                    const span = document.createElement("span");
+                    span.innerText = cellNumber;
+                    cell.appendChild(span);
+                    boardDiv.appendChild(cell);
+                }
+            }
+        }
+        
+        function renderTokens() {
+            document.querySelectorAll('.bishop-token').forEach(t => t.remove());
+            for (let p of players) {
+                const cell = document.getElementById(`cell-${p.position}`);
+                if (cell) {
+                    const token = createBishopToken(p.color);
+                    cell.style.position = "relative";
+                    cell.appendChild(token);
+                }
+            }
+        }
+        
+        function updateUI() {
+            players.forEach(p => {
+                const span = document.getElementById(p.spanId);
+                if (span) span.innerText = p.position;
+            });
+            document.querySelectorAll('.player-card').forEach((card, idx) => {
+                if (idx === currentPlayerIdx && gameActive && !winnerId) card.classList.add('active');
+                else card.classList.remove('active');
             });
         }
-
-        function updatePlayerPos(pIdx) {
-            const p = players[pIdx];
-            const cell = document.getElementById('cell-' + p.pos);
-            const rect = cell.getBoundingClientRect();
-            const boardRect = board.getBoundingClientRect();
-            
-            const el = document.getElementById(p.id);
-            const offset = pIdx * 5; // Offset players slightly
-            el.style.left = (rect.left - boardRect.left + 15 + offset) + 'px';
-            el.style.top = (rect.top - boardRect.top + 15 + offset) + 'px';
-            
-            document.getElementById(`${p.id}-pos`).innerText = `Position: ${p.pos}`;
+        
+        async function applySnakeLadder(player, pos) {
+            if (SNAKES[pos]) {
+                msgDiv.innerHTML = `🐍 ${player.name} hit a SNAKE! Sliding from ${pos} → ${SNAKES[pos]}`;
+                player.position = SNAKES[pos];
+                renderTokens();
+                updateUI();
+                await delay(500);
+                return true;
+            } else if (LADDERS[pos]) {
+                msgDiv.innerHTML = `🪜 ${player.name} climbed a LADDER! Moving from ${pos} → ${LADDERS[pos]}`;
+                player.position = LADDERS[pos];
+                renderTokens();
+                updateUI();
+                await delay(500);
+                return true;
+            }
+            return false;
         }
-
-        function updateUI() {
-            document.getElementById('p1-panel').classList.toggle('active-turn', turn === 0);
-            document.getElementById('p2-panel').classList.toggle('active-turn', turn === 1);
+        
+        async function movePlayer(player, steps) {
+            let newPos = player.position + steps;
+            if (newPos > 100) {
+                msgDiv.innerHTML = `🎲 ${player.name} rolled ${steps} but needs exact roll! Stays at ${player.position}.`;
+                return false;
+            }
+            player.position = newPos;
+            renderTokens();
+            updateUI();
+            await delay(400);
+            await applySnakeLadder(player, player.position);
+            
+            if (player.position === 100) {
+                gameActive = false;
+                winnerId = player.id;
+                msgDiv.innerHTML = `🏆✨ ${player.name} REACHED 100! ${player.name} WINS! ✨🏆`;
+                turnSpan.innerHTML = `🏆 WINNER: ${player.name} 🏆`;
+                rollBtn.disabled = true;
+                return true;
+            }
+            return false;
         }
-
-        window.onload = createBoard;
-        window.onresize = () => location.reload(); // Refresh to recalculate connector positions
-    </script>
+        
+        function delay(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
+        
+        async function performRoll() {
+            if (!gameActive || rolling) return;
+            const currentPlayer = players[currentPlayerIdx];
+            rolling = true;
+            rollBtn.disabled = true;
+            
+            dice3d.classList.add("rolling");
+            let rollInterval = setInterval(() => {
+                const rand = Math.floor(Math.random() * 6) + 1;
+                const faces = ["⚀", "⚁", "⚂", "⚃", "⚄", "⚅"];
+                const faceElements = document.querySelectorAll('.dice-face');
+                for (let i = 0; i < faceElements.length; i++) {
+                    faceElements[i].innerText = faces[rand - 1];
+                }
+            }, 80);
+            
+            await delay(550);
+            clearInterval(rollInterval);
+            const finalValue = Math.floor(Math.random() * 6) + 1;
+            const finalFaces = ["⚀", "⚁", "⚂", "⚃", "⚄", "⚅"];
+            const faceEls = document.querySelectorAll('.dice-face');
+            for (let i = 0; i < faceEls.length; i++) {
+                faceEls[i].innerText = finalFaces[finalValue - 1];
+            }
+            dice3d.classList.remove("rolling");
+            
+            msgDiv.innerHTML = `🎲 ${currentPlayer.name} rolled a ${finalValue}!`;
+            
+            const won = await movePlayer(currentPlayer, finalValue);
+            if (won) { rolling = false; rollBtn.disabled = true; return; }
+            
+            await delay(400);
+            
+            if (gameActive && !winnerId) {
+                if (finalValue === 6) {
+                    msgDiv.innerHTML += ` 🎲 EXTRA TURN for ${currentPlayer.name}!`;
+                    rolling = false;
+                    rollBtn.disabled = false;
+                    updateTurnDisplay();
+                    return;
+                } else {
+                    currentPlayerIdx = currentPlayerIdx === 0 ? 1 : 0;
+                    updateTurnDisplay();
+                }
+            }
+            rolling = false;
+            rollBtn.disabled = false;
+        }
+        
+        function updateTurnDisplay() {
+            if (!gameActive) return;
+            turnSpan.innerHTML = `🎲 ${players[currentPlayerIdx].name}'s TURN`;
+        }
+        
+        function resetGame() {
+            rolling = false;
+            players.forEach(p => p.position = 1);
+            currentPlayerIdx = 0;
+            gameActive = true;
+            winnerId = null;
+            rollBtn.disabled = false;
+            updateUI();
+            renderTokens();
+            updateTurnDisplay();
+            const faces = ["⚀", "⚁", "⚂", "⚃", "⚄", "⚅"];
+            const faceEls = document.querySelectorAll('.dice-face');
+            for (let i = 0; i < faceEls.length; i++) {
+                faceEls[i].innerText = faces[i];
+            }
+            msgDiv.innerHTML = "🔄 Game reset! First to 100 wins! Roll 6 = extra turn.";
+            setTimeout(() => drawConnections(), 100);
+        }
+        
+        function backToHub() { window.location.href = "../index.html"; }
+        
+        // Event Listeners
+        rollBtn.addEventListener("click", performRoll);
+        resetBtn.addEventListener("click", resetGame);
+        backBtn.addEventListener("click", backToHub);
+        
+        // Initialize
+        buildBoard();
+        resetGame();
+        
+        window.addEventListener('resize', () => {
+            setTimeout(() => {
+                drawConnections();
+                renderTokens();
+            }, 150);
+        });
+    })();
+</script>
 </body>
 </html>
