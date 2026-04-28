@@ -1,1 +1,0 @@
-this.scores = { black: 1, white: 1, queen: 5 };
