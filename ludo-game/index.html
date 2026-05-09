@@ -482,19 +482,27 @@ nextTurn();
 return;
 }
 
-const pos=mainPath[starts[color]];
+const startIndex=starts[color];
+const pos=mainPath[startIndex];
 
-placeToken(token,pos,starts[color],color);
+placeToken(token,pos,startIndex,color);
 
 token.dataset.out='true';
-token.dataset.index=starts[color];
-token.dataset.step='1';
+token.dataset.index=startIndex;
+
+token.dataset.step='0';
 
 }else{
 
-let step=parseInt(token.dataset.step);
-let index=parseInt(token.dataset.index);
+let currentIndex=parseInt(token.dataset.index);
 
+let targetIndex=currentIndex+rolled;
+
+while(targetIndex>=mainPath.length){
+targetIndex-=mainPath.length;
+}
+
+let step=parseInt(token.dataset.step||'0');
 const targetStep=step+rolled;
 
 // HOME PATH ENTRY
@@ -508,22 +516,14 @@ if(targetStep>=51){
 let homeIndex=targetStep-51;
 
 if(homeIndex<homePaths[color].length){
-
 placeToken(token,homePaths[color][homeIndex],'home-'+homeIndex,color);
-
 }
 
 }else{
 
-index=index+rolled;
+placeToken(token,mainPath[targetIndex],targetIndex,color);
 
-if(index>=mainPath.length){
-index=index-mainPath.length;
-}
-
-placeToken(token,mainPath[index],index,color);
-
-token.dataset.index=index;
+token.dataset.index=targetIndex;
 }
 
 token.dataset.step=targetStep;
