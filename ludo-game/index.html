@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,110 +8,149 @@
 
 <style>
 
-:root{
-    --red:#e53935;
-    --green:#43a047;
-    --yellow:#fdd835;
-    --blue:#1e88e5;
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
 }
 
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family:Arial, Helvetica, sans-serif;
+:root{
+--red:#d62828;
+--green:#2a9d2a;
+--yellow:#e9c600;
+--blue:#2774d9;
 }
 
 body{
-    background:#ececec;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    min-height:100vh;
-    gap:18px;
-    padding:20px;
+background:#efefef;
+font-family:Arial,Helvetica,sans-serif;
+display:flex;
+justify-content:center;
+align-items:center;
+min-height:100vh;
+padding:10px;
 }
 
-h1{
-    font-size:38px;
+.game{
+display:flex;
+flex-direction:column;
+align-items:center;
+gap:18px;
 }
 
-.controls{
-    display:flex;
-    gap:15px;
-    flex-wrap:wrap;
-    align-items:center;
-    justify-content:center;
+.top{
+display:flex;
+gap:18px;
+align-items:center;
+flex-wrap:wrap;
+justify-content:center;
 }
 
-.turn-btn{
-    padding:12px 22px;
-    border:none;
-    border-radius:14px;
-    font-size:18px;
-    font-weight:bold;
-    background:white;
-    box-shadow:0 6px 12px rgba(0,0,0,0.25);
+.turn{
+padding:12px 24px;
+background:white;
+border-radius:14px;
+font-weight:bold;
+font-size:20px;
+box-shadow:0 4px 12px rgba(0,0,0,.2);
 }
 
-.new-game-btn{
-    padding:12px 22px;
-    border:none;
-    border-radius:14px;
-    font-size:18px;
-    font-weight:bold;
-    cursor:pointer;
-    background:linear-gradient(145deg,#ffffff,#d9d9d9);
-    box-shadow:
-      0 6px 12px rgba(0,0,0,0.25),
-      inset 2px 2px 4px rgba(255,255,255,0.9),
-      inset -2px -2px 4px rgba(0,0,0,0.15);
+.new-btn{
+padding:12px 22px;
+border:none;
+border-radius:12px;
+background:#222;
+color:white;
+font-size:16px;
+font-weight:bold;
+cursor:pointer;
+box-shadow:0 4px 12px rgba(0,0,0,.25);
 }
+
+.scene{
+width:80px;
+height:80px;
+perspective:700px;
+}
+
+.dice{
+width:100%;
+height:100%;
+position:relative;
+transform-style:preserve-3d;
+transition:1s;
+cursor:pointer;
+}
+
+.face{
+position:absolute;
+width:80px;
+height:80px;
+background:white;
+border:3px solid #222;
+border-radius:16px;
+display:grid;
+grid-template-columns:repeat(3,1fr);
+grid-template-rows:repeat(3,1fr);
+padding:10px;
+}
+
+.dot{
+width:12px;
+height:12px;
+background:#111;
+border-radius:50%;
+place-self:center;
+}
+
+.front{transform:translateZ(40px);}
+.back{transform:rotateY(180deg) translateZ(40px);}
+.right{transform:rotateY(90deg) translateZ(40px);}
+.left{transform:rotateY(-90deg) translateZ(40px);}
+.topf{transform:rotateX(90deg) translateZ(40px);}
+.bottom{transform:rotateX(-90deg) translateZ(40px);}
 
 .board{
-    width:min(92vw,720px);
-    aspect-ratio:1;
-    background:white;
-    display:grid;
-    grid-template-columns:repeat(15,1fr);
-    grid-template-rows:repeat(15,1fr);
-    border:4px solid #111;
-    position:relative;
+width:min(95vw,720px);
+aspect-ratio:1;
+display:grid;
+grid-template-columns:repeat(15,1fr);
+grid-template-rows:repeat(15,1fr);
+background:white;
+position:relative;
+border:3px solid #111;
+overflow:hidden;
 }
 
 .cell{
-    border:1px solid #ccc;
+border:1px solid rgba(0,0,0,.12);
+position:relative;
 }
 
 .red-bg{background:var(--red);}
-.green-bg{background:var(--green);}
 .blue-bg{background:var(--blue);}
+.green-bg{background:var(--green);}
 .yellow-bg{background:var(--yellow);}
 
-.safe-star{
-    position:relative;
-}
-
-.safe-star::before{
-    content:"★";
-    position:absolute;
-    inset:0;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    color:white;
-    font-size:22px;
-    text-shadow:0 0 5px black;
+.safe::before{
+content:"★";
+position:absolute;
+inset:0;
+display:flex;
+align-items:center;
+justify-content:center;
+color:white;
+font-size:20px;
+text-shadow:0 0 5px black;
 }
 
 .yard{
-    position:absolute;
-    width:40%;
-    height:40%;
-    display:flex;
-    justify-content:center;
-    align-items:center;
+position:absolute;
+width:40%;
+height:40%;
+display:flex;
+justify-content:center;
+align-items:center;
 }
 
 .red-yard{left:0;bottom:0;background:var(--red);}
@@ -119,284 +159,396 @@ h1{
 .yellow-yard{right:0;bottom:0;background:var(--yellow);}
 
 .yard-inner{
-    width:68%;
-    height:68%;
-    background:white;
-    border-radius:10px;
-    display:grid;
-    grid-template-columns:repeat(2,1fr);
-    gap:15%;
-    padding:12%;
+width:70%;
+height:70%;
+background:white;
+border-radius:12px;
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:14%;
+padding:12%;
 }
 
 .token{
-    width:100%;
-    height:100%;
-    border-radius:50%;
-    box-shadow:
-      inset -5px -5px 10px rgba(0,0,0,0.25),
-      inset 5px 5px 8px rgba(255,255,255,0.4),
-      0 4px 8px rgba(0,0,0,0.4);
+width:100%;
+height:100%;
+border-radius:50%;
+position:relative;
+cursor:pointer;
+box-shadow:
+inset -4px -4px 8px rgba(0,0,0,.3),
+inset 4px 4px 8px rgba(255,255,255,.5),
+0 3px 8px rgba(0,0,0,.35);
 }
 
-.red{background:var(--red);}
-.blue{background:var(--blue);}
-.green{background:var(--green);}
-.yellow{background:var(--yellow);}
+.token.red{background:radial-gradient(circle at top,#ff5f5f,#980000);}
+.token.blue{background:radial-gradient(circle at top,#62a9ff,#004ea8);}
+.token.green{background:radial-gradient(circle at top,#63ff63,#007700);}
+.token.yellow{background:radial-gradient(circle at top,#fff06a,#aa8c00);}
+
+.highlight{
+outline:4px solid white;
+transform:scale(1.15);
+}
 
 .center{
-    grid-column:7/10;
-    grid-row:7/10;
-    display:grid;
-    grid-template-columns:repeat(3,1fr);
-    grid-template-rows:repeat(3,1fr);
+grid-column:7/10;
+grid-row:7/10;
+display:grid;
+grid-template-columns:repeat(3,1fr);
+grid-template-rows:repeat(3,1fr);
+z-index:5;
 }
+
+.center div{border:1px solid rgba(0,0,0,.1);}
 
 .c-red{background:var(--red);}
 .c-blue{background:var(--blue);}
 .c-green{background:var(--green);}
 .c-yellow{background:var(--yellow);}
 
-.winner{
-    background:white;
-    border-radius:50%;
-    margin:10%;
-    border:3px solid #555;
+.cup{
+background:white;
+border-radius:50%;
+margin:10%;
+border:3px solid #555;
 }
 
-/* 3D DICE */
-
-.scene{
-    width:80px;
-    height:80px;
-    perspective:600px;
+@media(max-width:700px){
+.turn{font-size:16px;}
+.scene{width:65px;height:65px;}
+.face{width:65px;height:65px;}
+.front{transform:translateZ(32px);}
+.back{transform:rotateY(180deg) translateZ(32px);}
+.right{transform:rotateY(90deg) translateZ(32px);}
+.left{transform:rotateY(-90deg) translateZ(32px);}
+.topf{transform:rotateX(90deg) translateZ(32px);}
+.bottom{transform:rotateX(-90deg) translateZ(32px);}
 }
-
-.dice{
-    width:100%;
-    height:100%;
-    position:relative;
-    transform-style:preserve-3d;
-    transition:transform 1s;
-    cursor:pointer;
-}
-
-.face{
-    position:absolute;
-    width:80px;
-    height:80px;
-    background:white;
-    border:3px solid #111;
-    border-radius:14px;
-    display:grid;
-    place-items:center;
-    font-size:32px;
-    font-weight:bold;
-}
-
-.front{transform:translateZ(40px);}
-.back{transform:rotateY(180deg) translateZ(40px);}
-.right{transform:rotateY(90deg) translateZ(40px);}
-.left{transform:rotateY(-90deg) translateZ(40px);}
-.top{transform:rotateX(90deg) translateZ(40px);}
-.bottom{transform:rotateX(-90deg) translateZ(40px);}
 
 </style>
 </head>
-
 <body>
 
-<h1>🎲 Ludo Classic</h1>
+<div class="game">
 
-<div class="controls">
-
-<button class="turn-btn" id="turnBtn">
-🔴 Red Turn
-</button>
+<div class="top">
+<div class="turn" id="turnText">🔴 Red Turn</div>
 
 <div class="scene">
 <div class="dice" id="dice">
 
-<div class="face front">1</div>
-<div class="face back">6</div>
-<div class="face right">3</div>
-<div class="face left">4</div>
-<div class="face top">5</div>
-<div class="face bottom">2</div>
+<div class="face front">
+<div></div><div></div><div></div>
+<div></div><div class="dot"></div><div></div>
+<div></div><div></div><div></div>
+</div>
+
+<div class="face back">
+<div class="dot"></div><div></div><div class="dot"></div>
+<div class="dot"></div><div></div><div class="dot"></div>
+<div class="dot"></div><div></div><div class="dot"></div>
+</div>
+
+<div class="face right">
+<div class="dot"></div><div></div><div></div>
+<div></div><div class="dot"></div><div></div>
+<div></div><div></div><div class="dot"></div>
+</div>
+
+<div class="face left">
+<div></div><div></div><div></div>
+<div class="dot"></div><div></div><div class="dot"></div>
+<div></div><div></div><div></div>
+</div>
+
+<div class="face topf">
+<div class="dot"></div><div></div><div class="dot"></div>
+<div></div><div class="dot"></div><div></div>
+<div class="dot"></div><div></div><div class="dot"></div>
+</div>
+
+<div class="face bottom">
+<div class="dot"></div><div></div><div class="dot"></div>
+<div></div><div></div><div></div>
+<div class="dot"></div><div></div><div class="dot"></div>
+</div>
 
 </div>
 </div>
 
-<button class="new-game-btn" id="newGameBtn">
-🎮 New Game
-</button>
-
+<button class="new-btn" onclick="location.reload()">🎮 New Game</button>
 </div>
 
 <div class="board" id="board"></div>
 
+</div>
+
 <script>
 
-const board=document.getElementById("board");
+const board=document.getElementById('board');
 
-function createCell(r,c,cls=""){
-    const cell=document.createElement("div");
-    cell.className=`cell ${cls}`;
-    cell.style.gridRow=r;
-    cell.style.gridColumn=c;
-    board.appendChild(cell);
+function cell(r,c,cls=''){
+const d=document.createElement('div');
+d.className='cell '+cls;
+d.style.gridRow=r;
+d.style.gridColumn=c;
+board.appendChild(d);
 }
 
 for(let r=1;r<=15;r++){
-    for(let c=1;c<=15;c++){
-        createCell(r,c);
-    }
+for(let c=1;c<=15;c++){
+cell(r,c);
+}
 }
 
-/* STAR CELLS */
+// HOME PATHS
+for(let r=10;r<=14;r++) cell(r,8,'red-bg');
+for(let c=2;c<=6;c++) cell(8,c,'blue-bg');
+for(let r=2;r<=6;r++) cell(r,8,'green-bg');
+for(let c=10;c<=14;c++) cell(8,c,'yellow-bg');
 
-createCell(14,7,"red-bg safe-star");
-createCell(9,3,"safe-star");
-createCell(7,2,"blue-bg safe-star");
-createCell(3,7,"safe-star");
-createCell(2,9,"green-bg safe-star");
-createCell(7,13,"safe-star");
-createCell(9,14,"yellow-bg safe-star");
-createCell(13,9,"safe-star");
+// STARS
+[
+[14,7,'red-bg safe'],
+[9,3,'safe'],
+[7,2,'blue-bg safe'],
+[3,7,'safe'],
+[2,9,'green-bg safe'],
+[7,13,'safe'],
+[9,14,'yellow-bg safe'],
+[13,9,'safe']
+].forEach(s=>cell(s[0],s[1],s[2]));
 
-/* HOME PATHS */
-
-for(let r=10;r<=14;r++) createCell(r,8,"red-bg");
-for(let c=2;c<=6;c++) createCell(8,c,"blue-bg");
-for(let r=2;r<=6;r++) createCell(r,8,"green-bg");
-for(let c=10;c<=14;c++) createCell(8,c,"yellow-bg");
-
-/* CENTER */
-
-const center=document.createElement("div");
-center.className="center";
-
+// CENTER
+const center=document.createElement('div');
+center.className='center';
 center.innerHTML=`
 <div class="c-blue"></div>
 <div class="c-green"></div>
 <div class="c-green"></div>
-
 <div class="c-blue"></div>
-<div class="winner"></div>
+<div class="cup"></div>
 <div class="c-yellow"></div>
-
 <div class="c-red"></div>
 <div class="c-red"></div>
 <div class="c-yellow"></div>
 `;
-
 board.appendChild(center);
 
-/* YARDS */
+// YARDS
+[
+['blue-yard','blue'],
+['green-yard','green'],
+['red-yard','red'],
+['yellow-yard','yellow']
+].forEach(y=>{
 
-const yards=[
-["blue-yard","blue"],
-["green-yard","green"],
-["red-yard","red"],
-["yellow-yard","yellow"]
-];
+const yd=document.createElement('div');
+yd.className='yard '+y[0];
 
-yards.forEach(y=>{
+const inner=document.createElement('div');
+inner.className='yard-inner';
 
-    const yard=document.createElement("div");
-    yard.className=`yard ${y[0]}`;
+for(let i=0;i<4;i++){
+const t=document.createElement('div');
+t.className='token '+y[1];
+t.dataset.out='false';
+t.dataset.step='0';
+t.dataset.index='0';
+inner.appendChild(t);
+}
 
-    const inner=document.createElement("div");
-    inner.className="yard-inner";
-
-    for(let i=0;i<4;i++){
-
-        const token=document.createElement("div");
-        token.className=`token ${y[1]}`;
-
-        inner.appendChild(token);
-    }
-
-    yard.appendChild(inner);
-    board.appendChild(yard);
-
+yd.appendChild(inner);
+board.appendChild(yd);
 });
 
-/* TURN SYSTEM */
-
-const players=[
-"🔴 Red",
-"🔵 Blue",
-"🟢 Green",
-"🟡 Yellow"
+const mainPath=[
+[14,7],[13,7],[12,7],[11,7],[10,7],
+[9,6],[9,5],[9,4],[9,3],[9,2],[9,1],
+[8,1],[7,1],
+[7,2],[7,3],[7,4],[7,5],[7,6],
+[6,7],[5,7],[4,7],[3,7],[2,7],[1,7],
+[1,8],[1,9],
+[2,9],[3,9],[4,9],[5,9],[6,9],
+[7,10],[7,11],[7,12],[7,13],[7,14],[7,15],
+[8,15],[9,15],
+[9,14],[9,13],[9,12],[9,11],[9,10],
+[10,9],[11,9],[12,9],[13,9],[14,9],[15,9],
+[15,8],[15,7]
 ];
 
-let currentPlayer=0;
+const homePaths={
+red:[[14,8],[13,8],[12,8],[11,8],[10,8],[8,8]],
+blue:[[8,2],[8,3],[8,4],[8,5],[8,6],[8,8]],
+green:[[2,8],[3,8],[4,8],[5,8],[6,8],[8,8]],
+yellow:[[8,14],[8,13],[8,12],[8,11],[8,10],[8,8]]
+};
 
-const turnBtn=document.getElementById("turnBtn");
+const starts={red:0,blue:13,green:26,yellow:39};
+
+const players=['red','blue','green','yellow'];
+let currentPlayer=0;
+let rolled=0;
+let canMove=false;
+
+const dice=document.getElementById('dice');
+const turnText=document.getElementById('turnText');
 
 function updateTurn(){
-    turnBtn.innerHTML=players[currentPlayer]+" Turn";
+const txt=['🔴 Red Turn','🔵 Blue Turn','🟢 Green Turn','🟡 Yellow Turn'];
+turnText.innerHTML=txt[currentPlayer];
 }
 
 updateTurn();
 
-/* DICE */
+// DICE
 
-const dice=document.getElementById("dice");
+dice.addEventListener('click',()=>{
 
-dice.addEventListener("click",()=>{
+if(canMove) return;
 
-    const value=Math.floor(Math.random()*6)+1;
+rolled=Math.floor(Math.random()*6)+1;
 
-    dice.style.transform=
-    `rotateX(${360*3}deg) rotateY(${360*3}deg)`;
+// ANIMATION
 
-    setTimeout(()=>{
+dice.style.transform='rotateX(1080deg) rotateY(1080deg)';
 
-        switch(value){
+setTimeout(()=>{
 
-            case 1:
-                dice.style.transform='rotateX(0deg) rotateY(0deg)';
-                break;
+switch(rolled){
+case 1:dice.style.transform='rotateX(0deg)';break;
+case 2:dice.style.transform='rotateX(-90deg)';break;
+case 3:dice.style.transform='rotateY(90deg)';break;
+case 4:dice.style.transform='rotateY(-90deg)';break;
+case 5:dice.style.transform='rotateX(90deg)';break;
+case 6:dice.style.transform='rotateY(180deg)';break;
+}
 
-            case 2:
-                dice.style.transform='rotateX(90deg)';
-                break;
+activateTokens();
 
-            case 3:
-                dice.style.transform='rotateY(-90deg)';
-                break;
-
-            case 4:
-                dice.style.transform='rotateY(90deg)';
-                break;
-
-            case 5:
-                dice.style.transform='rotateX(-90deg)';
-                break;
-
-            case 6:
-                dice.style.transform='rotateY(180deg)';
-                break;
-        }
-
-        currentPlayer=(currentPlayer+1)%4;
-
-        updateTurn();
-
-    },1000);
+},900);
 
 });
 
-/* NEW GAME */
+function activateTokens(){
 
-document.getElementById("newGameBtn")
-.addEventListener("click",()=>{
-    location.reload();
+clearHighlights();
+canMove=true;
+
+const color=players[currentPlayer];
+const tokens=document.querySelectorAll('.token.'+color);
+
+let movable=0;
+
+tokens.forEach(token=>{
+
+const out=token.dataset.out==='true';
+
+if(!out && rolled!==6) return;
+
+movable++;
+
+token.classList.add('highlight');
+
+token.onclick=()=>moveToken(token,color);
+
 });
+
+if(movable===0){
+setTimeout(nextTurn,700);
+}
+}
+
+function clearHighlights(){
+document.querySelectorAll('.token').forEach(t=>{
+t.classList.remove('highlight');
+t.onclick=null;
+});
+}
+
+function moveToken(token,color){
+
+if(!canMove) return;
+
+clearHighlights();
+
+let out=token.dataset.out==='true';
+
+if(!out){
+
+const pos=mainPath[starts[color]];
+
+placeToken(token,pos);
+
+token.dataset.out='true';
+token.dataset.index=starts[color];
+token.dataset.step='0';
+
+}else{
+
+let step=parseInt(token.dataset.step);
+let index=parseInt(token.dataset.index);
+
+step += rolled;
+
+if(step>50){
+
+let homeIndex=step-51;
+
+if(homeIndex<homePaths[color].length){
+placeToken(token,homePaths[color][homeIndex]);
+}
+
+}else{
+
+index=(index+rolled)%mainPath.length;
+
+token.dataset.index=index;
+
+placeToken(token,mainPath[index]);
+}
+
+token.dataset.step=step;
+}
+
+canMove=false;
+
+if(rolled!==6){
+setTimeout(nextTurn,500);
+}else{
+setTimeout(()=>{
+updateTurn();
+},400);
+}
+}
+
+function placeToken(token,pos){
+
+token.style.position='absolute';
+token.style.width='4.5%';
+token.style.height='4.5%';
+
+token.style.left=((pos[1]-1)*(100/15)+1.1)+'%';
+token.style.top=((pos[0]-1)*(100/15)+1.1)+'%';
+
+token.style.zIndex='999';
+
+board.appendChild(token);
+}
+
+function nextTurn(){
+
+clearHighlights();
+canMove=false;
+
+currentPlayer=(currentPlayer+1)%4;
+
+updateTurn();
+}
 
 </script>
 
 </body>
 </html>
+```
