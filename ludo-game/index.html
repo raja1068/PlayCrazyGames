@@ -488,7 +488,7 @@ placeToken(token,pos,starts[color],color);
 
 token.dataset.out='true';
 token.dataset.index=starts[color];
-token.dataset.step='0';
+token.dataset.step='1';
 
 }else{
 
@@ -503,7 +503,7 @@ nextTurn();
 return;
 }
 
-if(targetStep>50){
+if(targetStep>=51){
 
 let homeIndex=targetStep-51;
 
@@ -515,7 +515,11 @@ placeToken(token,homePaths[color][homeIndex],'home-'+homeIndex,color);
 
 }else{
 
-index=(index+rolled)%mainPath.length;
+index=index+rolled;
+
+if(index>=mainPath.length){
+index=index-mainPath.length;
+}
 
 placeToken(token,mainPath[index],index,color);
 
