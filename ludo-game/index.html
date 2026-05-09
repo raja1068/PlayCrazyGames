@@ -12,8 +12,6 @@
     --green:#43a047;
     --yellow:#fdd835;
     --blue:#1e88e5;
-    --white:#ffffff;
-    --border:#222;
 }
 
 *{
@@ -46,36 +44,28 @@ h1{
     justify-content:center;
 }
 
-.turn-box{
-    padding:12px 20px;
-    background:white;
-    border-radius:12px;
-    font-weight:bold;
-    box-shadow:0 5px 12px rgba(0,0,0,0.2);
-}
-
-button{
-    border:none;
-    cursor:pointer;
-}
-
-.roll-btn,
-.new-game-btn{
+.turn-btn{
     padding:12px 22px;
+    border:none;
     border-radius:14px;
     font-size:18px;
     font-weight:bold;
+    background:white;
+    box-shadow:0 6px 12px rgba(0,0,0,0.25);
+}
+
+.new-game-btn{
+    padding:12px 22px;
+    border:none;
+    border-radius:14px;
+    font-size:18px;
+    font-weight:bold;
+    cursor:pointer;
     background:linear-gradient(145deg,#ffffff,#d9d9d9);
     box-shadow:
       0 6px 12px rgba(0,0,0,0.25),
       inset 2px 2px 4px rgba(255,255,255,0.9),
       inset -2px -2px 4px rgba(0,0,0,0.15);
-    transition:0.25s;
-}
-
-.roll-btn:hover,
-.new-game-btn:hover{
-    transform:scale(1.05);
 }
 
 .board{
@@ -91,16 +81,15 @@ button{
 
 .cell{
     border:1px solid #ccc;
-    position:relative;
 }
 
-.red-bg{ background:var(--red); }
-.green-bg{ background:var(--green); }
-.blue-bg{ background:var(--blue); }
-.yellow-bg{ background:var(--yellow); }
+.red-bg{background:var(--red);}
+.green-bg{background:var(--green);}
+.blue-bg{background:var(--blue);}
+.yellow-bg{background:var(--yellow);}
 
-.white{
-    background:white;
+.safe-star{
+    position:relative;
 }
 
 .safe-star::before{
@@ -110,8 +99,8 @@ button{
     display:flex;
     justify-content:center;
     align-items:center;
-    font-size:22px;
     color:white;
+    font-size:22px;
     text-shadow:0 0 5px black;
 }
 
@@ -120,43 +109,24 @@ button{
     width:40%;
     height:40%;
     display:flex;
-    align-items:center;
     justify-content:center;
+    align-items:center;
 }
 
-.red-yard{
-    bottom:0;
-    left:0;
-    background:var(--red);
-}
-
-.blue-yard{
-    top:0;
-    left:0;
-    background:var(--blue);
-}
-
-.green-yard{
-    top:0;
-    right:0;
-    background:var(--green);
-}
-
-.yellow-yard{
-    bottom:0;
-    right:0;
-    background:var(--yellow);
-}
+.red-yard{left:0;bottom:0;background:var(--red);}
+.blue-yard{left:0;top:0;background:var(--blue);}
+.green-yard{right:0;top:0;background:var(--green);}
+.yellow-yard{right:0;bottom:0;background:var(--yellow);}
 
 .yard-inner{
     width:68%;
     height:68%;
     background:white;
+    border-radius:10px;
     display:grid;
     grid-template-columns:repeat(2,1fr);
     gap:15%;
     padding:12%;
-    border-radius:10px;
 }
 
 .token{
@@ -167,18 +137,12 @@ button{
       inset -5px -5px 10px rgba(0,0,0,0.25),
       inset 5px 5px 8px rgba(255,255,255,0.4),
       0 4px 8px rgba(0,0,0,0.4);
-    cursor:pointer;
 }
 
-.token.red{ background:var(--red); }
-.token.blue{ background:var(--blue); }
-.token.green{ background:var(--green); }
-.token.yellow{ background:var(--yellow); }
-
-.highlight{
-    outline:4px solid white;
-    transform:scale(1.12);
-}
+.red{background:var(--red);}
+.blue{background:var(--blue);}
+.green{background:var(--green);}
+.yellow{background:var(--yellow);}
 
 .center{
     grid-column:7/10;
@@ -186,13 +150,12 @@ button{
     display:grid;
     grid-template-columns:repeat(3,1fr);
     grid-template-rows:repeat(3,1fr);
-    z-index:5;
 }
 
-.c-red{ background:var(--red); }
-.c-blue{ background:var(--blue); }
-.c-green{ background:var(--green); }
-.c-yellow{ background:var(--yellow); }
+.c-red{background:var(--red);}
+.c-blue{background:var(--blue);}
+.c-green{background:var(--green);}
+.c-yellow{background:var(--yellow);}
 
 .winner{
     background:white;
@@ -201,23 +164,70 @@ button{
     border:3px solid #555;
 }
 
+/* 3D DICE */
+
+.scene{
+    width:80px;
+    height:80px;
+    perspective:600px;
+}
+
+.dice{
+    width:100%;
+    height:100%;
+    position:relative;
+    transform-style:preserve-3d;
+    transition:transform 1s;
+    cursor:pointer;
+}
+
+.face{
+    position:absolute;
+    width:80px;
+    height:80px;
+    background:white;
+    border:3px solid #111;
+    border-radius:14px;
+    display:grid;
+    place-items:center;
+    font-size:32px;
+    font-weight:bold;
+}
+
+.front{transform:translateZ(40px);}
+.back{transform:rotateY(180deg) translateZ(40px);}
+.right{transform:rotateY(90deg) translateZ(40px);}
+.left{transform:rotateY(-90deg) translateZ(40px);}
+.top{transform:rotateX(90deg) translateZ(40px);}
+.bottom{transform:rotateX(-90deg) translateZ(40px);}
+
 </style>
 </head>
+
 <body>
 
 <h1>🎲 Ludo Classic</h1>
 
 <div class="controls">
 
-<div class="turn-box" id="turnBox">
+<button class="turn-btn" id="turnBtn">
 🔴 Red Turn
-</div>
-
-<button class="roll-btn" id="rollBtn">
-🎲 Roll Dice
 </button>
 
-<button id="newGameBtn" class="new-game-btn">
+<div class="scene">
+<div class="dice" id="dice">
+
+<div class="face front">1</div>
+<div class="face back">6</div>
+<div class="face right">3</div>
+<div class="face left">4</div>
+<div class="face top">5</div>
+<div class="face bottom">2</div>
+
+</div>
+</div>
+
+<button class="new-game-btn" id="newGameBtn">
 🎮 New Game
 </button>
 
@@ -239,11 +249,11 @@ function createCell(r,c,cls=""){
 
 for(let r=1;r<=15;r++){
     for(let c=1;c<=15;c++){
-        createCell(r,c,"white");
+        createCell(r,c);
     }
 }
 
-/* SAFE STAR CELLS */
+/* STAR CELLS */
 
 createCell(14,7,"red-bg safe-star");
 createCell(9,3,"safe-star");
@@ -254,23 +264,12 @@ createCell(7,13,"safe-star");
 createCell(9,14,"yellow-bg safe-star");
 createCell(13,9,"safe-star");
 
-/* FINAL HOME PATHS */
+/* HOME PATHS */
 
-for(let r=10;r<=14;r++){
-    createCell(r,8,"red-bg");
-}
-
-for(let c=2;c<=6;c++){
-    createCell(8,c,"blue-bg");
-}
-
-for(let r=2;r<=6;r++){
-    createCell(r,8,"green-bg");
-}
-
-for(let c=10;c<=14;c++){
-    createCell(8,c,"yellow-bg");
-}
+for(let r=10;r<=14;r++) createCell(r,8,"red-bg");
+for(let c=2;c<=6;c++) createCell(8,c,"blue-bg");
+for(let r=2;r<=6;r++) createCell(r,8,"green-bg");
+for(let c=10;c<=14;c++) createCell(8,c,"yellow-bg");
 
 /* CENTER */
 
@@ -303,6 +302,7 @@ const yards=[
 ];
 
 yards.forEach(y=>{
+
     const yard=document.createElement("div");
     yard.className=`yard ${y[0]}`;
 
@@ -310,45 +310,89 @@ yards.forEach(y=>{
     inner.className="yard-inner";
 
     for(let i=0;i<4;i++){
+
         const token=document.createElement("div");
         token.className=`token ${y[1]}`;
+
         inner.appendChild(token);
     }
 
     yard.appendChild(inner);
     board.appendChild(yard);
+
 });
 
 /* TURN SYSTEM */
 
-const players=["Red","Blue","Green","Yellow"];
+const players=[
+"🔴 Red",
+"🔵 Blue",
+"🟢 Green",
+"🟡 Yellow"
+];
+
 let currentPlayer=0;
 
+const turnBtn=document.getElementById("turnBtn");
+
 function updateTurn(){
-    const colors=["🔴","🔵","🟢","🟡"];
-    document.getElementById("turnBox").innerHTML=
-    `${colors[currentPlayer]} ${players[currentPlayer]} Turn`;
+    turnBtn.innerHTML=players[currentPlayer]+" Turn";
 }
 
 updateTurn();
 
 /* DICE */
 
-document.getElementById("rollBtn").addEventListener("click",()=>{
+const dice=document.getElementById("dice");
 
-    let dice=Math.floor(Math.random()*6)+1;
+dice.addEventListener("click",()=>{
 
-    alert(players[currentPlayer]+" rolled "+dice);
+    const value=Math.floor(Math.random()*6)+1;
 
-    currentPlayer=(currentPlayer+1)%4;
+    dice.style.transform=
+    `rotateX(${360*3}deg) rotateY(${360*3}deg)`;
 
-    updateTurn();
+    setTimeout(()=>{
+
+        switch(value){
+
+            case 1:
+                dice.style.transform='rotateX(0deg) rotateY(0deg)';
+                break;
+
+            case 2:
+                dice.style.transform='rotateX(90deg)';
+                break;
+
+            case 3:
+                dice.style.transform='rotateY(-90deg)';
+                break;
+
+            case 4:
+                dice.style.transform='rotateY(90deg)';
+                break;
+
+            case 5:
+                dice.style.transform='rotateX(-90deg)';
+                break;
+
+            case 6:
+                dice.style.transform='rotateY(180deg)';
+                break;
+        }
+
+        currentPlayer=(currentPlayer+1)%4;
+
+        updateTurn();
+
+    },1000);
 
 });
 
 /* NEW GAME */
 
-document.getElementById("newGameBtn").addEventListener("click",()=>{
+document.getElementById("newGameBtn")
+.addEventListener("click",()=>{
     location.reload();
 });
 
