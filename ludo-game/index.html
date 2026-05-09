@@ -477,9 +477,14 @@ let out=token.dataset.out==='true';
 
 if(!out){
 
+if(rolled!==6){
+nextTurn();
+return;
+}
+
 const pos=mainPath[starts[color]];
 
-placeToken(token,pos);
+placeToken(token,pos,starts[color],color);
 
 token.dataset.out='true';
 token.dataset.index=starts[color];
@@ -490,26 +495,34 @@ token.dataset.step='0';
 let step=parseInt(token.dataset.step);
 let index=parseInt(token.dataset.index);
 
-step += rolled;
+const targetStep=step+rolled;
 
-if(step>50){
+// HOME PATH ENTRY
+if(targetStep>56){
+nextTurn();
+return;
+}
 
-let homeIndex=step-51;
+if(targetStep>50){
+
+let homeIndex=targetStep-51;
 
 if(homeIndex<homePaths[color].length){
-placeToken(token,homePaths[color][homeIndex]);
+
+placeToken(token,homePaths[color][homeIndex],'home-'+homeIndex,color);
+
 }
 
 }else{
 
 index=(index+rolled)%mainPath.length;
 
-token.dataset.index=index;
+placeToken(token,mainPath[index],index,color);
 
-placeToken(token,mainPath[index]);
+token.dataset.index=index;
 }
 
-token.dataset.step=step;
+token.dataset.step=targetStep;
 }
 
 canMove=false;
@@ -523,14 +536,38 @@ updateTurn();
 }
 }
 
-function placeToken(token,pos){
+function placeToken(token,pos,cellKey,color){
+
+const sameCellTokens=[...document.querySelectorAll('.token')].filter(t=>{
+
+if(t===token) return false;
+
+const left=t.dataset.leftPos;
+const top=t.dataset.topPos;
+
+return left===String(pos[1]) && top===String(pos[0]);
+
+});
+
+const offsets=[
+[-1.1,-1.1],
+[1.1,-1.1],
+[-1.1,1.1],
+[1.1,1.1]
+];
+
+const offset=offsets[Math.min(sameCellTokens.length,3)];
+
 
 token.style.position='absolute';
 token.style.width='4.5%';
 token.style.height='4.5%';
 
-token.style.left=((pos[1]-1)*(100/15)+1.1)+'%';
-token.style.top=((pos[0]-1)*(100/15)+1.1)+'%';
+token.style.left=((pos[1]-1)*(100/15)+1.8+offset[0])+'%';
+token.style.top=((pos[0]-1)*(100/15)+1.8+offset[1])+'%';
+
+token.dataset.leftPos=pos[1];
+token.dataset.topPos=pos[0];
 
 token.style.zIndex='999';
 
