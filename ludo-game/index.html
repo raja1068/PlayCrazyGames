@@ -473,8 +473,9 @@ if(!canMove) return;
 
 clearHighlights();
 
-let out=token.dataset.out==='true';
+const out=token.dataset.out==='true';
 
+// TOKEN COMES OUT ONLY ON 6
 if(!out){
 
 if(rolled!==6){
@@ -483,60 +484,73 @@ return;
 }
 
 const startIndex=starts[color];
-const pos=mainPath[startIndex];
+const startPos=mainPath[startIndex];
 
-placeToken(token,pos,startIndex,color);
+placeToken(token,startPos,startIndex,color);
 
 token.dataset.out='true';
 token.dataset.index=startIndex;
 
-token.dataset.step='0';
+token.dataset.moves='1';
 
-}else{
+canMove=false;
+rolled=0;
 
-let currentIndex=parseInt(token.dataset.index);
+// EXTRA TURN AFTER 6
+setTimeout(()=>{
+clearHighlights();
+updateTurn();
+},300);
 
-let targetIndex=currentIndex+rolled;
-
-while(targetIndex>=mainPath.length){
-targetIndex-=mainPath.length;
-}
-
-let step=parseInt(token.dataset.step||'0');
-const targetStep=step+rolled;
-
-// HOME PATH ENTRY
-if(targetStep>56){
-nextTurn();
 return;
 }
 
-if(targetStep>=51){
+// EXACT CELL MOVEMENT
+let currentIndex=parseInt(token.dataset.index);
+let currentMoves=parseInt(token.dataset.moves||'1');
 
-let homeIndex=targetStep-51;
+// MOVE EXACTLY SAME AS DICE DOTS
+let targetIndex=currentIndex;
 
-if(homeIndex<homePaths[color].length){
-placeToken(token,homePaths[color][homeIndex],'home-'+homeIndex,color);
+for(let i=0;i<rolled;i++){
+targetIndex++;
+if(targetIndex>=mainPath.length){
+targetIndex=0;
+}
+}
+
+const totalMoves=currentMoves+rolled;
+
+// HOME ENTRY
+if(totalMoves>51){
+
+const homeStep=totalMoves-52;
+
+if(homeStep>=0 && homeStep<homePaths[color].length){
+placeToken(token,homePaths[color][homeStep],'home-'+homeStep,color);
 }
 
 }else{
 
 placeToken(token,mainPath[targetIndex],targetIndex,color);
-
 token.dataset.index=targetIndex;
 }
 
-token.dataset.step=targetStep;
-}
+token.dataset.moves=totalMoves;
 
 canMove=false;
 
-if(rolled!==6){
-setTimeout(nextTurn,500);
+// TURN MANAGEMENT
+if(rolled===6){
+rolled=0;
+setTimeout(()=>{
+clearHighlights();
+updateTurn();
+},300);
 }else{
 setTimeout(()=>{
-updateTurn();
-},400);
+nextTurn();
+},450);
 }
 }
 
@@ -582,10 +596,17 @@ function nextTurn(){
 
 clearHighlights();
 canMove=false;
+rolled=0;
 
 currentPlayer=(currentPlayer+1)%4;
 
 updateTurn();
+
+// NEXT PLAYER CAN IMMEDIATELY ROLL DICE
+setTimeout(()=>{
+clearHighlights();
+},100);
+}
 }
 
 </script>
