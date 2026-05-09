@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ludo Classic</title>
+
+<style>
+
+:root{
+    --red:#e53935;
+    --green:#43a047;
+    --yellow:#fdd835;
+    --blue:#1e88e5;
+    --white:#ffffff;
+    --border:#222;
+}
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial, Helvetica, sans-serif;
+}
+
+body{
+    background:#ececec;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    min-height:100vh;
+    gap:18px;
+    padding:20px;
+}
+
+h1{
+    font-size:38px;
+}
+
+.controls{
+    display:flex;
+    gap:15px;
+    flex-wrap:wrap;
+    align-items:center;
+    justify-content:center;
+}
+
+.turn-box{
+    padding:12px 20px;
+    background:white;
+    border-radius:12px;
+    font-weight:bold;
+    box-shadow:0 5px 12px rgba(0,0,0,0.2);
+}
+
+button{
+    border:none;
+    cursor:pointer;
+}
+
+.roll-btn,
+.new-game-btn{
+    padding:12px 22px;
+    border-radius:14px;
+    font-size:18px;
+    font-weight:bold;
+    background:linear-gradient(145deg,#ffffff,#d9d9d9);
+    box-shadow:
+      0 6px 12px rgba(0,0,0,0.25),
+      inset 2px 2px 4px rgba(255,255,255,0.9),
+      inset -2px -2px 4px rgba(0,0,0,0.15);
+    transition:0.25s;
+}
+
+.roll-btn:hover,
+.new-game-btn:hover{
+    transform:scale(1.05);
+}
+
+.board{
+    width:min(92vw,720px);
+    aspect-ratio:1;
+    background:white;
+    display:grid;
+    grid-template-columns:repeat(15,1fr);
+    grid-template-rows:repeat(15,1fr);
+    border:4px solid #111;
+    position:relative;
+}
+
+.cell{
+    border:1px solid #ccc;
+    position:relative;
+}
+
+.red-bg{ background:var(--red); }
+.green-bg{ background:var(--green); }
+.blue-bg{ background:var(--blue); }
+.yellow-bg{ background:var(--yellow); }
+
+.white{
+    background:white;
+}
+
+.safe-star::before{
+    content:"★";
+    position:absolute;
+    inset:0;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-size:22px;
+    color:white;
+    text-shadow:0 0 5px black;
+}
+
+.yard{
+    position:absolute;
+    width:40%;
+    height:40%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+.red-yard{
+    bottom:0;
+    left:0;
+    background:var(--red);
+}
+
+.blue-yard{
+    top:0;
+    left:0;
+    background:var(--blue);
+}
+
+.green-yard{
+    top:0;
+    right:0;
+    background:var(--green);
+}
+
+.yellow-yard{
+    bottom:0;
+    right:0;
+    background:var(--yellow);
+}
+
+.yard-inner{
+    width:68%;
+    height:68%;
+    background:white;
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:15%;
+    padding:12%;
+    border-radius:10px;
+}
+
+.token{
+    width:100%;
+    height:100%;
+    border-radius:50%;
+    box-shadow:
+      inset -5px -5px 10px rgba(0,0,0,0.25),
+      inset 5px 5px 8px rgba(255,255,255,0.4),
+      0 4px 8px rgba(0,0,0,0.4);
+    cursor:pointer;
+}
+
+.token.red{ background:var(--red); }
+.token.blue{ background:var(--blue); }
+.token.green{ background:var(--green); }
+.token.yellow{ background:var(--yellow); }
+
+.highlight{
+    outline:4px solid white;
+    transform:scale(1.12);
+}
+
+.center{
+    grid-column:7/10;
+    grid-row:7/10;
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    grid-template-rows:repeat(3,1fr);
+    z-index:5;
+}
+
+.c-red{ background:var(--red); }
+.c-blue{ background:var(--blue); }
+.c-green{ background:var(--green); }
+.c-yellow{ background:var(--yellow); }
+
+.winner{
+    background:white;
+    border-radius:50%;
+    margin:10%;
+    border:3px solid #555;
+}
+
+</style>
+</head>
+<body>
+
+<h1>🎲 Ludo Classic</h1>
+
+<div class="controls">
+
+<div class="turn-box" id="turnBox">
+🔴 Red Turn
+</div>
+
+<button class="roll-btn" id="rollBtn">
+🎲 Roll Dice
+</button>
+
+<button id="newGameBtn" class="new-game-btn">
+🎮 New Game
+</button>
+
+</div>
+
+<div class="board" id="board"></div>
+
+<script>
+
+const board=document.getElementById("board");
+
+function createCell(r,c,cls=""){
+    const cell=document.createElement("div");
+    cell.className=`cell ${cls}`;
+    cell.style.gridRow=r;
+    cell.style.gridColumn=c;
+    board.appendChild(cell);
+}
+
+for(let r=1;r<=15;r++){
+    for(let c=1;c<=15;c++){
+        createCell(r,c,"white");
+    }
+}
+
+/* SAFE STAR CELLS */
+
+createCell(14,7,"red-bg safe-star");
+createCell(9,3,"safe-star");
+createCell(7,2,"blue-bg safe-star");
+createCell(3,7,"safe-star");
+createCell(2,9,"green-bg safe-star");
+createCell(7,13,"safe-star");
+createCell(9,14,"yellow-bg safe-star");
+createCell(13,9,"safe-star");
+
+/* FINAL HOME PATHS */
+
+for(let r=10;r<=14;r++){
+    createCell(r,8,"red-bg");
+}
+
+for(let c=2;c<=6;c++){
+    createCell(8,c,"blue-bg");
+}
+
+for(let r=2;r<=6;r++){
+    createCell(r,8,"green-bg");
+}
+
+for(let c=10;c<=14;c++){
+    createCell(8,c,"yellow-bg");
+}
+
+/* CENTER */
+
+const center=document.createElement("div");
+center.className="center";
+
+center.innerHTML=`
+<div class="c-blue"></div>
+<div class="c-green"></div>
+<div class="c-green"></div>
+
+<div class="c-blue"></div>
+<div class="winner"></div>
+<div class="c-yellow"></div>
+
+<div class="c-red"></div>
+<div class="c-red"></div>
+<div class="c-yellow"></div>
+`;
+
+board.appendChild(center);
+
+/* YARDS */
+
+const yards=[
+["blue-yard","blue"],
+["green-yard","green"],
+["red-yard","red"],
+["yellow-yard","yellow"]
+];
+
+yards.forEach(y=>{
+    const yard=document.createElement("div");
+    yard.className=`yard ${y[0]}`;
+
+    const inner=document.createElement("div");
+    inner.className="yard-inner";
+
+    for(let i=0;i<4;i++){
+        const token=document.createElement("div");
+        token.className=`token ${y[1]}`;
+        inner.appendChild(token);
+    }
+
+    yard.appendChild(inner);
+    board.appendChild(yard);
+});
+
+/* TURN SYSTEM */
+
+const players=["Red","Blue","Green","Yellow"];
+let currentPlayer=0;
+
+function updateTurn(){
+    const colors=["🔴","🔵","🟢","🟡"];
+    document.getElementById("turnBox").innerHTML=
+    `${colors[currentPlayer]} ${players[currentPlayer]} Turn`;
+}
+
+updateTurn();
+
+/* DICE */
+
+document.getElementById("rollBtn").addEventListener("click",()=>{
+
+    let dice=Math.floor(Math.random()*6)+1;
+
+    alert(players[currentPlayer]+" rolled "+dice);
+
+    currentPlayer=(currentPlayer+1)%4;
+
+    updateTurn();
+
+});
+
+/* NEW GAME */
+
+document.getElementById("newGameBtn").addEventListener("click",()=>{
+    location.reload();
+});
+
+</script>
+
+</body>
+</html>
