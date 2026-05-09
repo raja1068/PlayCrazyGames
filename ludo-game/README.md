@@ -3,12 +3,12 @@
 A fully functional, responsive Ludo board game built with vanilla HTML5, CSS3, and JavaScript. No frameworks required!
 
 ## 🎯 Features
-
+Blue
 ### Board Design
 - ✅ 15×15 CSS Grid layout matching classic Ludo design
-- ✅ 4 colored yards (Red, Green, Yellow, Blue) in corners
+- ✅ 4 colored yards (Red, Blue, Green, Yellow) in corners, arranged clockwise from Red yard, each corner of the board.
 - ✅ 4 tokens per color properly positioned in yards
-- ✅ Continuous clockwise movement path
+- ✅ Path of token's movement : Clockwise movement path begins with Red star-marked cell, outside Red yard for Red yard's tokens (taken into consideration, starting from Red yard as an example) , then 4 cells towards north besides Red yard, then 6 cells towards west (of which 5th cell is star-marked) besides Red yard, then 2 cell towards north (of which from 1st cell, a winner's path of 5 Blue cells for Blue tokens are gone towards east upto middle winner's cup safezone of the board), then 5 cells towards east (of which 1st cell is the Blue star-marked cell and beginning cell of Blue Yard's Blue tokens) besides Blue yard, then 6 cells towards north (of which 5th cell is star-marked) besides Blue yard, then 2 cells towards east (of which from 1st cell, a winner's path of 5 Green cells for Green tokens are gone towards south upto middle winner's cup safezone of the board), then 5 cells towards south (of which 1st cell is the star-marked Green cell and beginning cell of Green Yard's Green color tokens) besides Green yard, then 6 cells towards east  (of which 5th cell is star-marked) besides Green yard, then 2 cells towards south (of which from 1st cell, a winner's path of 5 Yellow cells for Yellow tokens are gone towards west upto middle winner's cup safezone of the board), then 5 cells towards west (of which 1st cell is the Yellow star-marked cell and beginning cell of Yellow Yard's Yellow tokens) besides Yellow yard, then 6 cells towards south  (of which 5th cell is star-marked) besides Yellow yard,  then 2 cells towards west (of which from 1st cell, a winner's path of 5 Red cells for Red tokens are gone towards north upto middle winner's cup safezone of the board). The pathway directions of each Blue, Green and Yellow tokens will be as per their positions on the Ludo board.
 - ✅ ⭐ Safe zones (star-marked cells) - tokens cannot be captured here
 - ✅ 🎯 Home columns (colored paths leading to center)
 - ✅ 🔺 Central home triangle with 4 colored sections
