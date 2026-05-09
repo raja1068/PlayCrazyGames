@@ -1,0 +1,221 @@
+/* =========================================================
+   TOKEN MOVEMENT SYSTEM
+   ADD BELOW YOUR EXISTING TURN SYSTEM
+========================================================= */
+
+const paths = {
+
+red:[
+[14,7],[13,7],[12,7],[11,7],[10,7],
+[9,6],[9,5],[9,4],[9,3],[9,2],[9,1],
+[8,1],[7,1],
+
+[7,2],[7,3],[7,4],[7,5],[7,6],
+
+[6,7],[5,7],[4,7],[3,7],[2,7],[1,7],
+
+[1,8],[1,9],
+
+[2,9],[3,9],[4,9],[5,9],[6,9],
+
+[7,10],[7,11],[7,12],[7,13],[7,14],[7,15],
+
+[8,15],[9,15],
+
+[9,14],[9,13],[9,12],[9,11],[9,10],
+
+[10,9],[11,9],[12,9],[13,9],[14,9],[15,9],
+
+[15,8],
+
+[14,8],[13,8],[12,8],[11,8],[10,8],[9,8]
+],
+
+blue:[],
+green:[],
+yellow:[]
+};
+
+/* ROTATE PATHS FOR OTHER COLORS */
+
+paths.blue = [...paths.red.slice(13), ...paths.red.slice(0,13)];
+paths.green = [...paths.red.slice(26), ...paths.red.slice(0,26)];
+paths.yellow = [...paths.red.slice(39), ...paths.red.slice(0,39)];
+
+let diceValue = 0;
+let canMove = false;
+
+/* =========================================================
+   DICE ROLL
+========================================================= */
+
+dice.addEventListener("click",()=>{
+
+    if(canMove) return;
+
+    diceValue=Math.floor(Math.random()*6)+1;
+
+    dice.style.transform=
+    `rotateX(${360*3}deg) rotateY(${360*3}deg)`;
+
+    setTimeout(()=>{
+
+        switch(diceValue){
+
+            case 1:
+                dice.style.transform='rotateX(0deg) rotateY(0deg)';
+                break;
+
+            case 2:
+                dice.style.transform='rotateX(90deg)';
+                break;
+
+            case 3:
+                dice.style.transform='rotateY(-90deg)';
+                break;
+
+            case 4:
+                dice.style.transform='rotateY(90deg)';
+                break;
+
+            case 5:
+                dice.style.transform='rotateX(-90deg)';
+                break;
+
+            case 6:
+                dice.style.transform='rotateY(180deg)';
+                break;
+        }
+
+        highlightPlayableTokens();
+
+    },1000);
+
+});
+
+/* =========================================================
+   TOKEN DATA
+========================================================= */
+
+document.querySelectorAll(".token").forEach(token=>{
+
+    token.dataset.step = -1;
+
+});
+
+/* =========================================================
+   HIGHLIGHT VALID TOKENS
+========================================================= */
+
+function highlightPlayableTokens(){
+
+    canMove = true;
+
+    clearHighlights();
+
+    const currentColor =
+    players[currentPlayer]
+    .split(" ")[1]
+    .toLowerCase();
+
+    const tokens =
+    document.querySelectorAll(`.token.${currentColor}`);
+
+    tokens.forEach(token=>{
+
+        const step = parseInt(token.dataset.step);
+
+        if(step === -1 && diceValue !== 6) return;
+
+        token.classList.add("highlight");
+
+        token.onclick=()=>moveToken(token,currentColor);
+
+    });
+
+}
+
+/* =========================================================
+   MOVE TOKEN
+========================================================= */
+
+function moveToken(token,color){
+
+    clearHighlights();
+
+    let step = parseInt(token.dataset.step);
+
+    if(step === -1){
+
+        step = 0;
+
+    }else{
+
+        step += diceValue;
+
+    }
+
+    if(step >= paths[color].length){
+
+        nextTurn();
+        return;
+    }
+
+    token.dataset.step = step;
+
+    const pos = paths[color][step];
+
+    token.style.position = "absolute";
+
+    token.style.width = "4.2%";
+    token.style.height = "4.2%";
+
+    token.style.left =
+    ((pos[1]-1)*(100/15)+1.3)+"%";
+
+    token.style.top =
+    ((pos[0]-1)*(100/15)+1.3)+"%";
+
+    token.style.zIndex = 100;
+
+    board.appendChild(token);
+
+    canMove = false;
+
+    if(diceValue !== 6){
+
+        nextTurn();
+
+    }
+
+}
+
+/* =========================================================
+   CLEAR HIGHLIGHTS
+========================================================= */
+
+function clearHighlights(){
+
+    document.querySelectorAll(".token")
+    .forEach(token=>{
+
+        token.classList.remove("highlight");
+
+        token.onclick=null;
+
+    });
+
+}
+
+/* =========================================================
+   NEXT TURN
+========================================================= */
+
+function nextTurn(){
+
+    currentPlayer =
+    (currentPlayer+1)%4;
+
+    updateTurn();
+
+}
