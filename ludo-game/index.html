@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-  <title>Ludo Classic | Star Stack | Home Bonus | 3‑Step Restriction</title>
+  <title>Ludo Classic | 4 Tokens | Right Turn Home | Extra Turn</title>
   <style>
     * {
       margin: 0;
@@ -178,13 +178,14 @@
     .token {
       width: 100%;
       height: 100%;
-      min-width: 32px;
-      min-height: 32px;
+      min-width: 28px;
+      min-height: 28px;
       border-radius: 50% 50% 50% 50% / 48% 48% 52% 52%;
-      position: relative;
       box-shadow: inset -5px -5px 8px rgba(0,0,0,0.25), inset 3px 3px 10px rgba(255,255,255,0.5), 0 6px 10px rgba(0,0,0,0.35);
       transition: all 0.1s ease;
       cursor: pointer;
+      z-index: 100;
+      position: relative; /* default for yard */
     }
     .token::before {
       content: "";
@@ -261,7 +262,7 @@
 
 <script>
   (function(){
-    // ----- BOARD CONSTRUCTION (classic, unchanged) -----
+    // ------------------------- BOARD LAYOUT (15x15, 4 tokens per yard) -------------------------
     const boardEl = document.getElementById('board');
     const cellMap = Array(16).fill().map(() => Array(16).fill(null));
     
@@ -277,7 +278,7 @@
     
     for(let r=1;r<=15;r++) for(let c=1;c<=15;c++) createCell(r,c);
     
-    // home path corridors
+    // home path visual corridors
     for(let c=2;c<=6;c++) createCell(8,c,'home-path-blue');
     for(let r=2;r<=6;r++) createCell(r,8,'home-path-green');
     for(let c=10;c<=14;c++) createCell(8,c,'home-path-yellow');
@@ -296,11 +297,11 @@
     centerDiv.innerHTML = `<div class="c-blue"></div><div class="c-green"></div><div class="c-green"></div><div class="c-blue"></div><div class="winner-cup"></div><div class="c-yellow"></div><div class="c-red"></div><div class="c-red"></div><div class="c-yellow"></div>`;
     boardEl.appendChild(centerDiv);
     
-    // extra star cells along path
+    // extra star cells
     const starCoords = [[14,7],[9,3],[7,2],[3,7],[2,9],[7,13],[9,14],[13,9]];
     starCoords.forEach(([r,c]) => createCell(r,c,'safe-star'));
     
-    // yards with tokens
+    // yards with 4 tokens each (relative positioning keeps them visible)
     const yardsData = [{cls:'blue',color:'blue'},{cls:'green',color:'green'},{cls:'red',color:'red'},{cls:'yellow',color:'yellow'}];
     yardsData.forEach(y=>{
       const yardDiv = document.createElement('div');
@@ -312,17 +313,17 @@
         token.className = `token ${y.color}`;
         token.dataset.out = 'false';
         token.dataset.steps = '0';
-        token.dataset.pathIndex = '0';
         token.dataset.row = '';
         token.dataset.col = '';
         token.dataset.finished = 'false';
+        token.style.position = 'relative';
         inner.appendChild(token);
       }
       yardDiv.appendChild(inner);
       boardEl.appendChild(yardDiv);
     });
     
-    // colored corner zones (visual only)
+    // colored corner backgrounds
     const zones = [
       {r1:1,r2:6,c1:1,c2:6,cls:'blue-bg'},
       {r1:1,r2:6,c1:10,c2:15,cls:'green-bg'},
@@ -335,8 +336,8 @@
       }
     });
     
-    // ----- FIXED PATHWAY (52 main cells + 6 home cells) -----
-    const mainPath = [
+    // ------------------------- CLOCKWISE PATHWAY (per color) -------------------------
+    const cyclicMain = [
       [14,7],[13,7],[12,7],[11,7],[10,7],
       [9,6],[9,5],[9,4],[9,3],[9,2],[9,1],
       [8,1],[7,1],
@@ -351,65 +352,39 @@
       [15,8],[15,7]
     ];
     
-    const homePaths = {
+    // Home stretch: 5 colored cells + final winner [8,8]
+    const homeStretch = {
       red:   [[14,8],[13,8],[12,8],[11,8],[10,8],[8,8]],
       blue:  [[8,2],[8,3],[8,4],[8,5],[8,6],[8,8]],
       green: [[2,8],[3,8],[4,8],[5,8],[6,8],[8,8]],
       yellow:[[8,14],[8,13],[8,12],[8,11],[8,10],[8,8]]
     };
     
-    const startPathIndexMap = { red:0, blue:13, green:26, yellow:39 };
+    const startIndex = { red:0, blue:13, green:26, yellow:39 };
     const players = ['red','blue','green','yellow'];
     const turnDisplay = { red:'🔴 Red', blue:'🔵 Blue', green:'🟢 Green', yellow:'🟡 Yellow' };
     
-    let currentPlayer = 0;
-    let rolledNumber = 0;
-    let canMove = false;
-    let activeTimeouts = [];
-    
-    const diceFaces = {1:[5],2:[1,9],3:[1,5,9],4:[1,3,7,9],5:[1,3,5,7,9],6:[1,3,4,6,7,9]};
-    function renderDice(num){
-      const container = document.getElementById('diceValue');
-      if(!container) return;
-      container.innerHTML='';
-      for(let i=1;i<=9;i++){
-        const pip = document.createElement('div');
-        pip.className='pip';
-        if(diceFaces[num]?.includes(i)) pip.classList.add('show');
-        container.appendChild(pip);
-      }
+    // Build full path for each color (52 main + 6 home)
+    const fullPaths = {};
+    for(let color of players){
+      const start = startIndex[color];
+      const rotatedMain = [...cyclicMain.slice(start), ...cyclicMain.slice(0, start)];
+      fullPaths[color] = [...rotatedMain, ...homeStretch[color]];
     }
     
-    function updateTurnUI(){
-      document.getElementById('turnIndicator').innerText = `${turnDisplay[players[currentPlayer]]} Turn`;
+    function totalPathLength(color) { return fullPaths[color].length; } // 58
+    
+    function getPositionAtStep(color, step){
+      const path = fullPaths[color];
+      if(step >= 0 && step < path.length) return path[step];
+      return null;
     }
     
-    function clearTokenSelection(){
-      document.querySelectorAll('.token').forEach(t=>{
-        t.style.outline = 'none';
-        t.style.transform = 'scale(1)';
-        t.style.cursor = 'default';
-        t.onclick = null;
-      });
-    }
-    
-    function resetTokenToYard(token, color){
-      token.dataset.out = 'false';
-      token.dataset.steps = '0';
-      token.dataset.pathIndex = '0';
-      token.dataset.row = '';
-      token.dataset.col = '';
-      token.dataset.finished = 'false';
-      token.style.position = '';
-      token.style.left = '';
-      token.style.top = '';
-      token.style.transform = '';
-      token.style.width = '';
-      token.style.height = '';
-      token.style.zIndex = '';
-      token.style.opacity = '1';
-      const yardInner = document.querySelector(`.yard.${color} .yard-inner`);
-      if(yardInner) yardInner.appendChild(token);
+    function getRemainingSteps(token, color){
+      if(token.dataset.finished === 'true') return 0;
+      if(token.dataset.out !== 'true') return totalPathLength(color);
+      let stepsTaken = parseInt(token.dataset.steps || '0');
+      return totalPathLength(color) - stepsTaken;
     }
     
     function isStarCell(row, col){
@@ -417,71 +392,21 @@
       return cell && cell.classList.contains('safe-star');
     }
     
-    function getActiveTokens(){
-      return Array.from(document.querySelectorAll('.token')).filter(t => t.dataset.out === 'true' && t.dataset.finished !== 'true');
-    }
-    
-    // side‑by‑side stacking (no overlap)
-    function repositionAllTokensGrouped(){
-      const active = getActiveTokens();
-      const groups = new Map();
-      for(const token of active){
-        const row = token.dataset.row;
-        const col = token.dataset.col;
-        if(row && col){
-          const key = `${row},${col}`;
-          if(!groups.has(key)) groups.set(key, []);
-          groups.get(key).push(token);
-        }
+    function isAnyHomePathCell(row, col){
+      for(let clr of players){
+        if(homeStretch[clr].some(([r,c]) => r===row && c===col)) return true;
       }
-      for(let [key, tokenList] of groups.entries()){
-        const [row, col] = key.split(',').map(Number);
-        const cellElem = cellMap[row]?.[col];
-        if(!cellElem) continue;
-        const rect = cellElem.getBoundingClientRect();
-        const boardRect = boardEl.getBoundingClientRect();
-        const leftPercent = ((rect.left - boardRect.left) / boardRect.width) * 100;
-        const topPercent = ((rect.top - boardRect.top) / boardRect.height) * 100;
-        const count = tokenList.length;
-        const cols = Math.min(count, 2);
-        const rows = Math.ceil(count / cols);
-        const cellW = 100 / 15;
-        const offsetStepX = (cellW * 0.7) / cols;
-        const offsetStepY = (cellW * 0.7) / rows;
-        for(let idx = 0; idx < count; idx++){
-          const token = tokenList[idx];
-          const gridX = idx % cols;
-          const gridY = Math.floor(idx / cols);
-          const offsetX = (gridX - (cols-1)/2) * offsetStepX;
-          const offsetY = (gridY - (rows-1)/2) * offsetStepY;
-          token.style.position = 'absolute';
-          token.style.left = `${leftPercent}%`;
-          token.style.top = `${topPercent}%`;
-          token.style.width = `${100/15 * 0.9}%`;
-          token.style.height = `${100/15 * 0.9}%`;
-          token.style.zIndex = '200';
-          token.style.transform = `translate(${offsetX}%, ${offsetY}%)`;
-        }
-      }
-      for(let token of active){
-        if(!token.style.transform || token.style.transform === 'none'){
-          token.style.transform = 'translate(0%, 0%)';
-        }
-      }
-    }
-    
-    function updateTokenPositionAndLayout(token, row, col){
-      token.dataset.row = row;
-      token.dataset.col = col;
-      repositionAllTokensGrouped();
+      return false;
     }
     
     function captureOpponentsAtCell(row, col, currentColor, movingToken){
-      if(isStarCell(row, col)) return false;
+      if(isStarCell(row,col)) return false;
+      if(isAnyHomePathCell(row,col)) return false;
       const activeTokens = getActiveTokens();
       let captured = false;
       for(let token of activeTokens){
         if(token === movingToken) continue;
+        if(token.dataset.finished === 'true') continue;
         const tRow = parseInt(token.dataset.row);
         const tCol = parseInt(token.dataset.col);
         if(tRow === row && tCol === col){
@@ -500,140 +425,75 @@
       return captured;
     }
     
-    // exactly 3 steps from home (including home stretch) + rolled 6 → block
-    function isThreeStepsFromHomeAndRollSix(token, color, stepsTaken, rollVal){
-      if(rollVal !== 6) return false;
-      const mainLen = mainPath.length;      // 52
-      const homeLen = homePaths[color].length; // 6
-      let remaining = 0;
-      if(stepsTaken < mainLen){
-        remaining = (mainLen - stepsTaken) + homeLen;
-      } else if(stepsTaken >= mainLen){
-        let homeProgress = stepsTaken - mainLen;
-        remaining = homeLen - homeProgress;
-      }
-      return remaining === 3;
+    // Exact movement: token can only move if dice ≤ remaining steps (no overshoot)
+    function canTokenMoveExactly(token, color, roll){
+      if(token.dataset.finished === 'true') return false;
+      const isOut = token.dataset.out === 'true';
+      if(!isOut) return (roll === 6);
+      const remaining = getRemainingSteps(token, color);
+      if(remaining === 3 && roll === 6) return false; // 3‑steps‑from‑home blocks a 6
+      return roll <= remaining;
     }
     
     function moveToken(token, color){
       if(!canMove) return;
+      if(token.dataset.finished === 'true') return;
+      
+      const roll = rolledNumber;
       const isOut = token.dataset.out === 'true';
-      const finished = token.dataset.finished === 'true';
-      if(finished) return;
       
-      // bring out from yard (only on 6)
-      if(!isOut && rolledNumber !== 6){
-        nextTurn();
-        return;
-      }
-      if(!isOut && rolledNumber === 6){
-        const startIdx = startPathIndexMap[color];
-        const startPos = mainPath[startIdx];
-        token.style.position = 'absolute';
-        token.style.width = `${100/15 * 0.9}%`;
-        token.style.height = `${100/15 * 0.9}%`;
+      // Exit yard (only on 6)
+      if(!isOut && roll === 6){
+        const startPos = getPositionAtStep(color, 0);
         token.dataset.out = 'true';
-        token.dataset.steps = rolledNumber.toString();
-        token.dataset.pathIndex = startIdx;
-        boardEl.appendChild(token);
+        token.dataset.steps = '0';
+        token.style.position = 'absolute';
         updateTokenPositionAndLayout(token, startPos[0], startPos[1]);
-        afterMove(true);
+        afterMove(true); // extra turn for rolling 6
+        return;
+      }
+      if(!isOut) { nextTurn(); return; }
+      
+      let stepsTaken = parseInt(token.dataset.steps || '0');
+      const remaining = getRemainingSteps(token, color);
+      if(roll > remaining) { nextTurn(); return; }
+      if(remaining === 3 && roll === 6) { nextTurn(); return; }
+      
+      let newSteps = stepsTaken + roll;
+      const maxSteps = totalPathLength(color);
+      if(newSteps > maxSteps) { nextTurn(); return; }
+      
+      let finalPos = getPositionAtStep(color, newSteps);
+      if(!finalPos) { nextTurn(); return; }
+      const newRow = finalPos[0], newCol = finalPos[1];
+      
+      let finishedFlag = (newSteps === maxSteps);
+      let captureHappened = false;
+      if(!finishedFlag && !isStarCell(newRow,newCol) && !isAnyHomePathCell(newRow,newCol)){
+        captureHappened = captureOpponentsAtCell(newRow, newCol, color, token);
+      }
+      
+      token.dataset.steps = newSteps.toString();
+      updateTokenPositionAndLayout(token, newRow, newCol);
+      
+      if(finishedFlag){
+        token.dataset.finished = 'true';
+        token.style.opacity = '0.5';
+        token.style.cursor = 'default';
+        repositionAllTokensGrouped();
+        afterMove(true); // EXTRA TURN for reaching home
         return;
       }
       
-      if(isOut){
-        let stepsTaken = parseInt(token.dataset.steps || '0');
-        let pathIdx = parseInt(token.dataset.pathIndex || '0');
-        let newSteps = stepsTaken + rolledNumber;
-        let newRow = null, newCol = null;
-        let enteredHome = false;
-        let finishedFlag = false;
-        
-        // already inside home stretch?
-        if(stepsTaken >= 52){
-          let homeProgress = stepsTaken - 52;
-          let newHomeProgress = homeProgress + rolledNumber;
-          if(newHomeProgress <= homePaths[color].length){
-            const pos = homePaths[color][newHomeProgress];
-            newRow = pos[0];
-            newCol = pos[1];
-            token.dataset.steps = (52 + newHomeProgress).toString();
-            if(newHomeProgress === homePaths[color].length){
-              finishedFlag = true;
-            }
-            enteredHome = true;
-          } else {
-            nextTurn();
-            return;
-          }
-        }
-        
-        if(!enteredHome){
-          if(stepsTaken < 52){
-            let newPathIdx = (pathIdx + rolledNumber) % mainPath.length;
-            let totalStepsAfter = stepsTaken + rolledNumber;
-            if(totalStepsAfter >= 52){
-              const firstHome = homePaths[color][0];
-              newRow = firstHome[0];
-              newCol = firstHome[1];
-              token.dataset.steps = '52';
-              token.dataset.pathIndex = newPathIdx;
-            } else {
-              const pos = mainPath[newPathIdx];
-              newRow = pos[0];
-              newCol = pos[1];
-              token.dataset.pathIndex = newPathIdx;
-              token.dataset.steps = totalStepsAfter.toString();
-            }
-          } else {
-            let homeStep = stepsTaken - 52;
-            let newHomeStep = homeStep + rolledNumber;
-            if(newHomeStep < homePaths[color].length){
-              const pos = homePaths[color][newHomeStep];
-              newRow = pos[0];
-              newCol = pos[1];
-              token.dataset.steps = (52 + newHomeStep).toString();
-            } else if(newHomeStep === homePaths[color].length){
-              const finalPos = homePaths[color][homePaths[color].length-1];
-              newRow = finalPos[0];
-              newCol = finalPos[1];
-              token.dataset.steps = (52 + homePaths[color].length).toString();
-              finishedFlag = true;
-            } else {
-              nextTurn();
-              return;
-            }
-          }
-        }
-        
-        if(newRow !== null && newCol !== null){
-          const isHomeCell = (color === 'red' && homePaths.red.some(([r,c])=> r===newRow && c===newCol)) ||
-                             (color === 'blue' && homePaths.blue.some(([r,c])=> r===newRow && c===newCol)) ||
-                             (color === 'green' && homePaths.green.some(([r,c])=> r===newRow && c===newCol)) ||
-                             (color === 'yellow' && homePaths.yellow.some(([r,c])=> r===newRow && c===newCol));
-          if(!isHomeCell && !isStarCell(newRow, newCol)){
-            captureOpponentsAtCell(newRow, newCol, color, token);
-          }
-          
-          token.style.position = 'absolute';
-          token.style.width = `${100/15 * 0.9}%`;
-          token.style.height = `${100/15 * 0.9}%`;
-          updateTokenPositionAndLayout(token, newRow, newCol);
-          
-          if(finishedFlag){
-            token.dataset.finished = 'true';
-            token.style.opacity = '0.5';
-            token.style.cursor = 'default';
-            repositionAllTokensGrouped();
-            afterMove(true);  // extra turn for reaching home
-            return;
-          }
-          afterMove(rolledNumber === 6);
-          return;
-        }
-      }
-      nextTurn();
+      const extraTurn = captureHappened || (roll === 6);
+      afterMove(extraTurn);
     }
+    
+    // ------------------------- GAME FLOW -------------------------
+    let canMove = false;
+    let rolledNumber = 0;
+    let currentPlayer = 0;
+    let activeTimeouts = [];
     
     function afterMove(extraTurn){
       canMove = false;
@@ -644,33 +504,9 @@
         addTimeout(()=>{
           canMove = false;
           clearTokenSelection();
-          document.getElementById('rollBtn').disabled = false;
           updateTurnUI();
+          document.getElementById('rollBtn').disabled = false;
         }, 400);
-      }
-    }
-    
-    function enableTokensForCurrent(){
-      clearTokenSelection();
-      const playerColor = players[currentPlayer];
-      const tokens = document.querySelectorAll(`.token.${playerColor}`);
-      let movable = false;
-      tokens.forEach(token=>{
-        if(token.dataset.finished === 'true') return;
-        const isOut = token.dataset.out === 'true';
-        const steps = parseInt(token.dataset.steps || '0');
-        const blocked = isOut && isThreeStepsFromHomeAndRollSix(token, playerColor, steps, rolledNumber);
-        const canMoveOut = (!isOut && rolledNumber === 6) || (isOut && !blocked);
-        if(canMoveOut){
-          movable = true;
-          token.style.cursor = 'pointer';
-          token.style.outline = '4px solid gold';
-          token.style.transform = 'scale(1.08)';
-          token.onclick = () => moveToken(token, playerColor);
-        }
-      });
-      if(!movable){
-        addTimeout(()=>{ nextTurn(); }, 600);
       }
     }
     
@@ -681,6 +517,141 @@
       renderDice(1);
       updateTurnUI();
       document.getElementById('rollBtn').disabled = false;
+    }
+    
+    function enableTokensForCurrent(){
+      clearTokenSelection();
+      const playerColor = players[currentPlayer];
+      const tokens = document.querySelectorAll(`.token.${playerColor}`);
+      let anyMovable = false;
+      tokens.forEach(token=>{
+        if(token.dataset.finished === 'true') return; // finished never highlights
+        if(canTokenMoveExactly(token, playerColor, rolledNumber)){
+          anyMovable = true;
+          token.style.cursor = 'pointer';
+          token.style.outline = '4px solid gold';
+          token.style.transform = 'scale(1.08)';
+          token.onclick = () => moveToken(token, playerColor);
+        } else {
+          token.style.outline = '';
+          token.style.transform = '';
+          token.onclick = null;
+        }
+      });
+      if(!anyMovable){
+        addTimeout(()=>{ nextTurn(); }, 600);
+      }
+    }
+    
+    // ------------------------- SIDE-BY-SIDE STACKING ON BOARD -------------------------
+    function getActiveTokens(){
+      return Array.from(document.querySelectorAll('.token')).filter(t => t.dataset.out === 'true' && t.dataset.finished !== 'true');
+    }
+    
+    function repositionAllTokensGrouped(){
+      const active = getActiveTokens();
+      const groups = new Map();
+      for(const token of active){
+        const row = token.dataset.row;
+        const col = token.dataset.col;
+        if(row && col){
+          const key = `${row},${col}`;
+          if(!groups.has(key)) groups.set(key, []);
+          groups.get(key).push(token);
+        }
+      }
+      
+      for(let [key, tokenList] of groups.entries()){
+        const [row, col] = key.split(',').map(Number);
+        const cellElem = cellMap[row]?.[col];
+        if(!cellElem) continue;
+        
+        const rect = cellElem.getBoundingClientRect();
+        const boardRect = boardEl.getBoundingClientRect();
+        const cellLeftPct = ((rect.left - boardRect.left) / boardRect.width) * 100;
+        const cellTopPct = ((rect.top - boardRect.top) / boardRect.height) * 100;
+        const cellWidthPct = (rect.width / boardRect.width) * 100;
+        const cellHeightPct = (rect.height / boardRect.height) * 100;
+        
+        const count = tokenList.length;
+        const cols = Math.min(count, 2);
+        const rows = Math.ceil(count / cols);
+        const tokenWidthPct = cellWidthPct * 0.7;
+        const tokenHeightPct = cellHeightPct * 0.7;
+        const gapX = (cellWidthPct - tokenWidthPct * cols) / (cols + 1);
+        const gapY = (cellHeightPct - tokenHeightPct * rows) / (rows + 1);
+        
+        for(let idx = 0; idx < count; idx++){
+          const colIdx = idx % cols;
+          const rowIdx = Math.floor(idx / cols);
+          const leftPct = cellLeftPct + gapX + colIdx * (tokenWidthPct + gapX);
+          const topPct = cellTopPct + gapY + rowIdx * (tokenHeightPct + gapY);
+          
+          const tk = tokenList[idx];
+          tk.style.position = 'absolute';
+          tk.style.left = `${leftPct}%`;
+          tk.style.top = `${topPct}%`;
+          tk.style.width = `${tokenWidthPct}%`;
+          tk.style.height = `${tokenHeightPct}%`;
+          tk.style.zIndex = '200';
+          tk.style.transform = 'none';
+        }
+      }
+    }
+    
+    function updateTokenPositionAndLayout(token, row, col){
+      token.dataset.row = row;
+      token.dataset.col = col;
+      if(token.parentNode !== boardEl) boardEl.appendChild(token);
+      token.style.position = 'absolute';
+      repositionAllTokensGrouped();
+    }
+    
+    function resetTokenToYard(token, color){
+      token.dataset.out = 'false';
+      token.dataset.steps = '0';
+      token.dataset.row = '';
+      token.dataset.col = '';
+      token.dataset.finished = 'false';
+      token.style.opacity = '1';
+      token.style.position = 'relative';
+      token.style.left = '';
+      token.style.top = '';
+      token.style.width = '';
+      token.style.height = '';
+      token.style.transform = '';
+      token.style.zIndex = '';
+      const yardInner = document.querySelector(`.yard.${color} .yard-inner`);
+      if(yardInner) yardInner.appendChild(token);
+      token.style.outline = '';
+      token.onclick = null;
+    }
+    
+    function clearTokenSelection(){
+      document.querySelectorAll('.token').forEach(t=>{
+        t.style.outline = 'none';
+        t.style.transform = 'scale(1)';
+        t.style.cursor = 'default';
+        t.onclick = null;
+      });
+    }
+    
+    // ------------------------- UI, DICE & RESET -------------------------
+    const diceFaces = {1:[5],2:[1,9],3:[1,5,9],4:[1,3,7,9],5:[1,3,5,7,9],6:[1,3,4,6,7,9]};
+    function renderDice(num){
+      const container = document.getElementById('diceValue');
+      if(!container) return;
+      container.innerHTML = '';
+      for(let i=1;i<=9;i++){
+        const pip = document.createElement('div');
+        pip.className = 'pip';
+        if(diceFaces[num]?.includes(i)) pip.classList.add('show');
+        container.appendChild(pip);
+      }
+    }
+    
+    function updateTurnUI(){
+      document.getElementById('turnIndicator').innerText = `${turnDisplay[players[currentPlayer]]} Turn`;
     }
     
     function addTimeout(fn, delay){
@@ -704,8 +675,7 @@
       rolledNumber = 0;
       updateTurnUI();
       renderDice(1);
-      const rollBtn = document.getElementById('rollBtn');
-      if(rollBtn) rollBtn.disabled = false;
+      document.getElementById('rollBtn').disabled = false;
       
       const allTokens = document.querySelectorAll('.token');
       allTokens.forEach(token=>{
@@ -716,19 +686,18 @@
         else colorClass = 'yellow';
         const yardInner = document.querySelector(`.yard.${colorClass} .yard-inner`);
         if(yardInner) yardInner.appendChild(token);
-        token.style.position = '';
+        token.style.position = 'relative';
         token.style.left = '';
         token.style.top = '';
-        token.style.transform = '';
         token.style.width = '';
         token.style.height = '';
+        token.style.transform = '';
         token.style.cursor = '';
         token.style.outline = '';
         token.style.zIndex = '';
         token.style.opacity = '1';
         token.dataset.out = 'false';
         token.dataset.steps = '0';
-        token.dataset.pathIndex = '0';
         token.dataset.row = '';
         token.dataset.col = '';
         token.dataset.finished = 'false';
@@ -738,6 +707,7 @@
       repositionAllTokensGrouped();
     }
     
+    // ------------------------- EVENT LISTENERS -------------------------
     const rollBtn = document.getElementById('rollBtn');
     const diceDiv = document.getElementById('dice');
     rollBtn.addEventListener('click', ()=>{
