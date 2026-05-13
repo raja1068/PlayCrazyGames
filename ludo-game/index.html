@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-  <title>Ludo Classic | 4 Tokens | Right Turn Home | Extra Turn</title>
+  <title>Ludo Classic | Extra Turn on Home | 57 Cells | Right Turn</title>
   <style>
     * {
       margin: 0;
@@ -185,7 +185,7 @@
       transition: all 0.1s ease;
       cursor: pointer;
       z-index: 100;
-      position: relative; /* default for yard */
+      position: relative;
     }
     .token::before {
       content: "";
@@ -301,7 +301,7 @@
     const starCoords = [[14,7],[9,3],[7,2],[3,7],[2,9],[7,13],[9,14],[13,9]];
     starCoords.forEach(([r,c]) => createCell(r,c,'safe-star'));
     
-    // yards with 4 tokens each (relative positioning keeps them visible)
+    // yards with 4 tokens each
     const yardsData = [{cls:'blue',color:'blue'},{cls:'green',color:'green'},{cls:'red',color:'red'},{cls:'yellow',color:'yellow'}];
     yardsData.forEach(y=>{
       const yardDiv = document.createElement('div');
@@ -336,7 +336,8 @@
       }
     });
     
-    // ------------------------- CLOCKWISE PATHWAY (per color) -------------------------
+    // ------------------------- PATHWAY (57 cells per color) -------------------------
+    // 52‑cell outer loop (clockwise)
     const cyclicMain = [
       [14,7],[13,7],[12,7],[11,7],[10,7],
       [9,6],[9,5],[9,4],[9,3],[9,2],[9,1],
@@ -352,7 +353,7 @@
       [15,8],[15,7]
     ];
     
-    // Home stretch: 5 colored cells + final winner [8,8]
+    // Home stretch: 5 colored cells + final winner [8,8] (total 6 cells)
     const homeStretch = {
       red:   [[14,8],[13,8],[12,8],[11,8],[10,8],[8,8]],
       blue:  [[8,2],[8,3],[8,4],[8,5],[8,6],[8,8]],
@@ -360,19 +361,22 @@
       yellow:[[8,14],[8,13],[8,12],[8,11],[8,10],[8,8]]
     };
     
+    // Starting indices (0‑based) inside the 52‑cell cyclicMain
     const startIndex = { red:0, blue:13, green:26, yellow:39 };
     const players = ['red','blue','green','yellow'];
     const turnDisplay = { red:'🔴 Red', blue:'🔵 Blue', green:'🟢 Green', yellow:'🟡 Yellow' };
     
-    // Build full path for each color (52 main + 6 home)
+    // Build full path: first 51 cells of the rotated main loop + 6 home cells = 57 cells total
     const fullPaths = {};
     for(let color of players){
       const start = startIndex[color];
       const rotatedMain = [...cyclicMain.slice(start), ...cyclicMain.slice(0, start)];
-      fullPaths[color] = [...rotatedMain, ...homeStretch[color]];
+      // Take only 51 main cells (so the 51st cell is the last before the right turn)
+      const main51 = rotatedMain.slice(0, 51);
+      fullPaths[color] = [...main51, ...homeStretch[color]];
     }
     
-    function totalPathLength(color) { return fullPaths[color].length; } // 58
+    function totalPathLength(color) { return fullPaths[color].length; } // 57
     
     function getPositionAtStep(color, step){
       const path = fullPaths[color];
@@ -425,13 +429,13 @@
       return captured;
     }
     
-    // Exact movement: token can only move if dice ≤ remaining steps (no overshoot)
+    // Exact movement rule (no overshoot, 3‑steps block)
     function canTokenMoveExactly(token, color, roll){
       if(token.dataset.finished === 'true') return false;
       const isOut = token.dataset.out === 'true';
       if(!isOut) return (roll === 6);
       const remaining = getRemainingSteps(token, color);
-      if(remaining === 3 && roll === 6) return false; // 3‑steps‑from‑home blocks a 6
+      if(remaining === 3 && roll === 6) return false;
       return roll <= remaining;
     }
     
@@ -442,7 +446,7 @@
       const roll = rolledNumber;
       const isOut = token.dataset.out === 'true';
       
-      // Exit yard (only on 6)
+      // Yard exit (only on 6)
       if(!isOut && roll === 6){
         const startPos = getPositionAtStep(color, 0);
         token.dataset.out = 'true';
@@ -481,7 +485,9 @@
         token.style.opacity = '0.5';
         token.style.cursor = 'default';
         repositionAllTokensGrouped();
-        afterMove(true); // EXTRA TURN for reaching home
+        // EXTRA TURN for reaching home (winner's safezone)
+        console.log(`🏆 ${color.toUpperCase()} token reached HOME! ${turnDisplay[color]} gets an extra turn.`);
+        afterMove(true);
         return;
       }
       
@@ -525,7 +531,7 @@
       const tokens = document.querySelectorAll(`.token.${playerColor}`);
       let anyMovable = false;
       tokens.forEach(token=>{
-        if(token.dataset.finished === 'true') return; // finished never highlights
+        if(token.dataset.finished === 'true') return;
         if(canTokenMoveExactly(token, playerColor, rolledNumber)){
           anyMovable = true;
           token.style.cursor = 'pointer';
