@@ -28,6 +28,7 @@
 
         body {
             font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            /* Light Green Background - as original */
             background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 50%, #a5d6a7 100%);
             min-height: 100vh;
             overflow-x: hidden;
@@ -63,7 +64,7 @@
             letter-spacing: 1px;
         }
 
-        /* Main Container */
+        /* Main Container (no 3D perspective) */
         .container {
             max-width: 1400px;
             margin: 0 auto;
@@ -178,29 +179,29 @@
             font-size: 0.9rem;
         }
 
-        /* Games Grid */
+        /* Games Grid - Flat, clean layout */
         .games-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
             gap: 30px;
         }
 
-        /* Game Card - Navy Blue Background */
+        /* Game Card - Using HEX #4a6591 as per your request (previously navy replaced) */
         .game-card {
-            background: linear-gradient(135deg, #1a237e 0%, #0d1b4a 100%);
+            background: linear-gradient(135deg, #4a6591 0%, #2f4a6e 100%);
             border-radius: 25px;
             text-align: center;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: all 0.3s ease;
             cursor: pointer;
-            border: 1px solid rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.2);
             animation: fadeInUp 0.6s ease backwards;
             overflow: hidden;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
         }
         .game-card:hover {
-            transform: translateY(-12px) scale(1.02);
-            border-color: rgba(255,255,255,0.3);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            transform: translateY(-8px);
+            box-shadow: 0 20px 30px rgba(0,0,0,0.25);
+            border-color: rgba(255,255,255,0.4);
         }
         
         /* Orange Background Space around Logo */
@@ -224,12 +225,12 @@
             justify-content: center;
             margin: 0 auto;
             font-size: 3.5rem;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.2);
             transition: transform 0.3s;
             overflow: hidden;
         }
         .game-card:hover .game-logo {
-            transform: scale(1.1) rotate(5deg);
+            transform: scale(1.05) rotate(2deg);
         }
         
         /* Real Image Logos */
@@ -257,7 +258,7 @@
         }
         
         .game-card p {
-            color: rgba(255,255,255,0.7);
+            color: rgba(255,255,255,0.8);
             font-size: 0.9rem;
             line-height: 1.5;
             margin-bottom: 15px;
@@ -288,8 +289,8 @@
             width: 100%;
         }
         .play-btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 5px 20px rgba(255, 152, 0, 0.4);
+            transform: scale(1.02);
+            box-shadow: 0 5px 15px rgba(255, 152, 0, 0.4);
         }
 
         /* Stats Bar */
@@ -317,6 +318,61 @@
             font-size: 0.8rem;
         }
 
+        /* Offline Promotion - Removed old install steps, added Indus Appstore Button */
+        .offline-promo {
+            background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+            border-radius: 25px;
+            padding: 30px;
+            text-align: center;
+            margin: 40px 0;
+            border: 2px solid #2e7d32;
+        }
+        .offline-promo h3 {
+            color: #1b5e20;
+            margin-bottom: 10px;
+        }
+        .offline-promo p {
+            color: #2e7d32;
+            margin-bottom: 20px;
+        }
+        
+        /* Indus Appstore Button Styles */
+        .indus-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            background: #121212;
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.1rem;
+            padding: 12px 28px;
+            border-radius: 50px;
+            transition: all 0.3s;
+            box-shadow: 0 5px 12px rgba(0,0,0,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            cursor: pointer;
+        }
+        .indus-btn:hover {
+            transform: translateY(-3px);
+            background: #2c2c2c;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+        }
+        .indus-logo {
+            width: 32px;
+            height: 32px;
+            background: white;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #121212;
+        }
+        /* You can replace the inner text with an actual SVG if needed, but emoji/icon is fine */
+        
         /* Footer */
         footer {
             text-align: center;
@@ -362,44 +418,13 @@
             cursor: pointer;
         }
 
-        /* Offline Promotion */
-        .offline-promo {
-            background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
-            border-radius: 25px;
-            padding: 30px;
-            text-align: center;
-            margin: 40px 0;
-            border: 2px solid #2e7d32;
-        }
-        .offline-promo h3 {
-            color: #1b5e20;
-            margin-bottom: 10px;
-        }
-        .offline-promo p {
-            color: #2e7d32;
-            margin-bottom: 20px;
-        }
-        .install-steps {
-            display: flex;
-            gap: 15px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-        .install-step {
-            background: #2e7d32;
-            padding: 8px 20px;
-            border-radius: 25px;
-            color: white;
-            font-size: 0.85rem;
-        }
-
-        /* Animations */
+        /* Animations - simple fade */
         @keyframes fadeInDown {
-            from { opacity: 0; transform: translateY(-40px); }
+            from { opacity: 0; transform: translateY(-30px); }
             to { opacity: 1; transform: translateY(0); }
         }
         @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(40px); }
+            from { opacity: 0; transform: translateY(30px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
@@ -416,6 +441,8 @@
             .stat-number { font-size: 1.3rem; }
             .game-logo { width: 90px; height: 90px; font-size: 2.5rem; }
             .game-logo img { width: 60px; height: 60px; }
+            .indus-btn { font-size: 0.9rem; padding: 10px 20px; }
+            .indus-logo { width: 26px; height: 26px; font-size: 1.2rem; }
         }
     </style>
 </head>
@@ -493,9 +520,7 @@
                     <div class="game-logo-container">
                         <div class="game-logo">
                             <svg class="revolver-svg" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <!-- Revolver Body -->
                                 <rect x="35" y="40" width="45" height="25" rx="5" fill="#555" stroke="#333" stroke-width="2"/>
-                                <!-- Revolver Cylinder -->
                                 <circle cx="42" cy="52" r="14" fill="#666" stroke="#333" stroke-width="2"/>
                                 <circle cx="42" cy="52" r="8" fill="#888"/>
                                 <circle cx="42" cy="45" r="2" fill="#333"/>
@@ -504,17 +529,11 @@
                                 <circle cx="42" cy="59" r="2" fill="#333"/>
                                 <circle cx="36" cy="56" r="2" fill="#333"/>
                                 <circle cx="36" cy="48" r="2" fill="#333"/>
-                                <!-- Barrel -->
                                 <rect x="75" y="45" width="20" height="10" rx="2" fill="#555" stroke="#333" stroke-width="2"/>
-                                <!-- Handle/Grip -->
                                 <path d="M38 65 L35 85 L55 85 L52 65 Z" fill="#8B4513" stroke="#5D3A1A" stroke-width="2"/>
-                                <!-- Trigger Guard -->
                                 <path d="M38 55 Q35 62 40 65" fill="none" stroke="#555" stroke-width="2"/>
-                                <!-- Hammer -->
                                 <rect x="35" y="35" width="8" height="8" rx="2" fill="#555" stroke="#333" stroke-width="1"/>
-                                <!-- Front Sight -->
                                 <rect x="90" y="42" width="3" height="6" fill="#555"/>
-                                <!-- Rear Sight -->
                                 <rect x="42" y="38" width="10" height="3" fill="#555"/>
                             </svg>
                         </div>
@@ -651,16 +670,16 @@
             </div>
         </div>
 
-        <!-- Offline App Promotion -->
+        <!-- Offline App Promotion - Indus Appstore Button Only (removed Chrome/Safari/Firefox) -->
         <div class="offline-promo">
             <div style="font-size: 3rem; margin-bottom: 10px;">📱</div>
             <h3>Install Our App - Play Offline!</h3>
-            <p>Install PlayCrazyGames as PWA and play all games without internet! No data needed!</p>
-            <div class="install-steps">
-                <span class="install-step">📱 Chrome: Install App</span>
-                <span class="install-step">🍎 Safari: Add to Home Screen</span>
-                <span class="install-step">🔥 Firefox: Install PWA</span>
-            </div>
+            <p>Install PlayCrazyGames from Indus Appstore and play all games without internet! No data needed!</p>
+            <a href="#" id="indusInstallBtn" class="indus-btn">
+                <span class="indus-logo">🛍️</span>
+                Indus Appstore : Install App
+            </a>
+            <p style="font-size: 0.8rem; margin-top: 15px;">Get the official app for seamless offline gaming</p>
         </div>
     </div>
 
@@ -694,9 +713,7 @@
     </div>
 
     <script>
-        // ========================================
         // GAME NAVIGATION
-        // ========================================
         const gameUrls = {
             snake: 'snake-game/index.html',
             tictactoe: 'tic-tac-toe/index.html',
@@ -720,7 +737,6 @@
             });
         });
         
-        // Make entire card clickable
         document.querySelectorAll('.game-card').forEach(card => {
             card.addEventListener('click', (e) => {
                 if (!e.target.classList.contains('play-btn')) {
@@ -732,9 +748,7 @@
             });
         });
 
-        // ========================================
         // SEARCH FUNCTIONALITY
-        // ========================================
         const searchInput = document.getElementById('gameSearch');
         if (searchInput) {
             searchInput.addEventListener('input', function(e) {
@@ -755,9 +769,7 @@
             });
         }
 
-        // ========================================
         // COOKIE CONSENT
-        // ========================================
         if (!localStorage.getItem('cookiesAccepted')) {
             document.getElementById('cookieConsent').style.display = 'block';
         }
@@ -767,7 +779,18 @@
             document.getElementById('cookieConsent').style.display = 'none';
         });
 
-        console.log('🎮 PlayCrazyGames Loaded! 9 Games Ready for Fun!');
+        // Indus Appstore Button action (placeholder link - replace with actual store URL when available)
+        const indusBtn = document.getElementById('indusInstallBtn');
+        if (indusBtn) {
+            indusBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                // Replace with the official Indus Appstore page for your app
+                alert('Redirect to Indus Appstore (App Store) - In production, link to your app page.');
+                // window.location.href = 'https://www.indusappstore.com/playcrazygames';
+            });
+        }
+
+        console.log('🎮 PlayCrazyGames Loaded! Light Green Theme | Indus Appstore Button Ready');
     </script>
 </body>
 </html>
