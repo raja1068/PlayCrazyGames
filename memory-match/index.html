@@ -2,23 +2,576 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Memory Match Game</title>
-    <link rel="stylesheet" href="style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Memory Match · 3 Stages · Compact + Big Icons</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Quicksand', system-ui, -apple-system, 'Poppins', sans-serif;
+            background: linear-gradient(145deg, #0f1a3a 0%, #231a44 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 16px;
+        }
+
+        /* 🎮 MAIN CONTAINER - 25% LESSER than previous (reduced padding, smaller base) */
+        .game-container {
+            background: rgba(255, 255, 255, 0.96);
+            backdrop-filter: blur(2px);
+            border-radius: 28px;
+            padding: 20px 18px 26px 18px;
+            box-shadow: 0 20px 32px rgba(0, 0, 0, 0.3);
+            max-width: 980px;
+            width: 100%;
+            transition: all 0.2s;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            background: linear-gradient(135deg, #4a2c7a, #c248a0);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            text-align: center;
+            margin-bottom: 14px;
+            font-weight: 800;
+            letter-spacing: -0.3px;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            background: #eeeaff;
+            padding: 6px 16px;
+            border-radius: 50px;
+            margin-bottom: 20px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: #2e1e5e;
+        }
+
+        .stats div {
+            background: white;
+            padding: 4px 18px;
+            border-radius: 36px;
+            box-shadow: inset 0 1px 2px #0001, 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .stats span {
+            color: #bc5090;
+            font-size: 1.4rem;
+            font-weight: 800;
+            margin-left: 8px;
+        }
+
+        /* stage selector */
+        .stage-selector {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 22px;
+            flex-wrap: wrap;
+        }
+
+        .stage-btn {
+            background: linear-gradient(115deg, #e2dbff, #d2c5ff);
+            border: none;
+            font-size: 0.95rem;
+            font-weight: 700;
+            padding: 8px 20px;
+            border-radius: 50px;
+            cursor: pointer;
+            color: #2b1b4a;
+            transition: 0.2s;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+
+        .stage-btn.active {
+            background: linear-gradient(135deg, #6c4ab6, #a1579b);
+            color: white;
+            transform: scale(1.02);
+        }
+
+        .stage-btn:hover {
+            transform: translateY(-2px);
+            background: #cec2ff;
+        }
+
+        /* 🧩 GRID — side by side CLOSELY, reduced gap slightly */
+        .grid {
+            display: grid;
+            justify-content: center;
+            gap: 6px;
+            margin-bottom: 24px;
+        }
+
+        /* 4x4 layout (stage 1) */
+        .grid-4cols {
+            grid-template-columns: repeat(4, minmax(72px, 110px));
+        }
+
+        /* 6x6 layout (stages 2 & 3) — 36 boxes */
+        .grid-6cols {
+            grid-template-columns: repeat(6, minmax(68px, 100px));
+        }
+
+        /* CARD style — slightly smaller overall (25% reduction in base area) */
+        .card {
+            aspect-ratio: 1 / 1;
+            width: 100%;
+            background: linear-gradient(145deg, #7655b2, #593d8c);
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.18s ease;
+            box-shadow: 0 8px 12px -5px rgba(0, 0, 0, 0.3);
+            transform: scale(1);
+        }
+
+        /* flipped & matched */
+        .card.flipped, .card.matched {
+            background: white;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+            transform: scale(0.97);
+        }
+
+        .card.matched {
+            opacity: 0.65;
+            cursor: default;
+            filter: grayscale(0.08);
+            background: #f0ebff;
+        }
+
+        /* STAGE 1: Animal faces remain big but adjusted to smaller card size */
+        .stage-animals .card:not(.matched) {
+            font-size: 3.2rem;
+        }
+        .stage-animals .card.matched {
+            font-size: 2.8rem;
+        }
+
+        /* STAGE 2 & 3: vegetable & transport icons — 2.5 TIMES BIGGER than current (previous font-size was 2.4rem, now 2.4 * 2.5 = 6rem) */
+        .stage-veggies .card:not(.matched),
+        .stage-transport .card:not(.matched) {
+            font-size: 6rem;
+        }
+        /* matched cards also bigger for consistency */
+        .stage-veggies .card.matched,
+        .stage-transport .card.matched {
+            font-size: 5.6rem;
+            opacity: 0.7;
+        }
+
+        /* responsive: on smaller screens reduce the oversized icons to fit nicely */
+        @media (max-width: 860px) {
+            .grid-4cols {
+                grid-template-columns: repeat(4, minmax(65px, 90px));
+            }
+            .grid-6cols {
+                grid-template-columns: repeat(6, minmax(58px, 82px));
+            }
+            .stage-animals .card:not(.matched) {
+                font-size: 2.5rem;
+            }
+            /* For medium screens, keep 2.5x scaled but moderate */
+            .stage-veggies .card:not(.matched),
+            .stage-transport .card:not(.matched) {
+                font-size: 4.2rem;
+            }
+            .stage-veggies .card.matched,
+            .stage-transport .card.matched {
+                font-size: 3.8rem;
+            }
+            .stats div {
+                padding: 3px 12px;
+                font-size: 0.9rem;
+            }
+            .stats span {
+                font-size: 1.2rem;
+            }
+            h1 {
+                font-size: 1.5rem;
+            }
+            .stage-btn {
+                padding: 5px 14px;
+                font-size: 0.8rem;
+            }
+        }
+
+        @media (max-width: 620px) {
+            .game-container {
+                padding: 14px 12px;
+            }
+            .grid {
+                gap: 5px;
+            }
+            .grid-4cols {
+                grid-template-columns: repeat(4, minmax(62px, 80px));
+            }
+            .grid-6cols {
+                grid-template-columns: repeat(6, minmax(48px, 68px));
+            }
+            .stage-animals .card:not(.matched) {
+                font-size: 2rem;
+            }
+            .stage-veggies .card:not(.matched),
+            .stage-transport .card:not(.matched) {
+                font-size: 3rem;
+            }
+            .stage-veggies .card.matched,
+            .stage-transport .card.matched {
+                font-size: 2.6rem;
+            }
+            .card {
+                border-radius: 12px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .grid-6cols {
+                grid-template-columns: repeat(6, minmax(42px, 58px));
+            }
+            .stage-veggies .card:not(.matched),
+            .stage-transport .card:not(.matched) {
+                font-size: 2.2rem;
+            }
+            .stage-animals .card:not(.matched) {
+                font-size: 1.6rem;
+            }
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            margin-top: 6px;
+        }
+
+        .controls button {
+            background: linear-gradient(135deg, #6c4ab6, #965dbb);
+            border: none;
+            padding: 9px 22px;
+            border-radius: 48px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: white;
+            cursor: pointer;
+            transition: 0.2s;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        .controls button:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.03);
+        }
+
+        footer {
+            font-size: 0.65rem;
+            text-align: center;
+            margin-top: 20px;
+            color: #7b6a9e;
+        }
+    </style>
 </head>
 <body>
-    <div class="game-container">
-        <h1>🎴 Memory Match</h1>
-        <div class="stats">
-            <div>Moves: <span id="moves">0</span></div>
-            <div>Matches: <span id="matches">0</span></div>
-        </div>
-        <div class="grid" id="grid"></div>
-        <div class="controls">
-            <button id="resetBtn">New Game</button>
-            <button id="backBtn">⬅ Back to Hub</button>
-        </div>
+<div class="game-container" id="gameContainer">
+    <h1>🎴 MEMORY MATCH · 3 STAGES 🎴</h1>
+
+    <div class="stats">
+        <div>🔄 MOVES: <span id="moves">0</span></div>
+        <div>✨ MATCHES: <span id="matches">0</span></div>
     </div>
-    <script src="script.js"></script>
+
+    <div class="stage-selector">
+        <button data-stage="1" class="stage-btn active">🐾 STAGE 1 · ANIMALS (4x4)</button>
+        <button data-stage="2" class="stage-btn">🥦 STAGE 2 · VEGGIES (6x6)</button>
+        <button data-stage="3" class="stage-btn">🚂 STAGE 3 · TRANSPORT (6x6)</button>
+    </div>
+
+    <div class="grid" id="grid"></div>
+
+    <div class="controls">
+        <button id="resetBtn">🔄 NEW GAME</button>
+        <button id="backBtn">⬅ BACK TO HUB</button>
+    </div>
+    <footer>⚡ Tight layout · Vegetables & Transport icons 2.5x bigger</footer>
+</div>
+
+<script>
+    // ---------- 🧩 UNIQUE THEMES (18 pairs each for stage 2 & 3) ----------
+    // STAGE 1 : 8 animals → 4x4 = 16 cards
+    const ANIMALS = ['🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼'];
+    
+    // STAGE 2 : 18 VEGETABLES (unique icons) → 36 cards (6x6) 
+    const VEGGIES_FINAL = [
+        '🥕', '🍠', '🥦', '🥒', '🥔', '🍅', '🧅', '🥬', '🎃',
+        '🍃', '🫑', '🍆', '🧄', '🫚', '🫛', '🥗', '🌽', '🍈'
+    ];  // 18 distinct vegetables
+    
+    // STAGE 3 : 18 TRANSPORT icons → 36 cards (6x6)
+    const TRANSPORTS_FINAL = [
+        '🚂', '🚌', '🚗', '✈️', '🚢', '🚊', '🛺', '🚲', '🚑',
+        '🚒', '⛴️', '🛵', '🏍️', '🚚', '🚕', '🚁', '🛳️', '🚐'
+    ];
+
+    // -------------- GAME STATE --------------
+    let currentStage = 1;
+    let cards = [];            // stores 'matched' or original icon (during gameplay we mutate matched)
+    let originalDeck = [];     // persistent icons for display (never mutated)
+    let flippedIndices = [];
+    let matchedPairsCount = 0;
+    let totalPairs = 0;
+    let moves = 0;
+    let lockBoard = false;
+    let timeoutId = null;
+
+    // DOM elements
+    const gridEl = document.getElementById('grid');
+    const movesSpan = document.getElementById('moves');
+    const matchesSpan = document.getElementById('matches');
+    const resetBtn = document.getElementById('resetBtn');
+    const backBtn = document.getElementById('backBtn');
+    const container = document.getElementById('gameContainer');
+
+    // Get config for a stage (icon set, number of pairs, grid class, theme)
+    function getStageData(stage) {
+        if (stage === 1) {
+            return {
+                icons: ANIMALS,
+                pairCount: ANIMALS.length,
+                gridClass: 'grid-4cols',
+                theme: 'stage-animals'
+            };
+        } else if (stage === 2) {
+            return {
+                icons: VEGGIES_FINAL,
+                pairCount: VEGGIES_FINAL.length,
+                gridClass: 'grid-6cols',
+                theme: 'stage-veggies'
+            };
+        } else {
+            return {
+                icons: TRANSPORTS_FINAL,
+                pairCount: TRANSPORTS_FINAL.length,
+                gridClass: 'grid-6cols',
+                theme: 'stage-transport'
+            };
+        }
+    }
+
+    // Shuffle (Fisher-Yates)
+    function shuffleArray(arr) {
+        for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+    }
+
+    // Build shuffled deck for given stage (each icon appears twice)
+    function buildShuffledDeck(stage) {
+        const { icons, pairCount } = getStageData(stage);
+        let deck = [];
+        for (let i = 0; i < pairCount; i++) {
+            deck.push(icons[i]);
+            deck.push(icons[i]);
+        }
+        return shuffleArray(deck);
+    }
+
+    // Apply theme class & grid column class
+    function applyThemeAndGrid(stage) {
+        const { theme, gridClass } = getStageData(stage);
+        container.classList.remove('stage-animals', 'stage-veggies', 'stage-transport');
+        container.classList.add(theme);
+        gridEl.classList.remove('grid-4cols', 'grid-6cols');
+        gridEl.classList.add(gridClass);
+    }
+
+    // Render entire grid from current cards & flippedIndices
+    function renderGame() {
+        gridEl.innerHTML = '';
+        for (let i = 0; i < cards.length; i++) {
+            const cardStatus = cards[i];     // either icon string or 'matched'
+            const isFlipped = flippedIndices.includes(i);
+            const isMatched = (cardStatus === 'matched');
+            
+            const cardDiv = document.createElement('div');
+            cardDiv.classList.add('card');
+            
+            // Decide what to show
+            if (isFlipped || isMatched) {
+                const icon = originalDeck[i];
+                cardDiv.textContent = icon;
+                cardDiv.classList.add('flipped');
+            } else {
+                cardDiv.textContent = '';
+            }
+            
+            if (isMatched) {
+                cardDiv.classList.add('matched');
+            }
+            
+            cardDiv.addEventListener('click', (function(idx) {
+                return function() { onCardClick(idx); };
+            })(i));
+            
+            gridEl.appendChild(cardDiv);
+        }
+    }
+
+    // Handle match after two cards flipped
+    function evaluateMatch() {
+        if (flippedIndices.length !== 2) return;
+        
+        const idx1 = flippedIndices[0];
+        const idx2 = flippedIndices[1];
+        const icon1 = originalDeck[idx1];
+        const icon2 = originalDeck[idx2];
+        const isMatch = (icon1 === icon2);
+        
+        if (isMatch) {
+            cards[idx1] = 'matched';
+            cards[idx2] = 'matched';
+            matchedPairsCount++;
+            matchesSpan.textContent = matchedPairsCount;
+            flippedIndices = [];
+            renderGame();
+            
+            if (matchedPairsCount === totalPairs) {
+                setTimeout(() => {
+                    alert(`🏆 VICTORY! 🏆\nStage ${currentStage} completed in ${moves} moves! ✨`);
+                }, 80);
+            }
+        } else {
+            lockBoard = true;
+            timeoutId = setTimeout(() => {
+                flippedIndices = [];
+                renderGame();
+                lockBoard = false;
+                timeoutId = null;
+            }, 800);
+        }
+    }
+
+    // Card click handler
+    function onCardClick(clickedIdx) {
+        if (lockBoard) return;
+        if (cards[clickedIdx] === 'matched') return;
+        if (flippedIndices.includes(clickedIdx)) return;
+        if (flippedIndices.length >= 2) return;
+        
+        flippedIndices.push(clickedIdx);
+        renderGame();
+        
+        if (flippedIndices.length === 2) {
+            moves++;
+            movesSpan.textContent = moves;
+            evaluateMatch();
+        }
+    }
+
+    // Full reset for current stage
+    function resetGameSameStage() {
+        if (timeoutId) {
+            clearTimeout(timeoutId);
+            timeoutId = null;
+        }
+        lockBoard = false;
+        flippedIndices = [];
+        const newDeck = buildShuffledDeck(currentStage);
+        originalDeck = [...newDeck];
+        cards = [...newDeck];
+        matchedPairsCount = 0;
+        moves = 0;
+        movesSpan.textContent = moves;
+        matchesSpan.textContent = matchedPairsCount;
+        renderGame();
+    }
+
+    // Change stage completely
+    function switchStage(stage) {
+        if (timeoutId) {
+            clearTimeout(timeoutId);
+            timeoutId = null;
+        }
+        currentStage = stage;
+        lockBoard = false;
+        flippedIndices = [];
+        
+        const newDeck = buildShuffledDeck(currentStage);
+        originalDeck = [...newDeck];
+        cards = [...newDeck];
+        const { pairCount } = getStageData(currentStage);
+        totalPairs = pairCount;
+        matchedPairsCount = 0;
+        moves = 0;
+        movesSpan.textContent = moves;
+        matchesSpan.textContent = matchedPairsCount;
+        
+        applyThemeAndGrid(currentStage);
+        renderGame();
+    }
+
+    // Highlight active stage button
+    function updateActiveButton(activeStage) {
+        const btns = document.querySelectorAll('.stage-btn');
+        btns.forEach(btn => {
+            const stageVal = parseInt(btn.getAttribute('data-stage'), 10);
+            if (stageVal === activeStage) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+    }
+
+    // ---------- EVENT LISTENERS ----------
+    document.querySelectorAll('.stage-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const stageVal = parseInt(btn.getAttribute('data-stage'), 10);
+            if (stageVal === currentStage) return;
+            switchStage(stageVal);
+            updateActiveButton(stageVal);
+        });
+    });
+
+    resetBtn.addEventListener('click', () => {
+        resetGameSameStage();
+        updateActiveButton(currentStage);
+    });
+
+    backBtn.addEventListener('click', () => {
+        window.location.href = '../index.html';
+    });
+
+    // ---------- INITIALIZE GAME (Stage 1) ----------
+    function initGame() {
+        currentStage = 1;
+        const initialDeck = buildShuffledDeck(1);
+        originalDeck = [...initialDeck];
+        cards = [...initialDeck];
+        totalPairs = ANIMALS.length;
+        matchedPairsCount = 0;
+        moves = 0;
+        movesSpan.textContent = moves;
+        matchesSpan.textContent = matchedPairsCount;
+        applyThemeAndGrid(1);
+        renderGame();
+        updateActiveButton(1);
+    }
+
+    initGame();
+</script>
 </body>
 </html>
