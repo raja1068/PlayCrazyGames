@@ -3,7 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Chess Royale — Precious Edition</title>
+    <title>Chess Royale — Precious Edition | Golden Chess</title>
+    <!-- Google AdSense Script (Placeholder – Replace with your Publisher ID) -->
+    <!-- IMPORTANT: Replace 'ca-pub-XXXXXXXXXXXXXXXX' with your actual AdSense publisher ID -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX"
+            crossorigin="anonymous"></script>
     <style>
         * {
             margin: 0;
@@ -17,9 +21,42 @@
             background: linear-gradient(145deg, #2c2c3a 0%, #1a1a2a 100%);
             min-height: 100vh;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
+            justify-content: center;
             padding: 24px;
+            gap: 28px;
+        }
+
+        /* Premium ad container styling — elegant, non-intrusive */
+        .ad-container {
+            width: 100%;
+            max-width: 860px;
+            margin: 0 auto;
+            text-align: center;
+            background: rgba(30, 25, 21, 0.25);
+            backdrop-filter: blur(3px);
+            border-radius: 48px;
+            padding: 12px 16px;
+            transition: all 0.2s;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(218, 185, 115, 0.3);
+        }
+
+        .ad-container ins {
+            display: block;
+            margin: 0 auto;
+            background: transparent;
+        }
+
+        /* top ad spacing tweak */
+        .top-ad {
+            margin-bottom: 6px;
+        }
+
+        /* bottom ad subtle margin */
+        .bottom-ad {
+            margin-top: 6px;
         }
 
         /* main card - luxurious feel */
@@ -32,6 +69,8 @@
             box-shadow: 0 25px 45px rgba(0, 0, 0, 0.4), inset 0 1px 2px rgba(255, 255, 255, 0.6);
             transition: all 0.2s ease;
             border: 1px solid rgba(218, 185, 115, 0.6);
+            width: fit-content;
+            max-width: 100%;
         }
 
         h1 {
@@ -108,7 +147,7 @@
         }
 
         .square {
-            position: relative;   /* CRITICAL: allows pseudo-element to be positioned correctly, prevents distortion */
+            position: relative;
             width: 84px;
             height: 84px;
             display: flex;
@@ -122,7 +161,7 @@
             text-shadow: 2px 2px 3px rgba(0, 0, 0, 0.3);
             will-change: transform;
             backdrop-filter: brightness(1.01);
-            white-space: nowrap;   /* prevents any line break inside square */
+            white-space: nowrap;
             line-height: 1;
         }
 
@@ -147,7 +186,7 @@
             transition: all 0.08s;
         }
 
-        /* valid move marker — golden aura (fixed positioning to avoid layout shift) */
+        /* valid move marker — golden aura */
         .square.valid-move {
             position: relative;
             background: radial-gradient(circle, #d9c285, #bd9b5a);
@@ -194,7 +233,6 @@
             font-weight: 700;
         }
         
-        /* extra delicacy: hover effect for pieces */
         .square:hover {
             filter: brightness(1.02) contrast(1.03);
             transform: scale(1.01);
@@ -202,7 +240,6 @@
             transition: all 0.07s;
         }
 
-        /* premium buttons */
         .controls button {
             background: linear-gradient(145deg, #cfa668, #a5723e);
             border: none;
@@ -240,7 +277,7 @@
             letter-spacing: 1px;
         }
 
-        /* RESPONSIVE: scale down gracefully on smaller screens (preserve ratio) */
+        /* RESPONSIVE: scale down gracefully on smaller screens */
         @media (max-width: 780px) {
             .chessboard {
                 grid-template-columns: repeat(8, 54px);
@@ -268,6 +305,10 @@
             h1 {
                 font-size: 1.7rem;
             }
+            .ad-container {
+                max-width: 95%;
+                padding: 8px 12px;
+            }
         }
 
         @media (max-width: 560px) {
@@ -286,6 +327,22 @@
     </style>
 </head>
 <body>
+
+<!-- 🟡 TOP GOOGLE AD UNIT 🟡 -->
+<div class="ad-container top-ad">
+    <ins class="adsbygoogle"
+         style="display:block; width:100%; max-width:728px; margin:0 auto;"
+         data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+         data-ad-slot="1234567890"
+         data-ad-format="auto"
+         data-full-width-responsive="true"></ins>
+    <script>
+        (adsbygoogle = window.adsbygoogle || []).push({});
+    </script>
+    <!-- 🔹 Replace 'ca-pub-XXXXXXXXXXXXXXXX' and 'data-ad-slot' with your actual AdSense credentials -->
+</div>
+
+<!-- MAIN CHESS CARD -->
 <div class="game-container">
     <h1>♛ GOLDEN CHESS ♚</h1>
     <div class="game-info">
@@ -301,6 +358,20 @@
         <button id="backBtn">🏰 Back to Hub</button>
     </div>
     <div class="status" id="status"></div>
+</div>
+
+<!-- 🔻 BOTTOM GOOGLE AD UNIT 🔻 -->
+<div class="ad-container bottom-ad">
+    <ins class="adsbygoogle"
+         style="display:block; width:100%; max-width:728px; margin:0 auto;"
+         data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+         data-ad-slot="0987654321"
+         data-ad-format="auto"
+         data-full-width-responsive="true"></ins>
+    <script>
+        (adsbygoogle = window.adsbygoogle || []).push({});
+    </script>
+    <!-- 🔹 Replace 'ca-pub-XXXXXXXXXXXXXXXX' and data-ad-slot with your AdSense details -->
 </div>
 
 <script>
@@ -534,7 +605,7 @@
                     square.classList.add('selected');
                 }
                 
-                // show check on king (dynamic, based on current board state)
+                // show check on king (dynamic)
                 if (piece === '♔' && isKingInCheck(board, 'white')) {
                     square.classList.add('check');
                 }
@@ -629,7 +700,6 @@
 
     // --- full reset: no distortion, no leftover highlights, clean state ---
     function resetGame() {
-        // Deep reset board
         board = JSON.parse(JSON.stringify(initialBoard));
         currentPlayer = 'white';
         selectedSquare = null;
@@ -637,14 +707,11 @@
         whiteCaptured = [];
         blackCaptured = [];
         
-        // Reset UI elements
         const turnElem = document.getElementById('turnIndicator');
         if (turnElem) turnElem.innerHTML = '⚜️ White\'s Turn ⚜️';
         const statusDiv = document.getElementById('status');
         if (statusDiv) statusDiv.innerHTML = '';
         updateCapturedDisplay();
-        
-        // Completely re-render board (clears any stale valid-move classes or selection styles)
         renderBoard();
     }
 
