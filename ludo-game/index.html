@@ -4,6 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
   <title>Ludo Classic | Extra Turn on Home | 57 Cells | Right Turn</title>
+  <!-- Google AdSense Service (Test ad unit) -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3940256099942544"
+     crossorigin="anonymous"></script>
   <style>
     * {
       margin: 0;
@@ -37,6 +40,37 @@
       align-items: center;
       gap: 18px;
       width: 100%;
+      max-width: 800px;
+    }
+
+    /* AD containers */
+    .ad-container {
+      width: 100%;
+      background: rgba(255,255,240,0.9);
+      border-radius: 20px;
+      padding: 8px 0;
+      text-align: center;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      backdrop-filter: blur(2px);
+      transition: all 0.2s;
+      min-height: 100px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .ad-top {
+      margin-bottom: 4px;
+    }
+    .ad-bottom {
+      margin-top: 4px;
+    }
+    .adsbygoogle {
+      display: block;
+      width: 100%;
+      max-width: 728px;
+      margin: 0 auto;
+      border-radius: 12px;
+      background: #fef6e0;
     }
 
     .top-panel {
@@ -50,6 +84,7 @@
       border-radius: 80px;
       backdrop-filter: blur(6px);
       box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+      width: 100%;
     }
 
     .turn-indicator {
@@ -246,18 +281,40 @@
       .token { min-width: 20px; min-height: 20px; }
       .turn-indicator { font-size: 0.9rem; padding: 6px 14px; min-width: 120px; }
       .action-btn { padding: 6px 14px; font-size: 0.8rem; }
+      .ad-container { min-height: 70px; }
     }
   </style>
 </head>
 <body>
 <div class="game-wrapper">
+  <!-- TOP AD (Google Ad Service) -->
+  <div class="ad-container ad-top">
+    <ins class="adsbygoogle"
+         style="display:block"
+         data-ad-client="ca-pub-3940256099942544"
+         data-ad-slot="1783611599"
+         data-ad-format="auto"
+         data-full-width-responsive="true"></ins>
+  </div>
+
   <div class="top-panel">
     <div class="turn-indicator" id="turnIndicator">🔴 Red Turn</div>
     <button class="action-btn" id="rollBtn">🎲 Roll Dice</button>
     <button class="action-btn" id="newGameBtn">🔄 New Game</button>
     <div class="dice" id="dice"><div class="dice-dot" id="diceValue"></div></div>
   </div>
+
   <div class="board" id="board"></div>
+
+  <!-- BOTTOM AD (Google Ad Service) -->
+  <div class="ad-container ad-bottom">
+    <ins class="adsbygoogle"
+         style="display:block"
+         data-ad-client="ca-pub-3940256099942544"
+         data-ad-slot="1783611599"
+         data-ad-format="auto"
+         data-full-width-responsive="true"></ins>
+  </div>
 </div>
 
 <script>
@@ -337,7 +394,7 @@
     });
     
     // ------------------------- PATHWAY (57 cells per color) -------------------------
-    // 52‑cell outer loop (clockwise)
+    // 52‑cell outer loop (clockwise) right-turn classic path
     const cyclicMain = [
       [14,7],[13,7],[12,7],[11,7],[10,7],
       [9,6],[9,5],[9,4],[9,3],[9,2],[9,1],
@@ -371,7 +428,6 @@
     for(let color of players){
       const start = startIndex[color];
       const rotatedMain = [...cyclicMain.slice(start), ...cyclicMain.slice(0, start)];
-      // Take only 51 main cells (so the 51st cell is the last before the right turn)
       const main51 = rotatedMain.slice(0, 51);
       fullPaths[color] = [...main51, ...homeStretch[color]];
     }
@@ -439,6 +495,8 @@
       return roll <= remaining;
     }
     
+    // ------------- EXTRA TURN ON HOME (winner's safezone) -------------
+    // rule: reaching final cell [8,8] grants extra turn (already implemented in moveToken)
     function moveToken(token, color){
       if(!canMove) return;
       if(token.dataset.finished === 'true') return;
@@ -480,13 +538,14 @@
       token.dataset.steps = newSteps.toString();
       updateTokenPositionAndLayout(token, newRow, newCol);
       
+      // SPECIAL EXTRA TURN RULE: REACHING WINNER'S SAFEZONE (final cell)
       if(finishedFlag){
         token.dataset.finished = 'true';
-        token.style.opacity = '0.5';
+        token.style.opacity = '0.6';
         token.style.cursor = 'default';
         repositionAllTokensGrouped();
-        // EXTRA TURN for reaching home (winner's safezone)
-        console.log(`🏆 ${color.toUpperCase()} token reached HOME! ${turnDisplay[color]} gets an extra turn.`);
+        // EXTRA TURN for reaching home (winner's safezone = central [8,8])
+        console.log(`🏆 ${color.toUpperCase()} token reached WINNER SAFEZONE! ${turnDisplay[color]} gets an EXTRA TURN.`);
         afterMove(true);
         return;
       }
@@ -736,6 +795,18 @@
     renderDice(1);
     updateTurnUI();
     repositionAllTokensGrouped();
+
+    // Initialize Google Ads (push both ad units after loading)
+    if(window.adsbygoogle && typeof window.adsbygoogle.push === 'function'){
+      try {
+        (adsbygoogle = window.adsbygoogle || []).push({});
+      } catch(e) { console.warn("Ad push issue", e); }
+    }
+    setTimeout(()=>{
+      try {
+        if(window.adsbygoogle) (adsbygoogle = window.adsbygoogle || []).push({});
+      } catch(e) {}
+    }, 100);
   })();
 </script>
 </body>
