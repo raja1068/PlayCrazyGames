@@ -2,22 +2,440 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tic-Tac-Toe</title>
-    <link rel="stylesheet" href="style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>✨ Tic-Tac-Toe · Classic Duel ✨</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Poppins', system-ui, -apple-system, 'Inter', sans-serif;
+            background: linear-gradient(145deg, #1a1e2f 0%, #2d2b4e 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1.5rem;
+        }
+
+        /* ----- AD STYLES (Google AdSense ready) ----- */
+        .ad-container {
+            width: 100%;
+            max-width: 860px;
+            margin: 0 auto 24px auto;
+            text-align: center;
+            background: rgba(255,255,255,0.08);
+            border-radius: 28px;
+            backdrop-filter: blur(2px);
+            padding: 8px 0;
+            transition: all 0.2s ease;
+        }
+        .ad-bottom {
+            margin-top: 28px;
+            margin-bottom: 8px;
+        }
+        .adsbygoogle {
+            display: block;
+            margin: 0 auto;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+        /* fallback message (only visible if ads fail to load) – subtle */
+        .ad-container small {
+            color: rgba(255,255,240,0.5);
+            font-size: 0.7rem;
+            display: block;
+            margin-top: 6px;
+        }
+
+        /* ----- MAIN GAME CONTAINER (SCALED 1.6x) ----- */
+        .game-container {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.97);
+            backdrop-filter: blur(0px);
+            padding: 48px;          /* originally 30px × 1.6 = 48px */
+            border-radius: 44px;    /* larger roundness 20×1.6? originally 20 -> 32, but nicer 44 */
+            box-shadow: 0 25px 55px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255,255,255,0.2);
+            transition: all 0.2s;
+            width: fit-content;
+            max-width: 95vw;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 3.6rem;      /* scaled from ~2.2rem -> 3.52, but 3.6 gives presence */
+            font-weight: 800;
+            background: linear-gradient(135deg, #3b2c5f, #aa6dc9);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            margin-bottom: 32px;     /* 20px *1.6 = 32px */
+            letter-spacing: -0.5px;
+            text-shadow: 2px 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .status {
+            margin-bottom: 32px;     /* 20px *1.6 */
+            font-size: 1.92rem;     /* 1.2rem *1.6 */
+            font-weight: 700;
+            color: #4c33b0;
+            background: #f0eefc;
+            display: inline-block;
+            padding: 10px 28px;
+            border-radius: 60px;
+            backdrop-filter: blur(4px);
+            letter-spacing: 0.3px;
+            box-shadow: inset 0 1px 2px #ffffff80, 0 4px 8px rgba(0,0,0,0.05);
+        }
+
+        /* BOARD: 3x3 grid - scaled cells 1.6x */
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, 160px);   /* 100px ×1.6 = 160px */
+            gap: 16px;                                 /* 10px ×1.6 = 16px */
+            margin-bottom: 48px;                       /* 30px ×1.6 = 48px */
+            justify-content: center;
+        }
+
+        .cell {
+            width: 160px;
+            height: 160px;
+            background: linear-gradient(145deg, #f9f9ff, #edeef5);
+            border-radius: 28px;                       /* 10×1.6 = 16 → but 28 looks gorgeous */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 5.2rem;                         /* 3rem ×1.6 = 4.8, but 5.2 feels bold */
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            box-shadow: 0 12px 20px -8px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255,255,255,0.8);
+            color: #2e2a4a;
+        }
+
+        .cell:hover {
+            background: linear-gradient(145deg, #ffffff, #e9eafe);
+            transform: scale(0.97);
+            box-shadow: 0 6px 12px -6px rgba(0, 0, 0, 0.2);
+        }
+
+        .cell.x {
+            color: #27ae60;
+            text-shadow: 0 2px 6px #b9f6ca;
+        }
+
+        .cell.o {
+            color: #e84342;
+            text-shadow: 0 2px 6px #ffc9c9;
+        }
+
+        /* control buttons scale 1.6 */
+        .controls button {
+            background: linear-gradient(115deg, #5f4b9e, #3a2b6e);
+            color: white;
+            border: none;
+            padding: 16px 32px;           /* 10px 20px -> 16px 32px */
+            margin: 0 16px;               /* 0 10px -> 0 16px */
+            border-radius: 48px;          /* 10px -> 16px but 48 looks sleek */
+            cursor: pointer;
+            font-size: 1.6rem;            /* 1rem -> 1.6rem */
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            transition: all 0.2s;
+            box-shadow: 0 8px 14px rgba(0, 0, 0, 0.2);
+        }
+
+        .controls button:hover {
+            opacity: 0.92;
+            transform: translateY(-3px);
+            background: linear-gradient(115deg, #6f54b0, #4a3882);
+            box-shadow: 0 15px 20px -6px rgba(0, 0, 0, 0.3);
+        }
+
+        .controls button:active {
+            transform: translateY(1px);
+        }
+
+        /* responsive: for smaller screens, adjust cells but keep 1.6x intention relative */
+        @media (max-width: 680px) {
+            .board {
+                grid-template-columns: repeat(3, 130px);
+                gap: 12px;
+            }
+            .cell {
+                width: 130px;
+                height: 130px;
+                font-size: 4.2rem;
+                border-radius: 22px;
+            }
+            .game-container {
+                padding: 32px;
+            }
+            h1 {
+                font-size: 2.8rem;
+            }
+            .status {
+                font-size: 1.5rem;
+                padding: 6px 20px;
+            }
+            .controls button {
+                padding: 12px 22px;
+                font-size: 1.3rem;
+                margin: 0 10px;
+            }
+        }
+
+        @media (max-width: 500px) {
+            .board {
+                grid-template-columns: repeat(3, 100px);
+                gap: 10px;
+            }
+            .cell {
+                width: 100px;
+                height: 100px;
+                font-size: 3.4rem;
+                border-radius: 18px;
+            }
+            .game-container {
+                padding: 24px;
+            }
+            h1 {
+                font-size: 2.2rem;
+                margin-bottom: 20px;
+            }
+            .status {
+                font-size: 1.25rem;
+                margin-bottom: 24px;
+            }
+            .controls button {
+                padding: 8px 18px;
+                font-size: 1.1rem;
+            }
+        }
+
+        /* additional subtle animation */
+        .cell:active {
+            transform: scale(0.94);
+        }
+        footer {
+            text-align: center;
+            font-size: 0.7rem;
+            margin-top: 16px;
+            color: #ccc9e6;
+        }
+    </style>
+    <!-- Google AdSense Script (Async) - real ad service integration -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3940256099942544" crossorigin="anonymous"></script>
 </head>
 <body>
+
+    <!-- 🧩 TOP AD UNIT (Google Ad Service) -->
+    <div class="ad-container ad-top">
+        <ins class="adsbygoogle"
+            style="display:block; min-width:300px; width:100%; max-width:780px; height:auto; margin:0 auto;"
+            data-ad-client="ca-pub-3940256099942544"
+            data-ad-slot="1234567890"
+            data-ad-format="auto"
+            data-full-width-responsive="true"></ins>
+        <script>
+            (adsbygoogle = window.adsbygoogle || []).push({});
+        </script>
+        <small>⚡ advertisement</small>
+    </div>
+
+    <!-- MAIN GAME SECTION (SCALED 1.6x) -->
     <div class="game-container">
         <h1>❌ Tic-Tac-Toe ⭕</h1>
         <div class="status" id="status">Player X's turn</div>
-        <div class="board" id="board">
-            <!-- 3x3 grid will be generated by JS -->
-        </div>
+        <div class="board" id="board"></div>
         <div class="controls">
-            <button id="resetBtn">Reset Game</button>
+            <button id="resetBtn">⟳ Reset Game</button>
             <button id="backBtn">⬅ Back to Hub</button>
         </div>
     </div>
-    <script src="script.js"></script>
+
+    <!-- 🧩 BOTTOM AD UNIT (Google Ad Service) -->
+    <div class="ad-container ad-bottom">
+        <ins class="adsbygoogle"
+            style="display:block; min-width:300px; width:100%; max-width:780px; height:auto; margin:0 auto;"
+            data-ad-client="ca-pub-3940256099942544"
+            data-ad-slot="9876543210"
+            data-ad-format="auto"
+            data-full-width-responsive="true"></ins>
+        <script>
+            (adsbygoogle = window.adsbygoogle || []).push({});
+        </script>
+        <small>✨ advertisement space</small>
+    </div>
+
+    <footer>⚡ classic duel — bigger experience</footer>
+
+    <script>
+        // ---------- TIC-TAC-TOE GAME LOGIC (fully functional) ----------
+        (function() {
+            const boardElement = document.getElementById('board');
+            const statusDiv = document.getElementById('status');
+            let currentPlayer = 'X';
+            let gameActive = true;
+            let gameState = ['', '', '', '', '', '', '', '', ''];
+            
+            // Winning combos
+            const winningConditions = [
+                [0, 1, 2], [3, 4, 5], [6, 7, 8],
+                [0, 3, 6], [1, 4, 7], [2, 5, 8],
+                [0, 4, 8], [2, 4, 6]
+            ];
+
+            // Helper: update UI cells
+            function updateAllCellsFromState() {
+                const cells = document.querySelectorAll('.cell');
+                cells.forEach((cell, idx) => {
+                    const mark = gameState[idx];
+                    cell.textContent = mark;
+                    if (mark === 'X') {
+                        cell.classList.add('x');
+                        cell.classList.remove('o');
+                    } else if (mark === 'O') {
+                        cell.classList.add('o');
+                        cell.classList.remove('x');
+                    } else {
+                        cell.classList.remove('x', 'o');
+                    }
+                });
+            }
+
+            // Render fresh board (create DOM cells)
+            function createBoard() {
+                boardElement.innerHTML = '';
+                for (let i = 0; i < 9; i++) {
+                    const cell = document.createElement('div');
+                    cell.classList.add('cell');
+                    cell.setAttribute('data-index', i);
+                    cell.addEventListener('click', () => handleCellClick(i));
+                    boardElement.appendChild(cell);
+                }
+                // sync visuals with current gameState
+                updateAllCellsFromState();
+            }
+
+            // Update a single cell after move (performance & style)
+            function updateCellDisplay(index) {
+                const cells = document.querySelectorAll('.cell');
+                const mark = gameState[index];
+                cells[index].textContent = mark;
+                if (mark === 'X') {
+                    cells[index].classList.add('x');
+                    cells[index].classList.remove('o');
+                } else if (mark === 'O') {
+                    cells[index].classList.add('o');
+                    cells[index].classList.remove('x');
+                } else {
+                    cells[index].classList.remove('x', 'o');
+                }
+            }
+
+            // Check for win or draw
+            function checkResult() {
+                let roundWon = false;
+                let winningCombo = null;
+                
+                for (let i = 0; i < winningConditions.length; i++) {
+                    const [a, b, c] = winningConditions[i];
+                    if (gameState[a] && gameState[a] === gameState[b] && gameState[a] === gameState[c]) {
+                        roundWon = true;
+                        winningCombo = [a, b, c];
+                        break;
+                    }
+                }
+                
+                if (roundWon) {
+                    statusDiv.textContent = `🎉 Player ${currentPlayer} wins! 🎉`;
+                    gameActive = false;
+                    // optional: highlight winning cells? can add subtle animation but keep clean
+                    return;
+                }
+                
+                // check for draw
+                if (!gameState.includes('')) {
+                    statusDiv.textContent = "🤝 It's a draw! 🤝";
+                    gameActive = false;
+                    return;
+                }
+                
+                // switch turn
+                currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+                statusDiv.textContent = `Player ${currentPlayer}'s turn`;
+            }
+
+            function handleCellClick(index) {
+                // validation
+                if (gameState[index] !== '' || !gameActive) return;
+                
+                // apply move
+                gameState[index] = currentPlayer;
+                updateCellDisplay(index);
+                
+                // check win/draw after move
+                let roundWon = false;
+                for (let i = 0; i < winningConditions.length; i++) {
+                    const [a, b, c] = winningConditions[i];
+                    if (gameState[a] && gameState[a] === gameState[b] && gameState[a] === gameState[c]) {
+                        roundWon = true;
+                        break;
+                    }
+                }
+                
+                if (roundWon) {
+                    statusDiv.textContent = `🏆 Player ${currentPlayer} wins! 🏆`;
+                    gameActive = false;
+                    return;
+                }
+                
+                if (!gameState.includes('')) {
+                    statusDiv.textContent = "🤝 It's a draw! 🤝";
+                    gameActive = false;
+                    return;
+                }
+                
+                // change player
+                currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+                statusDiv.textContent = `Player ${currentPlayer}'s turn`;
+            }
+
+            // reset everything
+            function resetGame() {
+                currentPlayer = 'X';
+                gameActive = true;
+                gameState = ['', '', '', '', '', '', '', '', ''];
+                statusDiv.textContent = "Player X's turn";
+                // update all cells (clean text & classes)
+                const cells = document.querySelectorAll('.cell');
+                cells.forEach((cell, idx) => {
+                    cell.textContent = '';
+                    cell.classList.remove('x', 'o');
+                });
+                // also ensures any leftover winning status cleared
+            }
+
+            // Back to Hub functionality
+            function backToHub() {
+                window.location.href = '../index.html';
+            }
+
+            // Event binding & initialization
+            document.getElementById('resetBtn').addEventListener('click', resetGame);
+            document.getElementById('backBtn').addEventListener('click', backToHub);
+            
+            // Build the game board and attach fresh listeners
+            createBoard();
+            
+            // optional: extra safety for reset visual consistency
+            window.additionalResetSync = resetGame;
+        })();
+    </script>
 </body>
 </html>
