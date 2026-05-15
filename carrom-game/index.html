@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Carrom Classic – 2P Hot Seat | Horse Striker | Queen Cover + Foul Rule</title>
+    <!-- Google AdSense (replace with your publisher ID) -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-xxxxxxxxxxxxx"
+     crossorigin="anonymous"></script>
+    <style>
+        * {
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        body {
+            background: radial-gradient(circle at 30% 20%, #1e3a1a, #0a1f08);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Segoe UI', 'Poppins', system-ui, sans-serif;
+            margin: 0;
+            padding: 16px;
+            flex-direction: column;
+        }
+        /* Ad containers - white background with advertisement label */
+        .ad-container {
+            position: relative;
+            background: white;
+            border-radius: 16px;
+            margin: 10px auto;
+            overflow: hidden;
+            max-width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            border: 1px solid #ccc;
+            min-height: 90px;
+            width: 728px;
+            max-width: 90vw;
+        }
+        .ad-label {
+            position: absolute;
+            bottom: 4px;
+            right: 8px;
+            font-size: 10px;
+            color: #888;
+            background: rgba(255,255,255,0.8);
+            padding: 2px 6px;
+            border-radius: 12px;
+            font-family: sans-serif;
+            z-index: 2;
+            pointer-events: none;
+        }
+        .ad-top { margin-bottom: 12px; }
+        .ad-bottom { margin-top: 12px; }
+        
+        .game-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            background: rgba(0,0,0,0.55);
+            padding: 16px 24px;
+            border-radius: 56px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 20px 35px rgba(0,0,0,0.7);
+        }
+        /* Header with CARROM and board image */
+        .game-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            background: #2d241ce6;
+            padding: 8px 24px;
+            border-radius: 60px;
+            margin-bottom: 8px;
+            backdrop-filter: blur(8px);
+            width: 100%;
+        }
+        .game-header h1 {
+            font-family: 'Poppins', sans-serif;
+            font-size: 2rem;
+            letter-spacing: 3px;
+            background: linear-gradient(135deg, #f9e0a0, #e4a22d);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            margin: 0;
+        }
+        .board-icon {
+            width: 48px;
+            height: 48px;
+            background: #d9b382;
+            border-radius: 50%;
+            position: relative;
+            box-shadow: inset 0 0 0 3px #8b5a2b, 0 4px 8px black;
+        }
+        .board-icon::before {
+            content: "★";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 24px;
+            color: #e4a22d;
+            text-shadow: 0 1px 2px black;
+        }
+        .board-icon::after {
+            content: "";
+            position: absolute;
+            width: 32px;
+            height: 32px;
+            border: 2px solid #a05e1a;
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        
+        canvas {
+            display: block;
+            box-shadow: 0 20px 30px rgba(0,0,0,0.6), inset 0 0 0 3px #f7e3b2;
+            border-radius: 28px;
+            cursor: grab;
+            background: #d9b382;
+            width: 100%;
+            height: auto;
+        }
+        canvas:active { cursor: grabbing; }
+        .info-panel {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            gap: 20px;
+            background: #2d241ce6;
+            padding: 6px 20px;
+            border-radius: 60px;
+            backdrop-filter: blur(8px);
+            flex-wrap: wrap;
+        }
+        .turn-indicator {
+            background: #e4a22d;
+            padding: 6px 20px;
+            border-radius: 48px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 0 1px 3px black;
+            box-shadow: 0 3px 6px black;
+            font-size: 0.9rem;
+            min-width: 170px;
+            text-align: center;
+        }
+        .foul-badge {
+            background: #b91c1c;
+            color: #ffd966;
+            padding: 2px 12px;
+            border-radius: 40px;
+            font-size: 0.7rem;
+            font-weight: bold;
+        }
+        .button-group {
+            display: flex;
+            gap: 20px;
+            margin-top: 6px;
+            justify-content: space-between;
+            width: 100%;
+        }
+        .turn-buttons {
+            display: flex;
+            gap: 14px;
+            justify-content: flex-start;
+        }
+        .action-btn {
+            background: #9b6a3a;
+            border: none;
+            font-weight: bold;
+            padding: 6px 20px;
+            border-radius: 40px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            color: white;
+            box-shadow: 0 3px 0 #4a2a10;
+            transition: 0.07s linear;
+            font-family: inherit;
+        }
+        .action-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 #4a2a10; }
+        .turn-btn { background: #b87c3a; min-width: 130px; }
+        .reset-btn { background: #ffcd7e; color: #3e2a1f; box-shadow: 0 3px 0 #a05e1a; margin-left: auto; }
+        .power-meter {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1e1712e8;
+            backdrop-filter: blur(8px);
+            padding: 6px 20px;
+            border-radius: 100px;
+            font-weight: bold;
+            pointer-events: none;
+            font-size: 0.8rem;
+            color: #ffdd99;
+            transition: 0.1s;
+            white-space: nowrap;
+            font-family: monospace;
+            z-index: 10;
+        }
+        .power-meter.green-active { background: #2e7d32e6; color: #ffffff; text-shadow: 0 0 4px #004d00; }
+        @media (max-width: 800px) {
+            .power-meter { font-size: 0.65rem; padding: 4px 14px; bottom: 12px; }
+            .turn-indicator { font-size: 0.75rem; min-width: 140px; padding: 4px 12px; }
+            .turn-btn { min-width: 100px; padding: 4px 12px; }
+            .reset-btn { padding: 4px 16px; }
+        }
+    </style>
+</head>
+<body>
+<!-- TOP AD with white background and advertisement label -->
+<div class="ad-container ad-top">
+    <div class="ad-label">Advertisement</div>
+    <ins class="adsbygoogle"
+         style="display:inline-block;width:728px;height:90px"
+         data-ad-client="ca-pub-xxxxxxxxxxxxx"
+         data-ad-slot="1234567890"></ins>
+    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+</div>
+
+<div class="game-container">
+    <!-- Header with CARROM and board icon -->
+    <div class="game-header">
+        <div class="board-icon"></div>
+        <h1>CARROM</h1>
+        <div class="board-icon"></div>
+    </div>
+    
+    <canvas id="carromCanvas" width="750" height="750"></canvas>
+    
+    <div class="info-panel">
+        <div class="turn-indicator" id="turnText">⚪ PLAYER 1 (WHITE)</div>
+        <div id="foulAlert" class="foul-badge" style="display: none;">⚠️ FOUL! Coin returned</div>
+    </div>
+    
+    <!-- Button group: turn buttons left, reset right -->
+    <div class="button-group">
+        <div class="turn-buttons">
+            <button id="player1Btn" class="action-btn turn-btn">⚪ PLAYER 1 (WHITE)</button>
+            <button id="player2Btn" class="action-btn turn-btn">⚫ PLAYER 2 (BLACK)</button>
+        </div>
+        <button id="resetGameBtn" class="action-btn reset-btn">🔄 NEW MATCH</button>
+    </div>
+    
+    <div id="powerMeter" class="power-meter">🔙 PULL BACK → POWER 0%</div>
+</div>
+
+<!-- BOTTOM AD with white background and advertisement label -->
+<div class="ad-container ad-bottom">
+    <div class="ad-label">Advertisement</div>
+    <ins class="adsbygoogle"
+         style="display:inline-block;width:728px;height:90px"
+         data-ad-client="ca-pub-xxxxxxxxxxxxx"
+         data-ad-slot="0987654321"></ins>
+    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+</div>
+
+<script>
+    (function(){
+        // ---------- CANVAS ----------
+        const canvas = document.getElementById('carromCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // ---------- BOARD GEOMETRY ----------
+        const BOARD_SIZE = 446;
+        const BOARD_LEFT = (750 - BOARD_SIZE) / 2;
+        const BOARD_RIGHT = BOARD_LEFT + BOARD_SIZE;
+        const BOARD_TOP = (750 - BOARD_SIZE) / 2;
+        const BOARD_BOTTOM = BOARD_TOP + BOARD_SIZE;
+        const BOARD_CX = BOARD_LEFT + BOARD_SIZE/2;
+        const BOARD_CY = BOARD_TOP + BOARD_SIZE/2;
+        
+        const BASELINE_INNER_OFFSET = 29;
+        const BASELINE_OUTER_OFFSET = 43;
+        const COIN_RADIUS = 14;
+        const STRIKER_RADIUS = 21;
+        const POCKET_RADIUS = 47;
+        
+        const pockets = [
+            { x: BOARD_LEFT - 12, y: BOARD_TOP - 12, r: POCKET_RADIUS },
+            { x: BOARD_RIGHT + 12, y: BOARD_TOP - 12, r: POCKET_RADIUS },
+            { x: BOARD_LEFT - 12, y: BOARD_BOTTOM + 12, r: POCKET_RADIUS },
+            { x: BOARD_RIGHT + 12, y: BOARD_BOTTOM + 12, r: POCKET_RADIUS }
+        ];
+        
+        const diagFull1 = { x1: pockets[0].x, y1: pockets[0].y, x2: pockets[3].x, y2: pockets[3].y };
+        const diagFull2 = { x1: pockets[1].x, y1: pockets[1].y, x2: pockets[2].x, y2: pockets[2].y };
+        
+        function intersectHorizontalWithLine(y, line) {
+            if (Math.abs(line.y2 - line.y1) < 1e-5) return null;
+            let t = (y - line.y1) / (line.y2 - line.y1);
+            if (t < 0 || t > 1) return null;
+            let x = line.x1 + t * (line.x2 - line.x1);
+            return { x, y };
+        }
+        
+        function intersectVerticalWithLine(x, line) {
+            if (Math.abs(line.x2 - line.x1) < 1e-5) return null;
+            let t = (x - line.x1) / (line.x2 - line.x1);
+            if (t < 0 || t > 1) return null;
+            let y = line.y1 + t * (line.y2 - line.y1);
+            return { x, y };
+        }
+        
+        function getBaselineLimits(y) {
+            let inter1 = intersectHorizontalWithLine(y, diagFull1);
+            let inter2 = intersectHorizontalWithLine(y, diagFull2);
+            if (!inter1 || !inter2) return { min: BOARD_LEFT + BASELINE_INNER_OFFSET, max: BOARD_RIGHT - BASELINE_INNER_OFFSET };
+            let x1 = Math.min(inter1.x, inter2.x);
+            let x2 = Math.max(inter1.x, inter2.x);
+            return { min: x1 + 5, max: x2 - 5 };
+        }
+        
+        const bottomBaselineY = BOARD_BOTTOM - BASELINE_INNER_OFFSET;
+        const topBaselineY = BOARD_TOP + BASELINE_INNER_OFFSET;
+        let bottomLimits = getBaselineLimits(bottomBaselineY);
+        let topLimits = getBaselineLimits(topBaselineY);
+        
+        function getStrikerLimits(player) {
+            return player === 'white' ? bottomLimits : topLimits;
+        }
+        
+        // ---------- GLOBAL STATE ----------
+        let objects = [];
+        let coinsList = [];
+        let strikerObj = null;
+        let currentTurn = 'white';
+        let queenPendingCover = { active: false, player: null, extraTurnActive: false };
+        let gameWinner = null;
+        let isMoving = false;
+        let waitingForManualTurn = false;
+        
+        let foulCommitted = false;
+        let pocketedCount = { white: 0, black: 0 };
+        
+        let aimAngle = 0;
+        let powerDragActive = false;
+        let dragOrigin = null;
+        let currentPower = 0;
+        
+        const FRICTION_AIR = 0.985;
+        const MIN_VEL = 0.4;
+        const MASS_STRIKER = 3.2;
+        const MASS_COIN = 1;
+        
+        // ---------- AUDIO (optional) ----------
+        let audioCtx = null;
+        function initAudio() {
+            if (audioCtx) return;
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        function playCollisionSound(type) {
+            if (!audioCtx) initAudio();
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume().then(() => playSoundInternal(type));
+            } else {
+                playSoundInternal(type);
+            }
+        }
+        function playSoundInternal(type) {
+            if (!audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            if (type === 'striker_coin') {
+                osc.frequency.value = 880;
+                gain.gain.setValueAtTime(0.25, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.2);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.2);
+            } else if (type === 'wall') {
+                osc.frequency.value = 380;
+                gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.15);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.15);
+            }
+        }
+        function tryResumeAudio() {
+            if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+        }
+        
+        // ---------- HELPER: spawn a coin (for foul penalty) ----------
+        function isPositionValid(x, y, radius) {
+            if (x - radius < BOARD_LEFT + 5 || x + radius > BOARD_RIGHT - 5 || y - radius < BOARD_TOP + 5 || y + radius > BOARD_BOTTOM - 5) return false;
+            for (let obj of objects) {
+                if (obj.type !== 'striker' && Math.hypot(obj.x - x, obj.y - y) < obj.radius + radius + 3) return false;
+            }
+            if (strikerObj && Math.hypot(strikerObj.x - x, strikerObj.y - y) < strikerObj.radius + radius + 3) return false;
+            return true;
+        }
+        
+        function spawnCoin(color) {
+            let radius = COIN_RADIUS;
+            let bestPos = null;
+            for (let ang = 0; ang < 360; ang += 30) {
+                let rad = ang * Math.PI / 180;
+                let testX = BOARD_CX + Math.cos(rad) * 32;
+                let testY = BOARD_CY + Math.sin(rad) * 32;
+                if (isPositionValid(testX, testY, radius)) {
+                    bestPos = { x: testX, y: testY };
+                    break;
+                }
+            }
+            if (!bestPos) {
+                for (let i = 0; i < 100; i++) {
+                    let testX = BOARD_CX + (Math.random() - 0.5) * 70;
+                    let testY = BOARD_CY + (Math.random() - 0.5) * 70;
+                    if (isPositionValid(testX, testY, radius)) {
+                        bestPos = { x: testX, y: testY };
+                        break;
+                    }
+                }
+            }
+            if (!bestPos) bestPos = { x: BOARD_CX + 15, y: BOARD_CY + 15 };
+            
+            let newCoin = {
+                id: `foul_${Date.now()}_${Math.random()}`,
+                type: color,
+                x: bestPos.x, y: bestPos.y,
+                vx: 0, vy: 0,
+                radius: COIN_RADIUS,
+                mass: MASS_COIN,
+                color: color === 'white' ? '#F5F5DC' : '#3A3A3A',
+                label: color === 'white' ? 'W' : 'B'
+            };
+            objects.push(newCoin);
+            coinsList.push(newCoin);
+        }
+        
+        // ---------- POCKET & QUEEN LOGIC ----------
+        function removeCoinFromWorld(coin) {
+            const idxObj = objects.indexOf(coin);
+            if(idxObj !== -1) objects.splice(idxObj,1);
+            const idxCoin = coinsList.indexOf(coin);
+            if(idxCoin !== -1) coinsList.splice(idxCoin,1);
+        }
+        
+        function respawnQueen() {
+            let queenExists = coinsList.some(c => c.type === 'queen');
+            if(!queenExists) {
+                let queen = { id:'queen', type:'queen', x:BOARD_CX, y:BOARD_CY, vx:0, vy:0, radius:COIN_RADIUS, mass:MASS_COIN, color:'#E34234', label:'Q' };
+                objects.push(queen);
+                coinsList.push(queen);
+            }
+        }
+        
+        function handlePocketCoin(coin, isStrikerPocket, currentPlayerColor) {
+            if(isStrikerPocket) {
+                const idx = objects.indexOf(coin);
+                if(idx !== -1) objects.splice(idx,1);
+                if(strikerObj === coin) strikerObj = null;
+                foulCommitted = true;
+                return false;
+            }
+            
+            if(coin.type === 'queen') {
+                if(queenPendingCover.active) {
+                    removeCoinFromWorld(coin);
+                    queenPendingCover.active = false;
+                    queenPendingCover.extraTurnActive = false;
+                } else {
+                    queenPendingCover.active = true;
+                    queenPendingCover.player = currentPlayerColor;
+                    queenPendingCover.extraTurnActive = true;
+                    removeCoinFromWorld(coin);
+                }
+                return true;
+            }
+            
+            const isOwnCoin = (coin.type === currentPlayerColor);
+            if(coin.type === 'white') pocketedCount.white++;
+            if(coin.type === 'black') pocketedCount.black++;
+            removeCoinFromWorld(coin);
+            
+            if(queenPendingCover.active && queenPendingCover.extraTurnActive && queenPendingCover.player === currentPlayerColor) {
+                if(isOwnCoin) {
+                    queenPendingCover.active = false;
+                    queenPendingCover.extraTurnActive = false;
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+            else if(queenPendingCover.active && !queenPendingCover.extraTurnActive && queenPendingCover.player === currentPlayerColor && isOwnCoin) {
+                queenPendingCover.active = false;
+                return true;
+            }
+            else if(queenPendingCover.active && queenPendingCover.player === currentPlayerColor && !isOwnCoin) {
+                queenPendingCover.active = false;
+                queenPendingCover.extraTurnActive = false;
+                respawnQueen();
+                return false;
+            }
+            return isOwnCoin;
+        }
+        
+        function checkPocketingAndGetExtraTurnFlag(currentPlayerColor) {
+            let extraTurn = false;
+            for(let i=objects.length-1; i>=0; i--) {
+                const obj = objects[i];
+                for(let p of pockets) {
+                    const dx = obj.x - p.x, dy = obj.y - p.y;
+                    if(Math.hypot(dx,dy) < p.r) {
+                        const isStriker = (obj.type === 'striker');
+                        const givesExtra = handlePocketCoin(obj, isStriker, currentPlayerColor);
+                        if(givesExtra) extraTurn = true;
+                        break;
+                    }
+                }
+            }
+            return extraTurn;
+        }
+        
+        function applyFoulAndTurnChange() {
+            if(!foulCommitted) return;
+            const foulPlayer = currentTurn;
+            const alertDiv = document.getElementById('foulAlert');
+            alertDiv.style.display = 'inline-block';
+            setTimeout(() => { if(alertDiv) alertDiv.style.display = 'none'; }, 1500);
+            
+            if(pocketedCount[foulPlayer] > 0) {
+                pocketedCount[foulPlayer]--;
+                spawnCoin(foulPlayer);
+            }
+            
+            if(queenPendingCover.active) {
+                queenPendingCover.active = false;
+                queenPendingCover.extraTurnActive = false;
+                respawnQueen();
+            }
+            
+            const nextTurn = (currentTurn === 'white') ? 'black' : 'white';
+            if(strikerObj) {
+                const idx = objects.indexOf(strikerObj);
+                if(idx !== -1) objects.splice(idx,1);
+                strikerObj = null;
+            }
+            currentTurn = nextTurn;
+            waitingForManualTurn = false;
+            createStriker();
+            foulCommitted = false;
+            updateUI();
+        }
+        
+        function createStriker() {
+            if(strikerObj) {
+                const idx = objects.indexOf(strikerObj);
+                if(idx !== -1) objects.splice(idx,1);
+            }
+            const strikerY = (currentTurn === 'white') ? bottomBaselineY : topBaselineY;
+            const limits = getStrikerLimits(currentTurn);
+            let startX = Math.min(limits.max, Math.max(limits.min, BOARD_CX));
+            strikerObj = {
+                id: 'striker',
+                type: 'striker',
+                x: startX,
+                y: strikerY,
+                vx: 0, vy: 0,
+                radius: STRIKER_RADIUS,
+                mass: MASS_STRIKER,
+                color: '#5AC8FA',
+                label: ''
+            };
+            objects.push(strikerObj);
+        }
+        
+        function setStrikerX(newX) {
+            if(gameWinner || isMoving) return;
+            if((currentTurn === 'white' && strikerObj && strikerObj.y > BOARD_CY) ||
+               (currentTurn === 'black' && strikerObj && strikerObj.y < BOARD_CY)) {
+                const limits = getStrikerLimits(currentTurn);
+                let clamped = Math.min(limits.max, Math.max(limits.min, newX));
+                if(strikerObj) strikerObj.x = clamped;
+            }
+        }
+        
+        // ---------- PHYSICS ----------
+        function applyPhysics() {
+            for(let obj of objects) {
+                let wallHit = false;
+                if(obj.x - obj.radius < BOARD_LEFT) { obj.x = BOARD_LEFT + obj.radius; obj.vx = -obj.vx * 0.98; wallHit = true; }
+                if(obj.x + obj.radius > BOARD_RIGHT) { obj.x = BOARD_RIGHT - obj.radius; obj.vx = -obj.vx * 0.98; wallHit = true; }
+                if(obj.y - obj.radius < BOARD_TOP) { obj.y = BOARD_TOP + obj.radius; obj.vy = -obj.vy * 0.98; wallHit = true; }
+                if(obj.y + obj.radius > BOARD_BOTTOM) { obj.y = BOARD_BOTTOM - obj.radius; obj.vy = -obj.vy * 0.98; wallHit = true; }
+                if(wallHit && Math.abs(obj.vx) + Math.abs(obj.vy) > 1.2) playCollisionSound('wall');
+                obj.vx *= FRICTION_AIR;
+                obj.vy *= FRICTION_AIR;
+                if(Math.abs(obj.vx) < MIN_VEL) obj.vx = 0;
+                if(Math.abs(obj.vy) < MIN_VEL) obj.vy = 0;
+                obj.x += obj.vx;
+                obj.y += obj.vy;
+            }
+            for(let i=0; i<objects.length; i++) {
+                for(let j=i+1; j<objects.length; j++) {
+                    const a = objects[i], b = objects[j];
+                    const dx = a.x - b.x, dy = a.y - b.y;
+                    const dist = Math.hypot(dx,dy);
+                    const minDist = a.radius + b.radius;
+                    if(dist < minDist) {
+                        const angle = Math.atan2(dy, dx);
+                        const overlap = minDist - dist;
+                        const correction = overlap/2;
+                        a.x += Math.cos(angle) * correction;
+                        a.y += Math.sin(angle) * correction;
+                        b.x -= Math.cos(angle) * correction;
+                        b.y -= Math.sin(angle) * correction;
+                        const nx = dx/dist, ny = dy/dist;
+                        const vrelx = a.vx - b.vx, vrely = a.vy - b.vy;
+                        const dot = vrelx*nx + vrely*ny;
+                        if(dot < 0) {
+                            const e = 0.85;
+                            const m1 = a.mass, m2 = b.mass;
+                            const imp = (1+e)*dot / ((1/m1)+(1/m2));
+                            a.vx -= imp * nx / m1;
+                            a.vy -= imp * ny / m1;
+                            b.vx += imp * nx / m2;
+                            b.vy += imp * ny / m2;
+                            if((a.type === 'striker' && b.type !== 'striker') || (b.type === 'striker' && a.type !== 'striker')) {
+                                let speed = Math.hypot(a.vx, a.vy) + Math.hypot(b.vx, b.vy);
+                                if(speed > 1.5) playCollisionSound('striker_coin');
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        function isAllStopped() {
+            return objects.every(obj => Math.abs(obj.vx) < 0.35 && Math.abs(obj.vy) < 0.35);
+        }
+        
+        function handleTurnEnd(extraTurnFlag) {
+            if(gameWinner) return;
+            if(isAllStopped() && isMoving) {
+                isMoving = false;
+                if(foulCommitted) {
+                    applyFoulAndTurnChange();
+                    return;
+                }
+                if(queenPendingCover.active && queenPendingCover.extraTurnActive) {
+                    queenPendingCover.active = false;
+                    queenPendingCover.extraTurnActive = false;
+                    respawnQueen();
+                }
+                if(extraTurnFlag) {
+                    createStriker();
+                    updateUI();
+                } else {
+                    if(strikerObj) {
+                        const idx = objects.indexOf(strikerObj);
+                        if(idx !== -1) objects.splice(idx,1);
+                        strikerObj = null;
+                    }
+                    waitingForManualTurn = true;
+                    updateUI();
+                }
+            }
+        }
+        
+        // ---------- SHOOTING ----------
+        function isPocketPossibleFromAngle(angleRad) {
+            if(!strikerObj) return false;
+            let closestDist = 300;
+            let hitCoin = null;
+            for(let coin of coinsList) {
+                let toCoinX = coin.x - strikerObj.x;
+                let toCoinY = coin.y - strikerObj.y;
+                let proj = (toCoinX * Math.cos(angleRad) + toCoinY * Math.sin(angleRad));
+                if(proj > 0) {
+                    let perpX = toCoinX - proj*Math.cos(angleRad);
+                    let perpY = toCoinY - proj*Math.sin(angleRad);
+                    let perpDist = Math.hypot(perpX, perpY);
+                    if(perpDist < COIN_RADIUS + STRIKER_RADIUS && proj < closestDist) {
+                        closestDist = proj;
+                        hitCoin = coin;
+                    }
+                }
+            }
+            if(hitCoin) {
+                for(let p of pockets) {
+                    let toPocket = { x: p.x - hitCoin.x, y: p.y - hitCoin.y };
+                    let pocketAngle = Math.atan2(toPocket.y, toPocket.x);
+                    let diff = Math.abs(pocketAngle - angleRad);
+                    if(diff < 0.65) return true;
+                }
+            }
+            return false;
+        }
+        
+        function shootStriker(powerVal, angleRad) {
+            if(isMoving || gameWinner) return false;
+            if(!strikerObj) return false;
+            strikerObj.vx = Math.cos(angleRad) * (powerVal * 0.95);
+            strikerObj.vy = Math.sin(angleRad) * (powerVal * 0.95);
+            isMoving = true;
+            powerDragActive = false;
+            document.getElementById('powerMeter').classList.remove('green-active');
+            return true;
+        }
+        
+        // ---------- DRAWING (complete) ----------
+        function drawBoardAndMarkings() {
+            ctx.fillStyle = '#dbb067';
+            ctx.fillRect(0,0,750,750);
+            ctx.fillStyle = '#8b5a2b';
+            ctx.fillRect(BOARD_LEFT-14, BOARD_TOP-14, BOARD_SIZE+28, BOARD_SIZE+28);
+            ctx.fillStyle = '#F7E5C2';
+            ctx.fillRect(BOARD_LEFT, BOARD_TOP, BOARD_SIZE, BOARD_SIZE);
+            
+            for(let p of pockets) {
+                ctx.beginPath(); ctx.arc(p.x, p.y, p.r-12, 0, Math.PI*2); ctx.fillStyle = '#4e2e14'; ctx.fill();
+                ctx.beginPath(); ctx.arc(p.x, p.y, p.r-22, 0, Math.PI*2); ctx.fillStyle = '#1f1409'; ctx.fill();
+            }
+            
+            ctx.beginPath();
+            let topI1 = intersectHorizontalWithLine(topBaselineY, diagFull1);
+            let bottomI1 = intersectHorizontalWithLine(bottomBaselineY, diagFull1);
+            if(topI1 && bottomI1) { ctx.moveTo(topI1.x, topI1.y); ctx.lineTo(bottomI1.x, bottomI1.y); }
+            let topI2 = intersectHorizontalWithLine(topBaselineY, diagFull2);
+            let bottomI2 = intersectHorizontalWithLine(bottomBaselineY, diagFull2);
+            if(topI2 && bottomI2) { ctx.moveTo(topI2.x, topI2.y); ctx.lineTo(bottomI2.x, bottomI2.y); }
+            ctx.lineWidth = 3; ctx.strokeStyle = '#c2732d'; ctx.stroke();
+            
+            ctx.beginPath(); ctx.arc(BOARD_CX, BOARD_CY, 52, 0, 2*Math.PI); ctx.strokeStyle='#b45a2a'; ctx.lineWidth=2.8; ctx.stroke();
+            ctx.beginPath(); ctx.arc(BOARD_CX, BOARD_CY, 24, 0, 2*Math.PI); ctx.stroke();
+            
+            function drawClippedHorizontal(y) {
+                let i1 = intersectHorizontalWithLine(y, diagFull1);
+                let i2 = intersectHorizontalWithLine(y, diagFull2);
+                if(i1 && i2) {
+                    let x1 = Math.min(i1.x, i2.x);
+                    let x2 = Math.max(i1.x, i2.x);
+                    ctx.beginPath(); ctx.moveTo(x1, y); ctx.lineTo(x2, y); ctx.stroke();
+                }
+            }
+            function drawClippedVertical(x) {
+                let i1 = intersectVerticalWithLine(x, diagFull1);
+                let i2 = intersectVerticalWithLine(x, diagFull2);
+                if(i1 && i2) {
+                    let y1 = Math.min(i1.y, i2.y);
+                    let y2 = Math.max(i1.y, i2.y);
+                    ctx.beginPath(); ctx.moveTo(x, y1); ctx.lineTo(x, y2); ctx.stroke();
+                }
+            }
+            ctx.lineWidth = 2.2; ctx.strokeStyle = '#bc6f2c';
+            drawClippedHorizontal(BOARD_BOTTOM - BASELINE_OUTER_OFFSET);
+            drawClippedHorizontal(BOARD_BOTTOM - BASELINE_INNER_OFFSET);
+            drawClippedHorizontal(BOARD_TOP + BASELINE_OUTER_OFFSET);
+            drawClippedHorizontal(BOARD_TOP + BASELINE_INNER_OFFSET);
+            drawClippedVertical(BOARD_LEFT + BASELINE_OUTER_OFFSET);
+            drawClippedVertical(BOARD_LEFT + BASELINE_INNER_OFFSET);
+            drawClippedVertical(BOARD_RIGHT - BASELINE_OUTER_OFFSET);
+            drawClippedVertical(BOARD_RIGHT - BASELINE_INNER_OFFSET);
+            
+            ctx.fillStyle = '#E63946';
+            let redPositions = [];
+            let hYs = [bottomBaselineY, topBaselineY];
+            for(let y of hYs) {
+                let i1 = intersectHorizontalWithLine(y, diagFull1);
+                let i2 = intersectHorizontalWithLine(y, diagFull2);
+                if(i1 && i2) { redPositions.push([i1.x, y]); redPositions.push([i2.x, y]); }
+            }
+            let vXs = [BOARD_LEFT+BASELINE_INNER_OFFSET, BOARD_RIGHT-BASELINE_INNER_OFFSET];
+            for(let x of vXs) {
+                let i1 = intersectVerticalWithLine(x, diagFull1);
+                let i2 = intersectVerticalWithLine(x, diagFull2);
+                if(i1 && i2) { redPositions.push([x, i1.y]); redPositions.push([x, i2.y]); }
+            }
+            for(let pos of redPositions) {
+                ctx.beginPath(); ctx.arc(pos[0], pos[1], 4.5, 0, 2*Math.PI); ctx.fill();
+            }
+        }
+        
+        function drawDetailedCoin(obj, x, y, r) {
+            ctx.beginPath(); ctx.arc(x, y, r-1, 0, 2*Math.PI);
+            ctx.fillStyle = obj.color; ctx.fill();
+            ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = 1.5; ctx.stroke();
+            ctx.beginPath(); ctx.arc(x, y, r*0.65, 0, 2*Math.PI);
+            ctx.strokeStyle = '#2c1a0c'; ctx.stroke();
+            ctx.fillStyle = '#111'; ctx.font = `bold ${Math.floor(r-4)}px "Segoe UI"`;
+            ctx.fillText(obj.label, x-5, y+5);
+        }
+        
+        function drawRealisticHorseFace(x, y, radius) {
+            ctx.save();
+            ctx.beginPath(); ctx.ellipse(x, y - radius*0.05, radius*0.7, radius*0.75, 0, 0, Math.PI*2);
+            ctx.fillStyle = "#B87333"; ctx.fill();
+            ctx.strokeStyle = "#5D3A1A"; ctx.lineWidth = 1.5; ctx.stroke();
+            ctx.beginPath(); ctx.ellipse(x + radius*0.15, y + radius*0.1, radius*0.35, radius*0.3, 0, 0, Math.PI*2);
+            ctx.fillStyle = "#E8C99E"; ctx.fill();
+            ctx.beginPath(); ctx.arc(x + radius*0.25, y + radius*0.05, radius*0.08, 0, 2*Math.PI); ctx.fillStyle = "#4A2511"; ctx.fill();
+            ctx.beginPath(); ctx.arc(x + radius*0.05, y + radius*0.05, radius*0.08, 0, 2*Math.PI); ctx.fill();
+            ctx.beginPath(); ctx.arc(x - radius*0.2, y - radius*0.15, radius*0.12, 0, 2*Math.PI); ctx.fillStyle = "#FDF5E6"; ctx.fill();
+            ctx.beginPath(); ctx.arc(x - radius*0.22, y - radius*0.17, radius*0.06, 0, 2*Math.PI); ctx.fillStyle = "#000"; ctx.fill();
+            ctx.beginPath(); ctx.moveTo(x - radius*0.45, y - radius*0.55); ctx.lineTo(x - radius*0.7, y - radius*0.85); ctx.lineTo(x - radius*0.25, y - radius*0.65); ctx.fillStyle = "#A05E2C"; ctx.fill();
+            ctx.beginPath(); ctx.moveTo(x + radius*0.45, y - radius*0.55); ctx.lineTo(x + radius*0.7, y - radius*0.85); ctx.lineTo(x + radius*0.25, y - radius*0.65); ctx.fill();
+            ctx.restore();
+        }
+        
+        function drawObjects() {
+            for(let obj of objects) {
+                if(obj.type === 'striker') {
+                    ctx.beginPath(); ctx.arc(obj.x, obj.y, obj.radius-1, 0, 2*Math.PI);
+                    ctx.fillStyle = obj.color; ctx.fill();
+                    ctx.strokeStyle = '#1f4a6e'; ctx.lineWidth = 1.8; ctx.stroke();
+                    drawRealisticHorseFace(obj.x, obj.y, obj.radius);
+                } else {
+                    drawDetailedCoin(obj, obj.x, obj.y, obj.radius);
+                }
+            }
+        }
+        
+        function drawAimingArrow() {
+            if(!strikerObj || isMoving || gameWinner || waitingForManualTurn) return;
+            let arrowLen = 70;
+            let tipX = strikerObj.x + Math.cos(aimAngle) * arrowLen;
+            let tipY = strikerObj.y + Math.sin(aimAngle) * arrowLen;
+            let pocketPossible = isPocketPossibleFromAngle(aimAngle);
+            ctx.beginPath(); ctx.moveTo(strikerObj.x, strikerObj.y); ctx.lineTo(tipX, tipY);
+            ctx.lineWidth = 4.5; ctx.strokeStyle = pocketPossible ? '#42F590' : '#E8B45E'; ctx.stroke();
+            let wing = 12;
+            ctx.beginPath(); ctx.moveTo(tipX, tipY);
+            ctx.lineTo(tipX + Math.cos(aimAngle - 0.55) * wing, tipY + Math.sin(aimAngle - 0.55) * wing);
+            ctx.lineTo(tipX + Math.cos(aimAngle + 0.55) * wing, tipY + Math.sin(aimAngle + 0.55) * wing);
+            ctx.fillStyle = pocketPossible ? '#42F590' : '#E8B45E'; ctx.fill();
+        }
+        
+        function updatePowerMeter() {
+            const pm = document.getElementById('powerMeter');
+            if(powerDragActive && strikerObj && !isMoving && !waitingForManualTurn) {
+                let possible = isPocketPossibleFromAngle(aimAngle);
+                if(possible) pm.classList.add('green-active');
+                else pm.classList.remove('green-active');
+                pm.innerHTML = `🔙 PULL BACK → POWER ${Math.floor(currentPower)}%  ${possible ? '🎯 POCKET READY' : ''}`;
+            } else {
+                pm.classList.remove('green-active');
+                pm.innerHTML = `🔙 PULL BACK → POWER 0%`;
+            }
+        }
+        
+        // ---------- TURN & RESET ----------
+        function setTurn(turn) {
+            if(gameWinner || isMoving) return;
+            if(queenPendingCover.active && !queenPendingCover.extraTurnActive) {
+                queenPendingCover.active = false;
+                respawnQueen();
+            }
+            currentTurn = turn;
+            waitingForManualTurn = false;
+            if(strikerObj) {
+                const idx = objects.indexOf(strikerObj);
+                if(idx !== -1) objects.splice(idx,1);
+                strikerObj = null;
+            }
+            createStriker();
+            updateUI();
+        }
+        
+        function initBoardCoins() {
+            objects = []; coinsList = [];
+            let queen = { id:'queen', type:'queen', x:BOARD_CX, y:BOARD_CY, vx:0, vy:0, radius:COIN_RADIUS, mass:MASS_COIN, color:'#E34234', label:'Q' };
+            objects.push(queen); coinsList.push(queen);
+            let innerColors = ['white','black','white','black','white','black'];
+            for(let i=0;i<6;i++){ let ang=(i*Math.PI*2/6); let x=BOARD_CX+Math.cos(ang)*23, y=BOARD_CY+Math.sin(ang)*23; let col=innerColors[i]; objects.push({id:`in${i}`,type:col,x,y,vx:0,vy:0,radius:COIN_RADIUS,mass:MASS_COIN,color:col==='white'?'#F5F5DC':'#3A3A3A',label:col==='white'?'W':'B'}); coinsList.push(objects[objects.length-1]); }
+            let outerColors = []; for(let i=0;i<12;i++) outerColors.push(i%2===0?'white':'black');
+            for(let i=0;i<12;i++){ let ang=(i*Math.PI*2/12); let x=BOARD_CX+Math.cos(ang)*45, y=BOARD_CY+Math.sin(ang)*45; let col=outerColors[i]; objects.push({id:`out${i}`,type:col,x,y,vx:0,vy:0,radius:COIN_RADIUS,mass:MASS_COIN,color:col==='white'?'#F5F5DC':'#3A3A3A',label:col==='white'?'W':'B'}); coinsList.push(objects[objects.length-1]); }
+            pocketedCount = { white: 0, black: 0 };
+            foulCommitted = false;
+        }
+        
+        function resetGame() {
+            objects = []; coinsList = [];
+            currentTurn = 'white';
+            queenPendingCover = { active: false, player: null, extraTurnActive: false };
+            gameWinner = null;
+            isMoving = false;
+            waitingForManualTurn = false;
+            powerDragActive = false;
+            foulCommitted = false;
+            pocketedCount = { white: 0, black: 0 };
+            initBoardCoins();
+            createStriker();
+            updateUI();
+        }
+        
+        function updateUI() {
+            let turnName = (currentTurn === 'white') ? '⚪ PLAYER 1 (WHITE)' : '⚫ PLAYER 2 (BLACK)';
+            if(gameWinner) turnName = `🏆 ${gameWinner.toUpperCase()} WINS! 🏆`;
+            document.getElementById('turnText').innerHTML = turnName;
+            // removed queen status message as requested
+        }
+        
+        // Animation loop
+        function animate() {
+            if(gameWinner) { drawBoardAndMarkings(); drawObjects(); if(!isMoving && !gameWinner) drawAimingArrow(); requestAnimationFrame(animate); return; }
+            if(isMoving) {
+                applyPhysics();
+                let extraTurn = checkPocketingAndGetExtraTurnFlag(currentTurn);
+                if(isAllStopped() && isMoving) { isMoving = false; handleTurnEnd(extraTurn); }
+            }
+            drawBoardAndMarkings();
+            drawObjects();
+            if(!isMoving && !gameWinner && !waitingForManualTurn) drawAimingArrow();
+            updatePowerMeter();
+            requestAnimationFrame(animate);
+        }
+        
+        // Input handling
+        function handlePowerStart(e) {
+            tryResumeAudio();
+            if(isMoving || gameWinner || waitingForManualTurn) return;
+            let rect = canvas.getBoundingClientRect();
+            let mx = (e.clientX - rect.left) * (750/rect.width);
+            let my = (e.clientY - rect.top) * (750/rect.height);
+            if(strikerObj && Math.hypot(mx-strikerObj.x, my-strikerObj.y) < STRIKER_RADIUS+10) {
+                powerDragActive = true;
+                dragOrigin = { x: strikerObj.x, y: strikerObj.y };
+                e.preventDefault();
+            }
+        }
+        function handlePowerDrag(e) {
+            if(!powerDragActive || isMoving) return;
+            let rect = canvas.getBoundingClientRect();
+            let mx = (e.clientX - rect.left) * (750/rect.width);
+            let my = (e.clientY - rect.top) * (750/rect.height);
+            let dx = dragOrigin.x - mx, dy = dragOrigin.y - my;
+            let pull = Math.min(34, Math.hypot(dx, dy));
+            currentPower = Math.min(42, pull * 1.28);
+            aimAngle = Math.atan2(dy, dx);
+            updatePowerMeter();
+            e.preventDefault();
+        }
+        function handlePowerRelease(e) {
+            if(!powerDragActive || isMoving) return;
+            if(currentPower > 7) shootStriker(currentPower, aimAngle);
+            powerDragActive = false;
+            currentPower = 0;
+            updatePowerMeter();
+        }
+        function handleMouseMoveAim(e) {
+            if(isMoving || gameWinner || powerDragActive || waitingForManualTurn) return;
+            let rect = canvas.getBoundingClientRect();
+            let mx = (e.clientX - rect.left) * (750/rect.width);
+            let my = (e.clientY - rect.top) * (750/rect.height);
+            if(strikerObj) aimAngle = Math.atan2(my - strikerObj.y, mx - strikerObj.x);
+        }
+        function handleDragStriker(e) {
+            if(isMoving || gameWinner || powerDragActive || waitingForManualTurn) return;
+            let rect = canvas.getBoundingClientRect();
+            let mx = (e.clientX - rect.left) * (750/rect.width);
+            setStrikerX(mx);
+        }
+        function attachEvents() {
+            canvas.addEventListener('mousemove', handleMouseMoveAim);
+            canvas.addEventListener('mousedown', handlePowerStart);
+            canvas.addEventListener('mousemove', (e) => { if(powerDragActive) handlePowerDrag(e); else handleDragStriker(e); });
+            canvas.addEventListener('mouseup', handlePowerRelease);
+            canvas.addEventListener('touchmove', (e)=>e.preventDefault());
+            canvas.addEventListener('touchstart', (e)=> { let t=e.touches[0]; handlePowerStart(t); tryResumeAudio(); });
+            canvas.addEventListener('touchmove', (e)=> { let t=e.touches[0]; if(powerDragActive) handlePowerDrag(t); else handleDragStriker(t); e.preventDefault(); });
+            canvas.addEventListener('touchend', handlePowerRelease);
+            document.getElementById('resetGameBtn').onclick = () => resetGame();
+            document.getElementById('player1Btn').onclick = () => setTurn('white');
+            document.getElementById('player2Btn').onclick = () => setTurn('black');
+        }
+        
+        attachEvents();
+        resetGame();
+        animate();
+        canvas.addEventListener('click', () => tryResumeAudio());
+    })();
+</script>
+</body>
+</html>
