@@ -3,7 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Carrom Classic – 2P Hot Seat | Realistic Horse Striker | Queen Cover Rule</title>
+    <title>Carrom Classic – 2P Hot Seat | Horse Striker | Queen Cover + Foul Rule</title>
+    <!-- Google AdSense (replace with your publisher ID) -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-xxxxxxxxxxxxx"
+     crossorigin="anonymous"></script>
     <style>
         * {
             user-select: none;
@@ -18,7 +21,41 @@
             font-family: 'Segoe UI', 'Poppins', system-ui, sans-serif;
             margin: 0;
             padding: 16px;
+            flex-direction: column;
         }
+        /* Ad containers - white background with advertisement label */
+        .ad-container {
+            position: relative;
+            background: white;
+            border-radius: 16px;
+            margin: 10px auto;
+            overflow: hidden;
+            max-width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            border: 1px solid #ccc;
+            min-height: 90px;
+            width: 728px;
+            max-width: 90vw;
+        }
+        .ad-label {
+            position: absolute;
+            bottom: 4px;
+            right: 8px;
+            font-size: 10px;
+            color: #888;
+            background: rgba(255,255,255,0.8);
+            padding: 2px 6px;
+            border-radius: 12px;
+            font-family: sans-serif;
+            z-index: 2;
+            pointer-events: none;
+        }
+        .ad-top { margin-bottom: 12px; }
+        .ad-bottom { margin-top: 12px; }
+        
         .game-container {
             display: flex;
             flex-direction: column;
@@ -30,6 +67,60 @@
             backdrop-filter: blur(10px);
             box-shadow: 0 20px 35px rgba(0,0,0,0.7);
         }
+        /* Header with CARROM and board image */
+        .game-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            background: #2d241ce6;
+            padding: 8px 24px;
+            border-radius: 60px;
+            margin-bottom: 8px;
+            backdrop-filter: blur(8px);
+            width: 100%;
+        }
+        .game-header h1 {
+            font-family: 'Poppins', sans-serif;
+            font-size: 2rem;
+            letter-spacing: 3px;
+            background: linear-gradient(135deg, #f9e0a0, #e4a22d);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            margin: 0;
+        }
+        .board-icon {
+            width: 48px;
+            height: 48px;
+            background: #d9b382;
+            border-radius: 50%;
+            position: relative;
+            box-shadow: inset 0 0 0 3px #8b5a2b, 0 4px 8px black;
+        }
+        .board-icon::before {
+            content: "★";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 24px;
+            color: #e4a22d;
+            text-shadow: 0 1px 2px black;
+        }
+        .board-icon::after {
+            content: "";
+            position: absolute;
+            width: 32px;
+            height: 32px;
+            border: 2px solid #a05e1a;
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        
         canvas {
             display: block;
             box-shadow: 0 20px 30px rgba(0,0,0,0.6), inset 0 0 0 3px #f7e3b2;
@@ -64,20 +155,25 @@
             min-width: 170px;
             text-align: center;
         }
-        .status {
-            background: #2c1e12;
-            padding: 5px 16px;
+        .foul-badge {
+            background: #b91c1c;
+            color: #ffd966;
+            padding: 2px 12px;
             border-radius: 40px;
-            color: #ffdd99;
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             font-weight: bold;
         }
         .button-group {
             display: flex;
-            gap: 14px;
+            gap: 20px;
             margin-top: 6px;
-            flex-wrap: wrap;
-            justify-content: center;
+            justify-content: space-between;
+            width: 100%;
+        }
+        .turn-buttons {
+            display: flex;
+            gap: 14px;
+            justify-content: flex-start;
         }
         .action-btn {
             background: #9b6a3a;
@@ -94,7 +190,7 @@
         }
         .action-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 #4a2a10; }
         .turn-btn { background: #b87c3a; min-width: 130px; }
-        .reset-btn { background: #ffcd7e; color: #3e2a1f; box-shadow: 0 3px 0 #a05e1a; }
+        .reset-btn { background: #ffcd7e; color: #3e2a1f; box-shadow: 0 3px 0 #a05e1a; margin-left: auto; }
         .power-meter {
             position: absolute;
             bottom: 20px;
@@ -111,35 +207,73 @@
             transition: 0.1s;
             white-space: nowrap;
             font-family: monospace;
+            z-index: 10;
         }
         .power-meter.green-active { background: #2e7d32e6; color: #ffffff; text-shadow: 0 0 4px #004d00; }
         @media (max-width: 800px) {
             .power-meter { font-size: 0.65rem; padding: 4px 14px; bottom: 12px; }
             .turn-indicator { font-size: 0.75rem; min-width: 140px; padding: 4px 12px; }
+            .turn-btn { min-width: 100px; padding: 4px 12px; }
+            .reset-btn { padding: 4px 16px; }
         }
     </style>
 </head>
 <body>
+<!-- TOP AD with white background and advertisement label -->
+<div class="ad-container ad-top">
+    <div class="ad-label">Advertisement</div>
+    <ins class="adsbygoogle"
+         style="display:inline-block;width:728px;height:90px"
+         data-ad-client="ca-pub-xxxxxxxxxxxxx"
+         data-ad-slot="1234567890"></ins>
+    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+</div>
+
 <div class="game-container">
+    <!-- Header with CARROM and board icon -->
+    <div class="game-header">
+        <div class="board-icon"></div>
+        <h1>CARROM</h1>
+        <div class="board-icon"></div>
+    </div>
+    
     <canvas id="carromCanvas" width="750" height="750"></canvas>
+    
     <div class="info-panel">
         <div class="turn-indicator" id="turnText">⚪ PLAYER 1 (WHITE)</div>
-        <div class="status" id="statusMsg">👑 Queen: free</div>
+        <div id="foulAlert" class="foul-badge" style="display: none;">⚠️ FOUL! Coin returned</div>
     </div>
-    <div id="turnButtonsContainer" class="button-group"></div>
+    
+    <!-- Button group: turn buttons left, reset right -->
     <div class="button-group">
+        <div class="turn-buttons">
+            <button id="player1Btn" class="action-btn turn-btn">⚪ PLAYER 1 (WHITE)</button>
+            <button id="player2Btn" class="action-btn turn-btn">⚫ PLAYER 2 (BLACK)</button>
+        </div>
         <button id="resetGameBtn" class="action-btn reset-btn">🔄 NEW MATCH</button>
     </div>
+    
     <div id="powerMeter" class="power-meter">🔙 PULL BACK → POWER 0%</div>
+</div>
+
+<!-- BOTTOM AD with white background and advertisement label -->
+<div class="ad-container ad-bottom">
+    <div class="ad-label">Advertisement</div>
+    <ins class="adsbygoogle"
+         style="display:inline-block;width:728px;height:90px"
+         data-ad-client="ca-pub-xxxxxxxxxxxxx"
+         data-ad-slot="0987654321"></ins>
+    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
 </div>
 
 <script>
     (function(){
-        // ---------- SCALED GEOMETRY (75% of previous base) ----------
+        // ---------- CANVAS ----------
         const canvas = document.getElementById('carromCanvas');
         const ctx = canvas.getContext('2d');
         
-        const BOARD_SIZE = 446;          // 75% scaled
+        // ---------- BOARD GEOMETRY ----------
+        const BOARD_SIZE = 446;
         const BOARD_LEFT = (750 - BOARD_SIZE) / 2;
         const BOARD_RIGHT = BOARD_LEFT + BOARD_SIZE;
         const BOARD_TOP = (750 - BOARD_SIZE) / 2;
@@ -149,12 +283,8 @@
         
         const BASELINE_INNER_OFFSET = 29;
         const BASELINE_OUTER_OFFSET = 43;
-        
-        // NEW SIZES: coin 1.3x bigger than previous (previous 11 -> 14.3 ≈ 14)
         const COIN_RADIUS = 14;
-        // Striker 25% smaller than previous (previous 28 -> 21)
         const STRIKER_RADIUS = 21;
-        
         const POCKET_RADIUS = 47;
         
         const pockets = [
@@ -172,6 +302,14 @@
             let t = (y - line.y1) / (line.y2 - line.y1);
             if (t < 0 || t > 1) return null;
             let x = line.x1 + t * (line.x2 - line.x1);
+            return { x, y };
+        }
+        
+        function intersectVerticalWithLine(x, line) {
+            if (Math.abs(line.x2 - line.x1) < 1e-5) return null;
+            let t = (x - line.x1) / (line.x2 - line.x1);
+            if (t < 0 || t > 1) return null;
+            let y = line.y1 + t * (line.y2 - line.y1);
             return { x, y };
         }
         
@@ -193,15 +331,18 @@
             return player === 'white' ? bottomLimits : topLimits;
         }
         
-        // ---------- GAME STATE ----------
+        // ---------- GLOBAL STATE ----------
         let objects = [];
         let coinsList = [];
         let strikerObj = null;
         let currentTurn = 'white';
-        let queenPendingCover = { active: false, player: null, extraTurnActive: false }; // extraTurnActive indicates the extra turn after queen pocket
+        let queenPendingCover = { active: false, player: null, extraTurnActive: false };
         let gameWinner = null;
         let isMoving = false;
         let waitingForManualTurn = false;
+        
+        let foulCommitted = false;
+        let pocketedCount = { white: 0, black: 0 };
         
         let aimAngle = 0;
         let powerDragActive = false;
@@ -213,7 +354,7 @@
         const MASS_STRIKER = 3.2;
         const MASS_COIN = 1;
         
-        // ---------- SOUND ----------
+        // ---------- AUDIO (optional) ----------
         let audioCtx = null;
         function initAudio() {
             if (audioCtx) return;
@@ -251,22 +392,55 @@
             if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
         }
         
-        // ---------- UI Helpers ----------
-        function updateUI() {
-            let turnName = (currentTurn === 'white') ? '⚪ PLAYER 1 (WHITE)' : '⚫ PLAYER 2 (BLACK)';
-            if(gameWinner) turnName = `🏆 ${gameWinner.toUpperCase()} WINS! 🏆`;
-            document.getElementById('turnText').innerHTML = turnName;
-            let statusText = "";
-            if (queenPendingCover.active && queenPendingCover.extraTurnActive) {
-                statusText = `🔥 QUEEN POCKETED! EXTRA TURN - MUST POCKET OWN COIN 🔥`;
-            } else if (queenPendingCover.active && !queenPendingCover.extraTurnActive) {
-                statusText = `⚠️ QUEEN PENDING COVER by ${queenPendingCover.player === 'white' ? 'WHITE' : 'BLACK'}!`;
-            } else {
-                statusText = "👑 Queen: free / cover needed";
+        // ---------- HELPER: spawn a coin (for foul penalty) ----------
+        function isPositionValid(x, y, radius) {
+            if (x - radius < BOARD_LEFT + 5 || x + radius > BOARD_RIGHT - 5 || y - radius < BOARD_TOP + 5 || y + radius > BOARD_BOTTOM - 5) return false;
+            for (let obj of objects) {
+                if (obj.type !== 'striker' && Math.hypot(obj.x - x, obj.y - y) < obj.radius + radius + 3) return false;
             }
-            document.getElementById('statusMsg').innerHTML = statusText;
+            if (strikerObj && Math.hypot(strikerObj.x - x, strikerObj.y - y) < strikerObj.radius + radius + 3) return false;
+            return true;
         }
         
+        function spawnCoin(color) {
+            let radius = COIN_RADIUS;
+            let bestPos = null;
+            for (let ang = 0; ang < 360; ang += 30) {
+                let rad = ang * Math.PI / 180;
+                let testX = BOARD_CX + Math.cos(rad) * 32;
+                let testY = BOARD_CY + Math.sin(rad) * 32;
+                if (isPositionValid(testX, testY, radius)) {
+                    bestPos = { x: testX, y: testY };
+                    break;
+                }
+            }
+            if (!bestPos) {
+                for (let i = 0; i < 100; i++) {
+                    let testX = BOARD_CX + (Math.random() - 0.5) * 70;
+                    let testY = BOARD_CY + (Math.random() - 0.5) * 70;
+                    if (isPositionValid(testX, testY, radius)) {
+                        bestPos = { x: testX, y: testY };
+                        break;
+                    }
+                }
+            }
+            if (!bestPos) bestPos = { x: BOARD_CX + 15, y: BOARD_CY + 15 };
+            
+            let newCoin = {
+                id: `foul_${Date.now()}_${Math.random()}`,
+                type: color,
+                x: bestPos.x, y: bestPos.y,
+                vx: 0, vy: 0,
+                radius: COIN_RADIUS,
+                mass: MASS_COIN,
+                color: color === 'white' ? '#F5F5DC' : '#3A3A3A',
+                label: color === 'white' ? 'W' : 'B'
+            };
+            objects.push(newCoin);
+            coinsList.push(newCoin);
+        }
+        
+        // ---------- POCKET & QUEEN LOGIC ----------
         function removeCoinFromWorld(coin) {
             const idxObj = objects.indexOf(coin);
             if(idxObj !== -1) objects.splice(idxObj,1);
@@ -281,6 +455,104 @@
                 objects.push(queen);
                 coinsList.push(queen);
             }
+        }
+        
+        function handlePocketCoin(coin, isStrikerPocket, currentPlayerColor) {
+            if(isStrikerPocket) {
+                const idx = objects.indexOf(coin);
+                if(idx !== -1) objects.splice(idx,1);
+                if(strikerObj === coin) strikerObj = null;
+                foulCommitted = true;
+                return false;
+            }
+            
+            if(coin.type === 'queen') {
+                if(queenPendingCover.active) {
+                    removeCoinFromWorld(coin);
+                    queenPendingCover.active = false;
+                    queenPendingCover.extraTurnActive = false;
+                } else {
+                    queenPendingCover.active = true;
+                    queenPendingCover.player = currentPlayerColor;
+                    queenPendingCover.extraTurnActive = true;
+                    removeCoinFromWorld(coin);
+                }
+                return true;
+            }
+            
+            const isOwnCoin = (coin.type === currentPlayerColor);
+            if(coin.type === 'white') pocketedCount.white++;
+            if(coin.type === 'black') pocketedCount.black++;
+            removeCoinFromWorld(coin);
+            
+            if(queenPendingCover.active && queenPendingCover.extraTurnActive && queenPendingCover.player === currentPlayerColor) {
+                if(isOwnCoin) {
+                    queenPendingCover.active = false;
+                    queenPendingCover.extraTurnActive = false;
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+            else if(queenPendingCover.active && !queenPendingCover.extraTurnActive && queenPendingCover.player === currentPlayerColor && isOwnCoin) {
+                queenPendingCover.active = false;
+                return true;
+            }
+            else if(queenPendingCover.active && queenPendingCover.player === currentPlayerColor && !isOwnCoin) {
+                queenPendingCover.active = false;
+                queenPendingCover.extraTurnActive = false;
+                respawnQueen();
+                return false;
+            }
+            return isOwnCoin;
+        }
+        
+        function checkPocketingAndGetExtraTurnFlag(currentPlayerColor) {
+            let extraTurn = false;
+            for(let i=objects.length-1; i>=0; i--) {
+                const obj = objects[i];
+                for(let p of pockets) {
+                    const dx = obj.x - p.x, dy = obj.y - p.y;
+                    if(Math.hypot(dx,dy) < p.r) {
+                        const isStriker = (obj.type === 'striker');
+                        const givesExtra = handlePocketCoin(obj, isStriker, currentPlayerColor);
+                        if(givesExtra) extraTurn = true;
+                        break;
+                    }
+                }
+            }
+            return extraTurn;
+        }
+        
+        function applyFoulAndTurnChange() {
+            if(!foulCommitted) return;
+            const foulPlayer = currentTurn;
+            const alertDiv = document.getElementById('foulAlert');
+            alertDiv.style.display = 'inline-block';
+            setTimeout(() => { if(alertDiv) alertDiv.style.display = 'none'; }, 1500);
+            
+            if(pocketedCount[foulPlayer] > 0) {
+                pocketedCount[foulPlayer]--;
+                spawnCoin(foulPlayer);
+            }
+            
+            if(queenPendingCover.active) {
+                queenPendingCover.active = false;
+                queenPendingCover.extraTurnActive = false;
+                respawnQueen();
+            }
+            
+            const nextTurn = (currentTurn === 'white') ? 'black' : 'white';
+            if(strikerObj) {
+                const idx = objects.indexOf(strikerObj);
+                if(idx !== -1) objects.splice(idx,1);
+                strikerObj = null;
+            }
+            currentTurn = nextTurn;
+            waitingForManualTurn = false;
+            createStriker();
+            foulCommitted = false;
+            updateUI();
         }
         
         function createStriker() {
@@ -315,89 +587,7 @@
             }
         }
         
-        // ---------- NEW QUEEN COVER RULE ----------
-        // When queen is pocketed: set pending, mark extraTurnActive = true, give extra turn.
-        // During that extra turn, if player pockets own coin -> cover permanently (queenPendingCover cleared, no respawn) and extra turn continues? Actually classic gives another extra. We'll give extra turn after cover (return true)
-        // If extra turn ends without pocketing own coin -> respawn queen, clear pending, and turn ends normally (no extra).
-        function handlePocketCoin(coin, isStrikerPocket, currentPlayerColor) {
-            if(isStrikerPocket) {
-                createStriker();
-                return false;
-            }
-            
-            // Queen pocket logic
-            if(coin.type === 'queen') {
-                // If queen already pending (should not happen), but just in case
-                if(queenPendingCover.active) {
-                    // Rare: queen pocketed again before cover? Remove it.
-                    removeCoinFromWorld(coin);
-                    queenPendingCover.active = false;
-                    queenPendingCover.extraTurnActive = false;
-                } else {
-                    // Pocket queen: set pending, mark extra turn active
-                    queenPendingCover.active = true;
-                    queenPendingCover.player = currentPlayerColor;
-                    queenPendingCover.extraTurnActive = true;  // this extra turn is for covering
-                    removeCoinFromWorld(coin);
-                }
-                return true; // extra turn for pocketing queen
-            }
-            
-            // Normal coin pocket
-            const isOwnCoin = (coin.type === currentPlayerColor);
-            removeCoinFromWorld(coin);
-            
-            // If we are in an extra turn due to queen cover attempt
-            if(queenPendingCover.active && queenPendingCover.extraTurnActive && queenPendingCover.player === currentPlayerColor) {
-                if(isOwnCoin) {
-                    // SUCCESSFUL COVER: queen is permanently covered (no respawn)
-                    queenPendingCover.active = false;
-                    queenPendingCover.extraTurnActive = false;
-                    // After covering, give another extra turn (classic carrom rule)
-                    return true;
-                } else {
-                    // Failed cover: pocketed opponent's coin or nothing? But here pocketed opponent's coin
-                    // After this turn ends, queen will respawn (handled in handleTurnEnd)
-                    // Don't clear pending yet, we will respawn at turn end
-                    // Important: do not clear here; let turn end handle respawn
-                    return false; // no extra turn from this pocket
-                }
-            }
-            // Normal case: if queen is pending but not in extraTurnActive (i.e., after failed extra turn, should be cleared)
-            else if(queenPendingCover.active && !queenPendingCover.extraTurnActive && queenPendingCover.player === currentPlayerColor && isOwnCoin) {
-                // This case occurs if somehow, but we'll treat as cover
-                queenPendingCover.active = false;
-                return true;
-            }
-            else if(queenPendingCover.active && queenPendingCover.player === currentPlayerColor && !isOwnCoin) {
-                // Pocket opponent's coin while queen pending (outside extra turn) -> queen respawns
-                queenPendingCover.active = false;
-                queenPendingCover.extraTurnActive = false;
-                respawnQueen();
-                return false;
-            }
-            
-            return isOwnCoin;
-        }
-        
-        function checkPocketingAndGetExtraTurnFlag(currentPlayerColor) {
-            let extraTurn = false;
-            for(let i=objects.length-1; i>=0; i--) {
-                const obj = objects[i];
-                for(let p of pockets) {
-                    const dx = obj.x - p.x, dy = obj.y - p.y;
-                    if(Math.hypot(dx,dy) < p.r) {
-                        const isStriker = (obj.type === 'striker');
-                        const givesExtra = handlePocketCoin(obj, isStriker, currentPlayerColor);
-                        if(givesExtra) extraTurn = true;
-                        break;
-                    }
-                }
-            }
-            return extraTurn;
-        }
-        
-        // ---------- PHYSICS WITH SOUND ----------
+        // ---------- PHYSICS ----------
         function applyPhysics() {
             for(let obj of objects) {
                 let wallHit = false;
@@ -405,9 +595,7 @@
                 if(obj.x + obj.radius > BOARD_RIGHT) { obj.x = BOARD_RIGHT - obj.radius; obj.vx = -obj.vx * 0.98; wallHit = true; }
                 if(obj.y - obj.radius < BOARD_TOP) { obj.y = BOARD_TOP + obj.radius; obj.vy = -obj.vy * 0.98; wallHit = true; }
                 if(obj.y + obj.radius > BOARD_BOTTOM) { obj.y = BOARD_BOTTOM - obj.radius; obj.vy = -obj.vy * 0.98; wallHit = true; }
-                if(wallHit && Math.abs(obj.vx) + Math.abs(obj.vy) > 1.2) {
-                    playCollisionSound('wall');
-                }
+                if(wallHit && Math.abs(obj.vx) + Math.abs(obj.vy) > 1.2) playCollisionSound('wall');
                 obj.vx *= FRICTION_AIR;
                 obj.vy *= FRICTION_AIR;
                 if(Math.abs(obj.vx) < MIN_VEL) obj.vx = 0;
@@ -458,26 +646,19 @@
             if(gameWinner) return;
             if(isAllStopped() && isMoving) {
                 isMoving = false;
-                
-                // ----- NEW QUEEN FAILURE RESPAWN RULE -----
-                // If after a turn (movement stopped) we have queenPendingCover.active and extraTurnActive is false? Actually extraTurnActive is true during the extra turn.
-                // After extra turn ends without covering, we must respawn queen.
-                // Check: if queenPendingCover.active and extraTurnActive is true, that means we just finished the extra turn that was given after pocketing queen,
-                // and the player did NOT pocket their own coin (otherwise cover success would have cleared pending).
+                if(foulCommitted) {
+                    applyFoulAndTurnChange();
+                    return;
+                }
                 if(queenPendingCover.active && queenPendingCover.extraTurnActive) {
-                    // Failed to cover on the extra turn -> queen returns to board
                     queenPendingCover.active = false;
                     queenPendingCover.extraTurnActive = false;
                     respawnQueen();
-                    // No extra turn, so turn will switch (extraTurnFlag is false from pockets)
                 }
-                
                 if(extraTurnFlag) {
-                    // Extra turn: same player, striker respawns automatically
                     createStriker();
                     updateUI();
                 } else {
-                    // No extra turn: remove striker, waiting for manual turn switch
                     if(strikerObj) {
                         const idx = objects.indexOf(strikerObj);
                         if(idx !== -1) objects.splice(idx,1);
@@ -489,7 +670,7 @@
             }
         }
         
-        // ---------- AIM & SHOOT ----------
+        // ---------- SHOOTING ----------
         function isPocketPossibleFromAngle(angleRad) {
             if(!strikerObj) return false;
             let closestDist = 300;
@@ -530,7 +711,7 @@
             return true;
         }
         
-        // ---------- DRAWING ----------
+        // ---------- DRAWING (complete) ----------
         function drawBoardAndMarkings() {
             ctx.fillStyle = '#dbb067';
             ctx.fillRect(0,0,750,750);
@@ -544,61 +725,37 @@
                 ctx.beginPath(); ctx.arc(p.x, p.y, p.r-22, 0, Math.PI*2); ctx.fillStyle = '#1f1409'; ctx.fill();
             }
             
-            const topInter1 = intersectHorizontalWithLine(topBaselineY, diagFull1);
-            const bottomInter1 = intersectHorizontalWithLine(bottomBaselineY, diagFull1);
-            const topInter2 = intersectHorizontalWithLine(topBaselineY, diagFull2);
-            const bottomInter2 = intersectHorizontalWithLine(bottomBaselineY, diagFull2);
-            
             ctx.beginPath();
-            if(topInter1 && bottomInter1) {
-                ctx.moveTo(topInter1.x, topInter1.y);
-                ctx.lineTo(bottomInter1.x, bottomInter1.y);
-            }
-            if(topInter2 && bottomInter2) {
-                ctx.moveTo(topInter2.x, topInter2.y);
-                ctx.lineTo(bottomInter2.x, bottomInter2.y);
-            }
-            ctx.lineWidth = 3;
-            ctx.strokeStyle = '#c2732d';
-            ctx.stroke();
+            let topI1 = intersectHorizontalWithLine(topBaselineY, diagFull1);
+            let bottomI1 = intersectHorizontalWithLine(bottomBaselineY, diagFull1);
+            if(topI1 && bottomI1) { ctx.moveTo(topI1.x, topI1.y); ctx.lineTo(bottomI1.x, bottomI1.y); }
+            let topI2 = intersectHorizontalWithLine(topBaselineY, diagFull2);
+            let bottomI2 = intersectHorizontalWithLine(bottomBaselineY, diagFull2);
+            if(topI2 && bottomI2) { ctx.moveTo(topI2.x, topI2.y); ctx.lineTo(bottomI2.x, bottomI2.y); }
+            ctx.lineWidth = 3; ctx.strokeStyle = '#c2732d'; ctx.stroke();
             
             ctx.beginPath(); ctx.arc(BOARD_CX, BOARD_CY, 52, 0, 2*Math.PI); ctx.strokeStyle='#b45a2a'; ctx.lineWidth=2.8; ctx.stroke();
             ctx.beginPath(); ctx.arc(BOARD_CX, BOARD_CY, 24, 0, 2*Math.PI); ctx.stroke();
             
             function drawClippedHorizontal(y) {
-                let inter1 = intersectHorizontalWithLine(y, diagFull1);
-                let inter2 = intersectHorizontalWithLine(y, diagFull2);
-                if(inter1 && inter2) {
-                    let x1 = Math.min(inter1.x, inter2.x);
-                    let x2 = Math.max(inter1.x, inter2.x);
-                    ctx.beginPath();
-                    ctx.moveTo(x1, y);
-                    ctx.lineTo(x2, y);
-                    ctx.stroke();
+                let i1 = intersectHorizontalWithLine(y, diagFull1);
+                let i2 = intersectHorizontalWithLine(y, diagFull2);
+                if(i1 && i2) {
+                    let x1 = Math.min(i1.x, i2.x);
+                    let x2 = Math.max(i1.x, i2.x);
+                    ctx.beginPath(); ctx.moveTo(x1, y); ctx.lineTo(x2, y); ctx.stroke();
                 }
-            }
-            function intersectVerticalWithLine(x, line) {
-                if (Math.abs(line.x2 - line.x1) < 1e-5) return null;
-                let t = (x - line.x1) / (line.x2 - line.x1);
-                if (t < 0 || t > 1) return null;
-                let y = line.y1 + t * (line.y2 - line.y1);
-                return { x, y };
             }
             function drawClippedVertical(x) {
-                let inter1 = intersectVerticalWithLine(x, diagFull1);
-                let inter2 = intersectVerticalWithLine(x, diagFull2);
-                if(inter1 && inter2) {
-                    let y1 = Math.min(inter1.y, inter2.y);
-                    let y2 = Math.max(inter1.y, inter2.y);
-                    ctx.beginPath();
-                    ctx.moveTo(x, y1);
-                    ctx.lineTo(x, y2);
-                    ctx.stroke();
+                let i1 = intersectVerticalWithLine(x, diagFull1);
+                let i2 = intersectVerticalWithLine(x, diagFull2);
+                if(i1 && i2) {
+                    let y1 = Math.min(i1.y, i2.y);
+                    let y2 = Math.max(i1.y, i2.y);
+                    ctx.beginPath(); ctx.moveTo(x, y1); ctx.lineTo(x, y2); ctx.stroke();
                 }
             }
-            
-            ctx.lineWidth = 2.2;
-            ctx.strokeStyle = '#bc6f2c';
+            ctx.lineWidth = 2.2; ctx.strokeStyle = '#bc6f2c';
             drawClippedHorizontal(BOARD_BOTTOM - BASELINE_OUTER_OFFSET);
             drawClippedHorizontal(BOARD_BOTTOM - BASELINE_INNER_OFFSET);
             drawClippedHorizontal(BOARD_TOP + BASELINE_OUTER_OFFSET);
@@ -608,131 +765,58 @@
             drawClippedVertical(BOARD_RIGHT - BASELINE_OUTER_OFFSET);
             drawClippedVertical(BOARD_RIGHT - BASELINE_INNER_OFFSET);
             
-            let redDots = [];
-            let horizYs = [bottomBaselineY, topBaselineY];
-            for(let y of horizYs) {
-                let inter1 = intersectHorizontalWithLine(y, diagFull1);
-                let inter2 = intersectHorizontalWithLine(y, diagFull2);
-                if(inter1 && inter2) { redDots.push([inter1.x, y]); redDots.push([inter2.x, y]); }
-            }
-            let vertXs = [BOARD_LEFT+BASELINE_INNER_OFFSET, BOARD_RIGHT-BASELINE_INNER_OFFSET];
-            for(let x of vertXs) {
-                let inter1 = intersectVerticalWithLine(x, diagFull1);
-                let inter2 = intersectVerticalWithLine(x, diagFull2);
-                if(inter1 && inter2) { redDots.push([x, inter1.y]); redDots.push([x, inter2.y]); }
-            }
             ctx.fillStyle = '#E63946';
-            for(let pos of redDots) {
+            let redPositions = [];
+            let hYs = [bottomBaselineY, topBaselineY];
+            for(let y of hYs) {
+                let i1 = intersectHorizontalWithLine(y, diagFull1);
+                let i2 = intersectHorizontalWithLine(y, diagFull2);
+                if(i1 && i2) { redPositions.push([i1.x, y]); redPositions.push([i2.x, y]); }
+            }
+            let vXs = [BOARD_LEFT+BASELINE_INNER_OFFSET, BOARD_RIGHT-BASELINE_INNER_OFFSET];
+            for(let x of vXs) {
+                let i1 = intersectVerticalWithLine(x, diagFull1);
+                let i2 = intersectVerticalWithLine(x, diagFull2);
+                if(i1 && i2) { redPositions.push([x, i1.y]); redPositions.push([x, i2.y]); }
+            }
+            for(let pos of redPositions) {
                 ctx.beginPath(); ctx.arc(pos[0], pos[1], 4.5, 0, 2*Math.PI); ctx.fill();
             }
         }
         
         function drawDetailedCoin(obj, x, y, r) {
-            ctx.beginPath();
-            ctx.arc(x, y, r-1, 0, 2*Math.PI);
-            ctx.fillStyle = obj.color;
-            ctx.fill();
-            ctx.strokeStyle = '#1a1a1a';
-            ctx.lineWidth = 1.5;
-            ctx.stroke();
-            const innerR = r * 0.65;
-            ctx.beginPath();
-            ctx.arc(x, y, innerR, 0, 2*Math.PI);
-            ctx.strokeStyle = '#2c1a0c';
-            ctx.lineWidth = 2;
-            ctx.stroke();
-            const innerMostR = r * 0.35;
-            ctx.beginPath();
-            ctx.arc(x, y, innerMostR, 0, 2*Math.PI);
-            ctx.strokeStyle = '#d4a259';
-            ctx.lineWidth = 1.8;
-            ctx.stroke();
-            ctx.fillStyle = '#111';
-            ctx.font = `bold ${Math.floor(r-4)}px "Segoe UI"`;
+            ctx.beginPath(); ctx.arc(x, y, r-1, 0, 2*Math.PI);
+            ctx.fillStyle = obj.color; ctx.fill();
+            ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = 1.5; ctx.stroke();
+            ctx.beginPath(); ctx.arc(x, y, r*0.65, 0, 2*Math.PI);
+            ctx.strokeStyle = '#2c1a0c'; ctx.stroke();
+            ctx.fillStyle = '#111'; ctx.font = `bold ${Math.floor(r-4)}px "Segoe UI"`;
             ctx.fillText(obj.label, x-5, y+5);
         }
         
-        // Realistic horse face on striker
         function drawRealisticHorseFace(x, y, radius) {
             ctx.save();
-            ctx.shadowBlur = 0;
-            // Base head shape (ellipse)
-            ctx.beginPath();
-            ctx.ellipse(x, y - radius*0.05, radius*0.7, radius*0.75, 0, 0, Math.PI*2);
-            ctx.fillStyle = "#B87333"; // copper brown base
-            ctx.fill();
-            ctx.strokeStyle = "#5D3A1A";
-            ctx.lineWidth = 1.5;
-            ctx.stroke();
-            // Muzzle lighter area
-            ctx.beginPath();
-            ctx.ellipse(x + radius*0.15, y + radius*0.1, radius*0.35, radius*0.3, 0, 0, Math.PI*2);
-            ctx.fillStyle = "#E8C99E";
-            ctx.fill();
-            // Nostrils
-            ctx.beginPath();
-            ctx.arc(x + radius*0.25, y + radius*0.05, radius*0.08, 0, 2*Math.PI);
-            ctx.fillStyle = "#4A2511";
-            ctx.fill();
-            ctx.beginPath();
-            ctx.arc(x + radius*0.05, y + radius*0.05, radius*0.08, 0, 2*Math.PI);
-            ctx.fill();
-            // Eye
-            ctx.beginPath();
-            ctx.arc(x - radius*0.2, y - radius*0.15, radius*0.12, 0, 2*Math.PI);
-            ctx.fillStyle = "#FDF5E6";
-            ctx.fill();
-            ctx.beginPath();
-            ctx.arc(x - radius*0.22, y - radius*0.17, radius*0.06, 0, 2*Math.PI);
-            ctx.fillStyle = "#000";
-            ctx.fill();
-            ctx.beginPath();
-            ctx.arc(x - radius*0.24, y - radius*0.19, radius*0.025, 0, 2*Math.PI);
-            ctx.fillStyle = "#FFF";
-            ctx.fill();
-            // Ears
-            ctx.beginPath();
-            ctx.moveTo(x - radius*0.45, y - radius*0.55);
-            ctx.lineTo(x - radius*0.7, y - radius*0.85);
-            ctx.lineTo(x - radius*0.25, y - radius*0.65);
-            ctx.fillStyle = "#A05E2C";
-            ctx.fill();
-            ctx.beginPath();
-            ctx.moveTo(x + radius*0.45, y - radius*0.55);
-            ctx.lineTo(x + radius*0.7, y - radius*0.85);
-            ctx.lineTo(x + radius*0.25, y - radius*0.65);
-            ctx.fill();
-            // Mane
-            ctx.beginPath();
-            ctx.moveTo(x + radius*0.55, y - radius*0.6);
-            ctx.quadraticCurveTo(x + radius*0.8, y - radius*0.3, x + radius*0.6, y - radius*0.1);
-            ctx.lineTo(x + radius*0.7, y - radius*0.15);
-            ctx.fillStyle = "#6B3E1C";
-            ctx.fill();
-            ctx.beginPath();
-            ctx.moveTo(x - radius*0.5, y - radius*0.6);
-            ctx.quadraticCurveTo(x - radius*0.8, y - radius*0.3, x - radius*0.55, y - radius*0.05);
-            ctx.fill();
-            // Forelock
-            ctx.beginPath();
-            ctx.moveTo(x - radius*0.15, y - radius*0.7);
-            ctx.quadraticCurveTo(x, y - radius*0.9, x + radius*0.15, y - radius*0.7);
-            ctx.fill();
+            ctx.beginPath(); ctx.ellipse(x, y - radius*0.05, radius*0.7, radius*0.75, 0, 0, Math.PI*2);
+            ctx.fillStyle = "#B87333"; ctx.fill();
+            ctx.strokeStyle = "#5D3A1A"; ctx.lineWidth = 1.5; ctx.stroke();
+            ctx.beginPath(); ctx.ellipse(x + radius*0.15, y + radius*0.1, radius*0.35, radius*0.3, 0, 0, Math.PI*2);
+            ctx.fillStyle = "#E8C99E"; ctx.fill();
+            ctx.beginPath(); ctx.arc(x + radius*0.25, y + radius*0.05, radius*0.08, 0, 2*Math.PI); ctx.fillStyle = "#4A2511"; ctx.fill();
+            ctx.beginPath(); ctx.arc(x + radius*0.05, y + radius*0.05, radius*0.08, 0, 2*Math.PI); ctx.fill();
+            ctx.beginPath(); ctx.arc(x - radius*0.2, y - radius*0.15, radius*0.12, 0, 2*Math.PI); ctx.fillStyle = "#FDF5E6"; ctx.fill();
+            ctx.beginPath(); ctx.arc(x - radius*0.22, y - radius*0.17, radius*0.06, 0, 2*Math.PI); ctx.fillStyle = "#000"; ctx.fill();
+            ctx.beginPath(); ctx.moveTo(x - radius*0.45, y - radius*0.55); ctx.lineTo(x - radius*0.7, y - radius*0.85); ctx.lineTo(x - radius*0.25, y - radius*0.65); ctx.fillStyle = "#A05E2C"; ctx.fill();
+            ctx.beginPath(); ctx.moveTo(x + radius*0.45, y - radius*0.55); ctx.lineTo(x + radius*0.7, y - radius*0.85); ctx.lineTo(x + radius*0.25, y - radius*0.65); ctx.fill();
             ctx.restore();
         }
         
         function drawObjects() {
             for(let obj of objects) {
                 if(obj.type === 'striker') {
-                    ctx.beginPath();
-                    ctx.arc(obj.x, obj.y, obj.radius-1, 0, 2*Math.PI);
-                    ctx.fillStyle = obj.color;
-                    ctx.fill();
-                    ctx.strokeStyle = '#1f4a6e';
-                    ctx.lineWidth = 1.8;
-                    ctx.stroke();
+                    ctx.beginPath(); ctx.arc(obj.x, obj.y, obj.radius-1, 0, 2*Math.PI);
+                    ctx.fillStyle = obj.color; ctx.fill();
+                    ctx.strokeStyle = '#1f4a6e'; ctx.lineWidth = 1.8; ctx.stroke();
                     drawRealisticHorseFace(obj.x, obj.y, obj.radius);
-                    ctx.beginPath(); ctx.arc(obj.x-3, obj.y-4, 4, 0, 2*Math.PI); ctx.fillStyle = "#FFF9C4"; ctx.fill();
                 } else {
                     drawDetailedCoin(obj, obj.x, obj.y, obj.radius);
                 }
@@ -745,40 +829,29 @@
             let tipX = strikerObj.x + Math.cos(aimAngle) * arrowLen;
             let tipY = strikerObj.y + Math.sin(aimAngle) * arrowLen;
             let pocketPossible = isPocketPossibleFromAngle(aimAngle);
-            let arrowColor = pocketPossible ? '#42F590' : '#E8B45E';
-            ctx.beginPath();
-            ctx.moveTo(strikerObj.x, strikerObj.y);
-            ctx.lineTo(tipX, tipY);
-            ctx.lineWidth = 4.5;
-            ctx.strokeStyle = arrowColor;
-            ctx.stroke();
-            let wingLen = 12;
-            let leftX = tipX + Math.cos(aimAngle - 0.55) * wingLen;
-            let leftY = tipY + Math.sin(aimAngle - 0.55) * wingLen;
-            let rightX = tipX + Math.cos(aimAngle + 0.55) * wingLen;
-            let rightY = tipY + Math.sin(aimAngle + 0.55) * wingLen;
-            ctx.beginPath();
-            ctx.moveTo(tipX, tipY);
-            ctx.lineTo(leftX, leftY);
-            ctx.lineTo(rightX, rightY);
-            ctx.fillStyle = arrowColor;
-            ctx.fill();
+            ctx.beginPath(); ctx.moveTo(strikerObj.x, strikerObj.y); ctx.lineTo(tipX, tipY);
+            ctx.lineWidth = 4.5; ctx.strokeStyle = pocketPossible ? '#42F590' : '#E8B45E'; ctx.stroke();
+            let wing = 12;
+            ctx.beginPath(); ctx.moveTo(tipX, tipY);
+            ctx.lineTo(tipX + Math.cos(aimAngle - 0.55) * wing, tipY + Math.sin(aimAngle - 0.55) * wing);
+            ctx.lineTo(tipX + Math.cos(aimAngle + 0.55) * wing, tipY + Math.sin(aimAngle + 0.55) * wing);
+            ctx.fillStyle = pocketPossible ? '#42F590' : '#E8B45E'; ctx.fill();
         }
         
         function updatePowerMeter() {
-            const pmDiv = document.getElementById('powerMeter');
+            const pm = document.getElementById('powerMeter');
             if(powerDragActive && strikerObj && !isMoving && !waitingForManualTurn) {
-                let pocketPossible = isPocketPossibleFromAngle(aimAngle);
-                if(pocketPossible) pmDiv.classList.add('green-active');
-                else pmDiv.classList.remove('green-active');
-                pmDiv.innerHTML = `🔙 PULL BACK → POWER ${Math.floor(currentPower)}%  ${pocketPossible ? '🎯 POCKET READY' : ''}`;
+                let possible = isPocketPossibleFromAngle(aimAngle);
+                if(possible) pm.classList.add('green-active');
+                else pm.classList.remove('green-active');
+                pm.innerHTML = `🔙 PULL BACK → POWER ${Math.floor(currentPower)}%  ${possible ? '🎯 POCKET READY' : ''}`;
             } else {
-                pmDiv.classList.remove('green-active');
-                pmDiv.innerHTML = `🔙 PULL BACK → POWER 0%`;
+                pm.classList.remove('green-active');
+                pm.innerHTML = `🔙 PULL BACK → POWER 0%`;
             }
         }
         
-        // ---------- TURN BUTTONS ----------
+        // ---------- TURN & RESET ----------
         function setTurn(turn) {
             if(gameWinner || isMoving) return;
             if(queenPendingCover.active && !queenPendingCover.extraTurnActive) {
@@ -796,38 +869,16 @@
             updateUI();
         }
         
-        function player1Turn() { setTurn('white'); }
-        function player2Turn() { setTurn('black'); }
-        
-        function renderTurnButtons() {
-            const container = document.getElementById('turnButtonsContainer');
-            container.innerHTML = '';
-            const p1Btn = document.createElement('button');
-            p1Btn.innerText = '⚪ PLAYER 1 (WHITE)';
-            p1Btn.className = 'action-btn turn-btn';
-            p1Btn.onclick = player1Turn;
-            const p2Btn = document.createElement('button');
-            p2Btn.innerText = '⚫ PLAYER 2 (BLACK)';
-            p2Btn.className = 'action-btn turn-btn';
-            p2Btn.onclick = player2Turn;
-            container.appendChild(p1Btn);
-            container.appendChild(p2Btn);
-        }
-        
-        // ---------- INITIAL BOARD ----------
         function initBoardCoins() {
-            objects = [];
-            coinsList = [];
-            const centerX = BOARD_CX, centerY = BOARD_CY;
-            const innerRad = 23;
-            const outerRad = 45;
-            let queen = { id:'queen', type:'queen', x:centerX, y:centerY, vx:0, vy:0, radius:COIN_RADIUS, mass:MASS_COIN, color:'#E34234', label:'Q' };
+            objects = []; coinsList = [];
+            let queen = { id:'queen', type:'queen', x:BOARD_CX, y:BOARD_CY, vx:0, vy:0, radius:COIN_RADIUS, mass:MASS_COIN, color:'#E34234', label:'Q' };
             objects.push(queen); coinsList.push(queen);
             let innerColors = ['white','black','white','black','white','black'];
-            for(let i=0;i<6;i++){ let ang=(i*Math.PI*2/6); let x=centerX+Math.cos(ang)*innerRad, y=centerY+Math.sin(ang)*innerRad; let col=innerColors[i]; objects.push({id:`in${i}`,type:col,x,y,vx:0,vy:0,radius:COIN_RADIUS,mass:MASS_COIN,color:col==='white'?'#F5F5DC':'#3A3A3A',label:col==='white'?'W':'B'}); coinsList.push(objects[objects.length-1]); }
-            let outerColors = [];
-            for(let i=0;i<12;i++) outerColors.push(i%2===0?'white':'black');
-            for(let i=0;i<12;i++){ let ang=(i*Math.PI*2/12); let x=centerX+Math.cos(ang)*outerRad, y=centerY+Math.sin(ang)*outerRad; let col=outerColors[i]; objects.push({id:`out${i}`,type:col,x,y,vx:0,vy:0,radius:COIN_RADIUS,mass:MASS_COIN,color:col==='white'?'#F5F5DC':'#3A3A3A',label:col==='white'?'W':'B'}); coinsList.push(objects[objects.length-1]); }
+            for(let i=0;i<6;i++){ let ang=(i*Math.PI*2/6); let x=BOARD_CX+Math.cos(ang)*23, y=BOARD_CY+Math.sin(ang)*23; let col=innerColors[i]; objects.push({id:`in${i}`,type:col,x,y,vx:0,vy:0,radius:COIN_RADIUS,mass:MASS_COIN,color:col==='white'?'#F5F5DC':'#3A3A3A',label:col==='white'?'W':'B'}); coinsList.push(objects[objects.length-1]); }
+            let outerColors = []; for(let i=0;i<12;i++) outerColors.push(i%2===0?'white':'black');
+            for(let i=0;i<12;i++){ let ang=(i*Math.PI*2/12); let x=BOARD_CX+Math.cos(ang)*45, y=BOARD_CY+Math.sin(ang)*45; let col=outerColors[i]; objects.push({id:`out${i}`,type:col,x,y,vx:0,vy:0,radius:COIN_RADIUS,mass:MASS_COIN,color:col==='white'?'#F5F5DC':'#3A3A3A',label:col==='white'?'W':'B'}); coinsList.push(objects[objects.length-1]); }
+            pocketedCount = { white: 0, black: 0 };
+            foulCommitted = false;
         }
         
         function resetGame() {
@@ -838,9 +889,18 @@
             isMoving = false;
             waitingForManualTurn = false;
             powerDragActive = false;
+            foulCommitted = false;
+            pocketedCount = { white: 0, black: 0 };
             initBoardCoins();
             createStriker();
             updateUI();
+        }
+        
+        function updateUI() {
+            let turnName = (currentTurn === 'white') ? '⚪ PLAYER 1 (WHITE)' : '⚫ PLAYER 2 (BLACK)';
+            if(gameWinner) turnName = `🏆 ${gameWinner.toUpperCase()} WINS! 🏆`;
+            document.getElementById('turnText').innerHTML = turnName;
+            // removed queen status message as requested
         }
         
         // Animation loop
@@ -849,10 +909,7 @@
             if(isMoving) {
                 applyPhysics();
                 let extraTurn = checkPocketingAndGetExtraTurnFlag(currentTurn);
-                if(isAllStopped() && isMoving) {
-                    isMoving = false;
-                    handleTurnEnd(extraTurn);
-                }
+                if(isAllStopped() && isMoving) { isMoving = false; handleTurnEnd(extraTurn); }
             }
             drawBoardAndMarkings();
             drawObjects();
@@ -861,7 +918,7 @@
             requestAnimationFrame(animate);
         }
         
-        // Input handlers
+        // Input handling
         function handlePowerStart(e) {
             tryResumeAudio();
             if(isMoving || gameWinner || waitingForManualTurn) return;
@@ -906,7 +963,6 @@
             let mx = (e.clientX - rect.left) * (750/rect.width);
             setStrikerX(mx);
         }
-        
         function attachEvents() {
             canvas.addEventListener('mousemove', handleMouseMoveAim);
             canvas.addEventListener('mousedown', handlePowerStart);
@@ -917,11 +973,12 @@
             canvas.addEventListener('touchmove', (e)=> { let t=e.touches[0]; if(powerDragActive) handlePowerDrag(t); else handleDragStriker(t); e.preventDefault(); });
             canvas.addEventListener('touchend', handlePowerRelease);
             document.getElementById('resetGameBtn').onclick = () => resetGame();
+            document.getElementById('player1Btn').onclick = () => setTurn('white');
+            document.getElementById('player2Btn').onclick = () => setTurn('black');
         }
         
-        renderTurnButtons();
-        resetGame();
         attachEvents();
+        resetGame();
         animate();
         canvas.addEventListener('click', () => tryResumeAudio());
     })();
