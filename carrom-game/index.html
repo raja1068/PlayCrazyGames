@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Carrom Classic – 2P Hot Seat | Horse Striker | Queen Cover + Foul Rule</title>
+    <title>Carrom Classic – 2P Hot Seat | Horse Striker | Queen Cover + Foul Rule (Fixed)</title>
     <!-- Google AdSense (replace with your publisher ID) -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-xxxxxxxxxxxxx"
      crossorigin="anonymous"></script>
@@ -23,7 +23,6 @@
             padding: 16px;
             flex-direction: column;
         }
-        /* Ad containers - white background with advertisement label */
         .ad-container {
             position: relative;
             background: white;
@@ -67,7 +66,6 @@
             backdrop-filter: blur(10px);
             box-shadow: 0 20px 35px rgba(0,0,0,0.7);
         }
-        /* Header with CARROM and board image */
         .game-header {
             display: flex;
             align-items: center;
@@ -219,7 +217,6 @@
     </style>
 </head>
 <body>
-<!-- TOP AD with white background and advertisement label -->
 <div class="ad-container ad-top">
     <div class="ad-label">Advertisement</div>
     <ins class="adsbygoogle"
@@ -230,7 +227,6 @@
 </div>
 
 <div class="game-container">
-    <!-- Header with CARROM and board icon -->
     <div class="game-header">
         <div class="board-icon"></div>
         <h1>CARROM</h1>
@@ -241,10 +237,9 @@
     
     <div class="info-panel">
         <div class="turn-indicator" id="turnText">⚪ PLAYER 1 (WHITE)</div>
-        <div id="foulAlert" class="foul-badge" style="display: none;">⚠️ FOUL! Coin returned</div>
+        <div id="foulAlert" class="foul-badge" style="display: none;">⚠️ FOUL! Coin returned to centre</div>
     </div>
     
-    <!-- Button group: turn buttons left, reset right -->
     <div class="button-group">
         <div class="turn-buttons">
             <button id="player1Btn" class="action-btn turn-btn">⚪ PLAYER 1 (WHITE)</button>
@@ -256,7 +251,6 @@
     <div id="powerMeter" class="power-meter">🔙 PULL BACK → POWER 0%</div>
 </div>
 
-<!-- BOTTOM AD with white background and advertisement label -->
 <div class="ad-container ad-bottom">
     <div class="ad-label">Advertisement</div>
     <ins class="adsbygoogle"
@@ -268,11 +262,10 @@
 
 <script>
     (function(){
-        // ---------- CANVAS ----------
         const canvas = document.getElementById('carromCanvas');
         const ctx = canvas.getContext('2d');
         
-        // ---------- BOARD GEOMETRY ----------
+        // BOARD GEOMETRY
         const BOARD_SIZE = 446;
         const BOARD_LEFT = (750 - BOARD_SIZE) / 2;
         const BOARD_RIGHT = BOARD_LEFT + BOARD_SIZE;
@@ -286,6 +279,10 @@
         const COIN_RADIUS = 14;
         const STRIKER_RADIUS = 21;
         const POCKET_RADIUS = 47;
+        
+        // Centre circle zone for foul return
+        const CENTRE_CIRCLE_RADIUS = 52;   // drawn circle radius, we want inside it
+        const MAX_CENTRE_PLACE_RADIUS = CENTRE_CIRCLE_RADIUS - COIN_RADIUS - 2; // ~36px safe
         
         const pockets = [
             { x: BOARD_LEFT - 12, y: BOARD_TOP - 12, r: POCKET_RADIUS },
@@ -331,7 +328,7 @@
             return player === 'white' ? bottomLimits : topLimits;
         }
         
-        // ---------- GLOBAL STATE ----------
+        // GAME STATE
         let objects = [];
         let coinsList = [];
         let strikerObj = null;
@@ -342,7 +339,7 @@
         let waitingForManualTurn = false;
         
         let foulCommitted = false;
-        let pocketedCount = { white: 0, black: 0 };
+        let pocketedCount = { white: 0, black: 0 }; // tracks pocketed coins per color (global)
         
         let aimAngle = 0;
         let powerDragActive = false;
@@ -354,7 +351,7 @@
         const MASS_STRIKER = 3.2;
         const MASS_COIN = 1;
         
-        // ---------- AUDIO (optional) ----------
+        // AUDIO
         let audioCtx = null;
         function initAudio() {
             if (audioCtx) return;
@@ -392,41 +389,66 @@
             if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
         }
         
-        // ---------- HELPER: spawn a coin (for foul penalty) ----------
-        function isPositionValid(x, y, radius) {
-            if (x - radius < BOARD_LEFT + 5 || x + radius > BOARD_RIGHT - 5 || y - radius < BOARD_TOP + 5 || y + radius > BOARD_BOTTOM - 5) return false;
+        // ----- IMPROVED SPAWN COIN: ALWAYS INSIDE CENTRE CIRCLE ZONE -----
+        function isInsideCentreCircle(x, y, radius) {
+            const dist = Math.hypot(x - BOARD_CX, y - BOARD_CY);
+            return dist + radius <= CENTRE_CIRCLE_RADIUS;
+        }
+        
+        function isPositionValid(x, y, radius, ignoreStriker = false) {
+            if (x - radius < BOARD_LEFT + 3 || x + radius > BOARD_RIGHT - 3 || y - radius < BOARD_TOP + 3 || y + radius > BOARD_BOTTOM - 3) return false;
             for (let obj of objects) {
                 if (obj.type !== 'striker' && Math.hypot(obj.x - x, obj.y - y) < obj.radius + radius + 3) return false;
             }
-            if (strikerObj && Math.hypot(strikerObj.x - x, strikerObj.y - y) < strikerObj.radius + radius + 3) return false;
+            if (!ignoreStriker && strikerObj && Math.hypot(strikerObj.x - x, strikerObj.y - y) < strikerObj.radius + radius + 3) return false;
             return true;
         }
         
         function spawnCoin(color) {
-            let radius = COIN_RADIUS;
+            const radius = COIN_RADIUS;
             let bestPos = null;
-            for (let ang = 0; ang < 360; ang += 30) {
-                let rad = ang * Math.PI / 180;
-                let testX = BOARD_CX + Math.cos(rad) * 32;
-                let testY = BOARD_CY + Math.sin(rad) * 32;
-                if (isPositionValid(testX, testY, radius)) {
-                    bestPos = { x: testX, y: testY };
-                    break;
+            // exhaustive search within centre circle area
+            for (let rad = 8; rad <= MAX_CENTRE_PLACE_RADIUS; rad += 6) {
+                for (let angDeg = 0; angDeg < 360; angDeg += 30) {
+                    const angleRad = angDeg * Math.PI / 180;
+                    const testX = BOARD_CX + Math.cos(angleRad) * rad;
+                    const testY = BOARD_CY + Math.sin(angleRad) * rad;
+                    if (isPositionValid(testX, testY, radius, false) && isInsideCentreCircle(testX, testY, radius)) {
+                        bestPos = { x: testX, y: testY };
+                        break;
+                    }
                 }
+                if (bestPos) break;
             }
+            // fallback: random attempts
             if (!bestPos) {
-                for (let i = 0; i < 100; i++) {
-                    let testX = BOARD_CX + (Math.random() - 0.5) * 70;
-                    let testY = BOARD_CY + (Math.random() - 0.5) * 70;
-                    if (isPositionValid(testX, testY, radius)) {
+                for (let i = 0; i < 500; i++) {
+                    const randRad = Math.random() * MAX_CENTRE_PLACE_RADIUS;
+                    const randAng = Math.random() * Math.PI * 2;
+                    const testX = BOARD_CX + Math.cos(randAng) * randRad;
+                    const testY = BOARD_CY + Math.sin(randAng) * randRad;
+                    if (isPositionValid(testX, testY, radius, false) && isInsideCentreCircle(testX, testY, radius)) {
                         bestPos = { x: testX, y: testY };
                         break;
                     }
                 }
             }
-            if (!bestPos) bestPos = { x: BOARD_CX + 15, y: BOARD_CY + 15 };
+            // ultimate fallback: dead centre, but try nudging
+            if (!bestPos) {
+                bestPos = { x: BOARD_CX, y: BOARD_CY };
+                if (!isPositionValid(bestPos.x, bestPos.y, radius, false)) {
+                    for (let ang = 0; ang < 360; ang += 15) {
+                        const offX = BOARD_CX + Math.cos(ang * Math.PI/180) * 10;
+                        const offY = BOARD_CY + Math.sin(ang * Math.PI/180) * 10;
+                        if (isPositionValid(offX, offY, radius, false) && isInsideCentreCircle(offX, offY, radius)) {
+                            bestPos = { x: offX, y: offY };
+                            break;
+                        }
+                    }
+                }
+            }
             
-            let newCoin = {
+            const newCoin = {
                 id: `foul_${Date.now()}_${Math.random()}`,
                 type: color,
                 x: bestPos.x, y: bestPos.y,
@@ -440,7 +462,7 @@
             coinsList.push(newCoin);
         }
         
-        // ---------- POCKET & QUEEN LOGIC ----------
+        // ----- POCKET & QUEEN LOGIC -----
         function removeCoinFromWorld(coin) {
             const idxObj = objects.indexOf(coin);
             if(idxObj !== -1) objects.splice(idxObj,1);
@@ -480,11 +502,13 @@
                 return true;
             }
             
+            // regular coin pocketed
             const isOwnCoin = (coin.type === currentPlayerColor);
             if(coin.type === 'white') pocketedCount.white++;
             if(coin.type === 'black') pocketedCount.black++;
             removeCoinFromWorld(coin);
             
+            // queen cover logic
             if(queenPendingCover.active && queenPendingCover.extraTurnActive && queenPendingCover.player === currentPlayerColor) {
                 if(isOwnCoin) {
                     queenPendingCover.active = false;
@@ -524,24 +548,32 @@
             return extraTurn;
         }
         
+        // ----- IMPROVED FOUL HANDLING: ALWAYS RETURN A COIN OF FOULING PLAYER'S COLOR INSIDE CENTRE CIRCLE -----
         function applyFoulAndTurnChange() {
             if(!foulCommitted) return;
             const foulPlayer = currentTurn;
             const alertDiv = document.getElementById('foulAlert');
             alertDiv.style.display = 'inline-block';
-            setTimeout(() => { if(alertDiv) alertDiv.style.display = 'none'; }, 1500);
+            setTimeout(() => { if(alertDiv) alertDiv.style.display = 'none'; }, 1600);
             
+            // Rule: one white/black piece returned from pockets (if any pocketed of that color)
+            // If no coin of that color has been pocketed, we still return a new coin (penalty) to make rule visible.
             if(pocketedCount[foulPlayer] > 0) {
                 pocketedCount[foulPlayer]--;
                 spawnCoin(foulPlayer);
+            } else {
+                // No coin of this color in pocket -> spawn a new one as penalty (always returns a piece)
+                spawnCoin(foulPlayer);
             }
             
+            // Reset queen cover if pending
             if(queenPendingCover.active) {
                 queenPendingCover.active = false;
                 queenPendingCover.extraTurnActive = false;
                 respawnQueen();
             }
             
+            // Switch turn
             const nextTurn = (currentTurn === 'white') ? 'black' : 'white';
             if(strikerObj) {
                 const idx = objects.indexOf(strikerObj);
@@ -587,7 +619,7 @@
             }
         }
         
-        // ---------- PHYSICS ----------
+        // PHYSICS
         function applyPhysics() {
             for(let obj of objects) {
                 let wallHit = false;
@@ -670,7 +702,7 @@
             }
         }
         
-        // ---------- SHOOTING ----------
+        // SHOOTING
         function isPocketPossibleFromAngle(angleRad) {
             if(!strikerObj) return false;
             let closestDist = 300;
@@ -711,7 +743,7 @@
             return true;
         }
         
-        // ---------- DRAWING (complete) ----------
+        // DRAWING
         function drawBoardAndMarkings() {
             ctx.fillStyle = '#dbb067';
             ctx.fillRect(0,0,750,750);
@@ -851,7 +883,6 @@
             }
         }
         
-        // ---------- TURN & RESET ----------
         function setTurn(turn) {
             if(gameWinner || isMoving) return;
             if(queenPendingCover.active && !queenPendingCover.extraTurnActive) {
@@ -900,10 +931,9 @@
             let turnName = (currentTurn === 'white') ? '⚪ PLAYER 1 (WHITE)' : '⚫ PLAYER 2 (BLACK)';
             if(gameWinner) turnName = `🏆 ${gameWinner.toUpperCase()} WINS! 🏆`;
             document.getElementById('turnText').innerHTML = turnName;
-            // removed queen status message as requested
         }
         
-        // Animation loop
+        // ANIMATION LOOP
         function animate() {
             if(gameWinner) { drawBoardAndMarkings(); drawObjects(); if(!isMoving && !gameWinner) drawAimingArrow(); requestAnimationFrame(animate); return; }
             if(isMoving) {
@@ -918,7 +948,7 @@
             requestAnimationFrame(animate);
         }
         
-        // Input handling
+        // INPUT HANDLING
         function handlePowerStart(e) {
             tryResumeAudio();
             if(isMoving || gameWinner || waitingForManualTurn) return;
