@@ -237,7 +237,7 @@
             z-index: 10;
         }
 
-        /* Bishop Token on board */
+        /* Bishop Token on board - dynamic offset via style */
         .bishop-token {
             position: absolute;
             width: 22px;
@@ -246,7 +246,6 @@
             filter: drop-shadow(0 2px 5px rgba(0,0,0,0.5));
             z-index: 20;
             cursor: pointer;
-            transform: translate(-50%, -50%);
             top: 50%;
             left: 50%;
         }
@@ -476,7 +475,34 @@
             };
         }
         
-        // Realistic snake drawing
+        // Snake/ladder resolve (one step)
+        function resolveSnakeOrLadder(pos) {
+            if (SNAKES[pos]) return SNAKES[pos];
+            if (LADDERS[pos]) return LADDERS[pos];
+            return pos;
+        }
+        
+        // Count opponent pieces on a given cell (excluding 100)
+        function countOpponentPiecesOnCell(cell, opponentPlayerId) {
+            if (cell === 100) return 0;
+            const opponent = players[opponentPlayerId];
+            return opponent.pieces.filter(p => p.pos === cell).length;
+        }
+        
+        // Knockout: if exactly one opponent piece on cell, send it to stack (pos=0), return true
+        function knockoutSingleOpponentPiece(cell, opponentPlayerId) {
+            if (cell === 100) return false;
+            const opponent = players[opponentPlayerId];
+            const piecesOnCell = opponent.pieces.filter(p => p.pos === cell);
+            if (piecesOnCell.length === 1) {
+                const piece = piecesOnCell[0];
+                piece.pos = 0;
+                return true;
+            }
+            return false;
+        }
+        
+        // Realistic snake drawing (kept original)
         function drawRealisticSnake(startX, startY, endX, endY) {
             const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
             const dx = endX - startX;
@@ -672,11 +698,9 @@
             }
         }
         
-        function createBoardToken(color, pieceIdx) {
+        function createBoardTokenElement(color, pieceIdx) {
             const tokenDiv = document.createElement("div");
             tokenDiv.className = "bishop-token";
-            const offsetX = pieceIdx === 0 ? -8 : 8;
-            tokenDiv.style.transform = `translate(calc(-50% + ${offsetX}px), -50%)`;
             const body = document.createElement("div");
             body.className = "bishop-body";
             const base = document.createElement("div");
@@ -726,7 +750,6 @@
             diceContainer.appendChild(dice3dDiv);
         }
         
-        // Check if player has won (both pieces at 100)
         function checkWinner(playerId) {
             const player = players[playerId];
             const bothAt100 = player.pieces.every(piece => piece.pos === 100);
@@ -741,102 +764,11 @@
             return false;
         }
         
-        // Overlap rule: if moving piece lands on opponent's piece (not at 100), opponent's piece goes to stack
-        async function handleOverlap(movingPlayerId, targetCell) {
-            if (targetCell === 100) return false; // no overlap at finish line
-            const opponentId = movingPlayerId === 0 ? 1 : 0;
-            const opponent = players[opponentId];
-            const overlappingPiece = opponent.pieces.find(p => p.pos === targetCell);
-            if (overlappingPiece && overlappingPiece.pos !== 100) {
-                overlappingPiece.pos = 0;
-                msgDiv.innerHTML = `💥 ${players[movingPlayerId].name} knocked out ${opponent.name}'s piece from ${targetCell}! ${players[movingPlayerId].name} gets EXTRA TURN!`;
-                renderStacksAndTokens();
-                updateUI();
-                await delay(600);
-                return true;
-            }
-            return false;
-        }
-        
-        async function applySnakeLadder(playerId, pieceIdx, currentPos) {
-            if (currentPos === 100) return false;
-            if (SNAKES[currentPos]) {
-                const newPos = SNAKES[currentPos];
-                msgDiv.innerHTML = `🐍 ${players[playerId].name} piece ${pieceIdx+1} hit a SNAKE! ${currentPos} → ${newPos}`;
-                players[playerId].pieces[pieceIdx].pos = newPos;
-                renderStacksAndTokens();
-                updateUI();
-                await delay(480);
-                return true;
-            } else if (LADDERS[currentPos]) {
-                const newPos = LADDERS[currentPos];
-                msgDiv.innerHTML = `🪜 ${players[playerId].name} piece ${pieceIdx+1} climbed a LADDER! ${currentPos} → ${newPos}`;
-                players[playerId].pieces[pieceIdx].pos = newPos;
-                renderStacksAndTokens();
-                updateUI();
-                await delay(480);
-                return true;
-            }
-            return false;
-        }
-        
-        async function movePiece(playerId, pieceIdx, steps) {
-            const player = players[playerId];
-            const piece = player.pieces[pieceIdx];
-            // Cannot move a piece that is already at 100
-            if (piece.pos === 100) {
-                msgDiv.innerHTML = `🏁 Piece ${pieceIdx+1} is already at 100! Choose the other piece.`;
-                return { won: false, extraTurn: false, invalid: true };
-            }
-            
-            let newPos;
-            if (piece.pos === 0) {
-                newPos = steps;
-                msgDiv.innerHTML = `🚀 ${player.name} piece enters at ${newPos}!`;
-            } else {
-                newPos = piece.pos + steps;
-                if (newPos > 100) {
-                    msgDiv.innerHTML = `⚠️ Piece ${pieceIdx+1} would exceed 100! Choose other piece.`;
-                    return { won: false, extraTurn: false, invalid: true };
-                }
-            }
-            
-            const oldPos = piece.pos;
-            piece.pos = newPos;
-            renderStacksAndTokens();
-            updateUI();
-            await delay(380);
-            
-            let extraTurn = false;
-            // Overlap only if not entering from stack and not landing on 100
-            if (oldPos !== 0 && piece.pos !== 100) {
-                const overlapped = await handleOverlap(playerId, piece.pos);
-                if (overlapped) extraTurn = true;
-            }
-            
-            // Apply snake/ladder only if not at 100
-            if (piece.pos !== 100) {
-                await applySnakeLadder(playerId, pieceIdx, piece.pos);
-            }
-            
-            // After snake/ladder, re-render
-            renderStacksAndTokens();
-            updateUI();
-            
-            // Check win condition (both pieces at 100)
-            const winnerDeclared = checkWinner(playerId);
-            if (winnerDeclared) return { won: true, extraTurn: false, invalid: false };
-            
-            return { won: false, extraTurn: extraTurn, invalid: false };
-        }
-        
-        function delay(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
-        
-        // Permanent stacks rendering (always visible)
+        // Renders side-by-side pieces on board + stacks
         function renderStacksAndTokens() {
             stacksContainer.innerHTML = '';
             document.querySelectorAll('.bishop-token').forEach(t => t.remove());
-            
+            // Stacks rendering
             for (let p of players) {
                 const stackDiv = document.createElement('div');
                 stackDiv.className = 'piece-stack';
@@ -847,48 +779,57 @@
                 const piecesContainer = document.createElement('div');
                 piecesContainer.className = 'stack-pieces';
                 const offBoardPieces = p.pieces.filter(piece => piece.pos === 0);
+                for (let idx = 0; idx < offBoardPieces.length; idx++) {
+                    const pieceWrapper = document.createElement('div');
+                    pieceWrapper.className = 'stack-bishop';
+                    pieceWrapper.dataset.playerId = p.id;
+                    pieceWrapper.dataset.pieceIdx = offBoardPieces[idx].id;
+                    const miniToken = createBoardTokenElement(p.color, idx);
+                    miniToken.style.position = 'relative';
+                    miniToken.style.transform = 'none';
+                    miniToken.style.width = '28px';
+                    miniToken.style.height = '38px';
+                    pieceWrapper.appendChild(miniToken);
+                    piecesContainer.appendChild(pieceWrapper);
+                }
                 if (offBoardPieces.length === 0) {
                     const emptyDiv = document.createElement('div');
                     emptyDiv.style.width = '28px';
                     emptyDiv.style.height = '38px';
                     emptyDiv.style.opacity = '0.3';
                     piecesContainer.appendChild(emptyDiv);
-                } else {
-                    for (let idx = 0; idx < offBoardPieces.length; idx++) {
-                        const pieceWrapper = document.createElement('div');
-                        pieceWrapper.className = 'stack-bishop';
-                        pieceWrapper.dataset.playerId = p.id;
-                        pieceWrapper.dataset.pieceIdx = offBoardPieces[idx].id;
-                        const miniToken = createBoardToken(p.color, idx);
-                        miniToken.style.position = 'relative';
-                        miniToken.style.transform = 'none';
-                        miniToken.style.width = '28px';
-                        miniToken.style.height = '38px';
-                        pieceWrapper.appendChild(miniToken);
-                        piecesContainer.appendChild(pieceWrapper);
-                    }
                 }
                 stackDiv.appendChild(label);
                 stackDiv.appendChild(piecesContainer);
                 stacksContainer.appendChild(stackDiv);
             }
             
-            // Render on-board pieces (including those at 100)
+            // Build per-cell token map for side-by-side display
+            const cellMap = new Map(); // cell -> array of {playerId, pieceIdx, color}
             for (let p of players) {
                 p.pieces.forEach((piece, idx) => {
                     if (piece.pos >= 1 && piece.pos <= 100) {
-                        const cell = document.getElementById(`cell-${piece.pos}`);
-                        if (cell) {
-                            const token = createBoardToken(p.color, idx);
-                            token.dataset.playerId = p.id;
-                            token.dataset.pieceIdx = piece.id;
-                            cell.style.position = "relative";
-                            cell.appendChild(token);
-                        }
+                        if (!cellMap.has(piece.pos)) cellMap.set(piece.pos, []);
+                        cellMap.get(piece.pos).push({ playerId: p.id, pieceIdx: piece.id, color: p.color });
                     }
                 });
             }
+            for (let [cellNum, piecesOnCell] of cellMap.entries()) {
+                const cellDiv = document.getElementById(`cell-${cellNum}`);
+                if (!cellDiv) continue;
+                const count = piecesOnCell.length;
+                piecesOnCell.forEach((info, index) => {
+                    const token = createBoardTokenElement(info.color, info.pieceIdx);
+                    token.dataset.playerId = info.playerId;
+                    token.dataset.pieceIdx = info.pieceIdx;
+                    // Dynamic side-by-side offset: avoid overlapping
+                    const offsetX = (index - (count-1)/2) * 14;
+                    token.style.transform = `translate(calc(-50% + ${offsetX}px), -50%)`;
+                    cellDiv.appendChild(token);
+                });
+            }
             
+            // Add selection highlights if needed
             if (awaitingPieceSelection && gameActive && !winnerId) {
                 const curr = players[currentPlayerIdx];
                 document.querySelectorAll('.bishop-token').forEach(tok => {
@@ -897,8 +838,6 @@
                 document.querySelectorAll('.stack-bishop').forEach(sb => {
                     if (parseInt(sb.dataset.playerId) === curr.id) sb.classList.add('selectable-stack');
                 });
-            } else {
-                document.querySelectorAll('.bishop-token, .stack-bishop').forEach(el => el.classList.remove('selectable', 'selectable-stack'));
             }
         }
         
@@ -922,6 +861,60 @@
             }
         }
         
+        async function movePiece(playerId, pieceIdx, steps) {
+            const player = players[playerId];
+            const piece = player.pieces[pieceIdx];
+            if (piece.pos === 100) return { won: false, extraTurn: false, invalid: true };
+            
+            let newPos = (piece.pos === 0) ? steps : piece.pos + steps;
+            if (newPos > 100) return { won: false, extraTurn: false, invalid: true };
+            
+            // resolve snake/ladder to get final landing position
+            let finalPos = resolveSnakeOrLadder(newPos);
+            let ladderMsg = (finalPos !== newPos && LADDERS[newPos]) ? true : false;
+            let snakeMsg = (finalPos !== newPos && SNAKES[newPos]) ? true : false;
+            
+            // Knockout rule: before moving, check opponent pieces on finalPos (exactly one => knockout)
+            const opponentId = playerId === 0 ? 1 : 0;
+            let knockedOut = false;
+            if (finalPos !== 100) {
+                const cnt = countOpponentPiecesOnCell(finalPos, opponentId);
+                if (cnt === 1) {
+                    knockedOut = knockoutSingleOpponentPiece(finalPos, opponentId);
+                    if (knockedOut) {
+                        msgDiv.innerHTML = `⚔️ KNOCKOUT! ${players[playerId].name} landed on a single opponent piece at ${finalPos}. Opponent piece returns to stack! + extra turn`;
+                        renderStacksAndTokens();
+                        await delay(500);
+                    }
+                }
+            }
+            
+            // Apply movement
+            const oldPos = piece.pos;
+            piece.pos = finalPos;
+            renderStacksAndTokens();
+            updateUI();
+            await delay(380);
+            
+            // Show snake/ladder message
+            if (ladderMsg) msgDiv.innerHTML = `🪜 LADDER! ${player.name} climbed from ${newPos} to ${finalPos}!`;
+            else if (snakeMsg) msgDiv.innerHTML = `🐍 SNAKE! ${player.name} slid from ${newPos} to ${finalPos}!`;
+            else if (oldPos === 0) msgDiv.innerHTML = `🚀 ${player.name} piece enters at ${finalPos}!`;
+            else msgDiv.innerHTML = `🎲 ${player.name} moved piece to ${finalPos}.`;
+            
+            renderStacksAndTokens();
+            updateUI();
+            await delay(400);
+            
+            const winnerDeclared = checkWinner(playerId);
+            if (winnerDeclared) return { won: true, extraTurn: false, invalid: false };
+            
+            let extraTurn = (knockedOut) || (steps === 6);
+            return { won: false, extraTurn: extraTurn, invalid: false };
+        }
+        
+        function delay(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
+        
         async function onPieceSelected(e) {
             let target = e.target.closest('.bishop-token') || e.target.closest('.stack-bishop');
             if (!target) return;
@@ -932,7 +925,6 @@
             if (playerId !== currentPlayerIdx) return;
             
             const piece = players[currentPlayerIdx].pieces[pieceIdx];
-            // Check if piece is already at 100 - cannot move
             if (piece.pos === 100) return;
             if (piece.pos !== 0 && piece.pos + currentRollValue > 100) return;
             
@@ -944,7 +936,6 @@
             updateUI();
             if (won) { processingMove = false; return; }
             if (invalid) {
-                // Re-enable selection for same player
                 processingMove = false;
                 awaitingPieceSelection = true;
                 rolling = false;
@@ -954,7 +945,7 @@
                 return;
             }
             await delay(400);
-            if (extraTurn || currentRollValue === 6) {
+            if (extraTurn) {
                 msgDiv.innerHTML = `🎲 EXTRA TURN for ${players[currentPlayerIdx].name}! Roll again.`;
                 processingMove = false;
                 rolling = false;
@@ -995,7 +986,6 @@
             msgDiv.innerHTML = `🎲 ${players[currentPlayerIdx].name} rolled ${finalValue}! Click on YOUR piece to move.`;
             
             const player = players[currentPlayerIdx];
-            // Check if any piece can move (excluding those already at 100)
             const canMoveAny = player.pieces.some(p => {
                 if (p.pos === 100) return false;
                 if (p.pos === 0) return true;
