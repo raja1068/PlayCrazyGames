@@ -4,6 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>✨ Tic-Tac-Toe · Classic Duel ✨</title>
+    
+    <!-- ============================================= -->
+    <!-- GOOGLE ADSENSE CODE (UPDATED as requested)    -->
+    <!-- AdSense script with client-id only, no slot   -->
+    <!-- ============================================= -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9770610643444805"
+         crossorigin="anonymous"></script>
+    
     <style>
         * {
             margin: 0;
@@ -22,7 +30,7 @@
             padding: 2rem 1.5rem;
         }
 
-        /* ----- AD STYLES (Google AdSense ready) ----- */
+        /* ----- AD STYLES (Google AdSense ready, no data-ad-slot) ----- */
         .ad-container {
             width: 100%;
             max-width: 860px;
@@ -44,12 +52,12 @@
             border-radius: 20px;
             overflow: hidden;
         }
-        /* fallback message (only visible if ads fail to load) – subtle */
         .ad-container small {
-            color: rgba(255,255,240,0.5);
+            color: rgba(255,255,240,0.6);
             font-size: 0.7rem;
             display: block;
             margin-top: 6px;
+            letter-spacing: 0.3px;
         }
 
         /* ----- MAIN GAME CONTAINER (SCALED 1.6x) ----- */
@@ -57,8 +65,8 @@
             text-align: center;
             background: rgba(255, 255, 255, 0.97);
             backdrop-filter: blur(0px);
-            padding: 48px;          /* originally 30px × 1.6 = 48px */
-            border-radius: 44px;    /* larger roundness 20×1.6? originally 20 -> 32, but nicer 44 */
+            padding: 48px;
+            border-radius: 44px;
             box-shadow: 0 25px 55px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255,255,255,0.2);
             transition: all 0.2s;
             width: fit-content;
@@ -67,20 +75,82 @@
         }
 
         h1 {
-            font-size: 3.6rem;      /* scaled from ~2.2rem -> 3.52, but 3.6 gives presence */
+            font-size: 3.6rem;
             font-weight: 800;
             background: linear-gradient(135deg, #3b2c5f, #aa6dc9);
             background-clip: text;
             -webkit-background-clip: text;
             color: transparent;
-            margin-bottom: 32px;     /* 20px *1.6 = 32px */
+            margin-bottom: 20px;
             letter-spacing: -0.5px;
             text-shadow: 2px 4px 12px rgba(0,0,0,0.1);
         }
 
+        /* HOW TO PLAY SECTION - elegant and accessible */
+        .how-to-play {
+            background: rgba(245, 240, 255, 0.85);
+            backdrop-filter: blur(8px);
+            border-radius: 36px;
+            padding: 18px 28px;
+            margin-bottom: 32px;
+            max-width: 580px;
+            margin-left: auto;
+            margin-right: auto;
+            border: 1px solid rgba(255,255,255,0.5);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+        .how-to-play h3 {
+            font-size: 1.7rem;
+            font-weight: 700;
+            color: #2e236c;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        .how-to-play p {
+            font-size: 1.1rem;
+            line-height: 1.45;
+            color: #1e1a3a;
+            font-weight: 500;
+            margin-bottom: 10px;
+        }
+        .how-to-play ul {
+            text-align: left;
+            display: inline-block;
+            margin-top: 6px;
+            margin-bottom: 8px;
+            padding-left: 1.5rem;
+        }
+        .how-to-play li {
+            font-size: 0.98rem;
+            margin: 8px 0;
+            color: #2a254b;
+            font-weight: 500;
+            letter-spacing: 0.2px;
+        }
+        .rules-badge {
+            display: inline-flex;
+            gap: 12px;
+            background: #e9e2ff;
+            padding: 6px 16px;
+            border-radius: 40px;
+            margin-top: 10px;
+            font-weight: 600;
+        }
+        .rules-badge span.x-badge {
+            color: #27ae60;
+            font-size: 1.2rem;
+        }
+        .rules-badge span.o-badge {
+            color: #e84342;
+            font-size: 1.2rem;
+        }
+
         .status {
-            margin-bottom: 32px;     /* 20px *1.6 */
-            font-size: 1.92rem;     /* 1.2rem *1.6 */
+            margin-bottom: 32px;
+            font-size: 1.92rem;
             font-weight: 700;
             color: #4c33b0;
             background: #f0eefc;
@@ -95,9 +165,9 @@
         /* BOARD: 3x3 grid - scaled cells 1.6x */
         .board {
             display: grid;
-            grid-template-columns: repeat(3, 160px);   /* 100px ×1.6 = 160px */
-            gap: 16px;                                 /* 10px ×1.6 = 16px */
-            margin-bottom: 48px;                       /* 30px ×1.6 = 48px */
+            grid-template-columns: repeat(3, 160px);
+            gap: 16px;
+            margin-bottom: 48px;
             justify-content: center;
         }
 
@@ -105,11 +175,11 @@
             width: 160px;
             height: 160px;
             background: linear-gradient(145deg, #f9f9ff, #edeef5);
-            border-radius: 28px;                       /* 10×1.6 = 16 → but 28 looks gorgeous */
+            border-radius: 28px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 5.2rem;                         /* 3rem ×1.6 = 4.8, but 5.2 feels bold */
+            font-size: 5.2rem;
             font-weight: 800;
             cursor: pointer;
             transition: all 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1);
@@ -133,16 +203,16 @@
             text-shadow: 0 2px 6px #ffc9c9;
         }
 
-        /* control buttons scale 1.6 */
+        /* control buttons */
         .controls button {
             background: linear-gradient(115deg, #5f4b9e, #3a2b6e);
             color: white;
             border: none;
-            padding: 16px 32px;           /* 10px 20px -> 16px 32px */
-            margin: 0 16px;               /* 0 10px -> 0 16px */
-            border-radius: 48px;          /* 10px -> 16px but 48 looks sleek */
+            padding: 16px 32px;
+            margin: 0 16px;
+            border-radius: 48px;
             cursor: pointer;
-            font-size: 1.6rem;            /* 1rem -> 1.6rem */
+            font-size: 1.6rem;
             font-weight: 600;
             letter-spacing: 0.5px;
             transition: all 0.2s;
@@ -160,7 +230,7 @@
             transform: translateY(1px);
         }
 
-        /* responsive: for smaller screens, adjust cells but keep 1.6x intention relative */
+        /* responsive */
         @media (max-width: 680px) {
             .board {
                 grid-template-columns: repeat(3, 130px);
@@ -177,6 +247,12 @@
             }
             h1 {
                 font-size: 2.8rem;
+            }
+            .how-to-play h3 {
+                font-size: 1.4rem;
+            }
+            .how-to-play p, .how-to-play li {
+                font-size: 0.9rem;
             }
             .status {
                 font-size: 1.5rem;
@@ -205,7 +281,7 @@
             }
             h1 {
                 font-size: 2.2rem;
-                margin-bottom: 20px;
+                margin-bottom: 16px;
             }
             .status {
                 font-size: 1.25rem;
@@ -215,9 +291,12 @@
                 padding: 8px 18px;
                 font-size: 1.1rem;
             }
+            .how-to-play {
+                padding: 14px 20px;
+                margin-bottom: 24px;
+            }
         }
 
-        /* additional subtle animation */
         .cell:active {
             transform: scale(0.94);
         }
@@ -227,18 +306,18 @@
             margin-top: 16px;
             color: #ccc9e6;
         }
+        .highlight-turn {
+            transition: 0.1s;
+        }
     </style>
-    <!-- Google AdSense Script (Async) - real ad service integration -->
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3940256099942544" crossorigin="anonymous"></script>
 </head>
 <body>
 
-    <!-- 🧩 TOP AD UNIT (Google Ad Service) -->
+    <!-- 🧩 TOP AD UNIT (Google Ad Service - no data-ad-slot, using client only) -->
     <div class="ad-container ad-top">
         <ins class="adsbygoogle"
             style="display:block; min-width:300px; width:100%; max-width:780px; height:auto; margin:0 auto;"
-            data-ad-client="ca-pub-3940256099942544"
-            data-ad-slot="1234567890"
+            data-ad-client="ca-pub-9770610643444805"
             data-ad-format="auto"
             data-full-width-responsive="true"></ins>
         <script>
@@ -247,9 +326,31 @@
         <small>⚡ advertisement</small>
     </div>
 
-    <!-- MAIN GAME SECTION (SCALED 1.6x) -->
+    <!-- MAIN GAME SECTION (SCALED 1.6x) + HOW TO PLAY -->
     <div class="game-container">
         <h1>❌ Tic-Tac-Toe ⭕</h1>
+        
+        <!-- 🎮 HOW TO PLAY SECTION - integrated with game -->
+        <div class="how-to-play">
+            <h3>
+                <span>📜</span> How to Play <span>🎯</span>
+            </h3>
+            <p><strong>Classic Duel — simple & strategic!</strong> Two players take turns marking the spaces in a 3×3 grid.</p>
+            <ul>
+                <li>✅ <strong>Player X</strong> goes first. Click any empty cell to place your mark.</li>
+                <li>✅ <strong>Player O</strong> follows. The goal: get <strong>three of your marks</strong> in a row (horizontally, vertically, or diagonally).</li>
+                <li>✅ If all 9 cells are filled and no one has 3 in a row, the game ends in a <strong>draw</strong>.</li>
+                <li>✅ Press <strong>⟳ Reset Game</strong> to start a fresh match anytime.</li>
+                <li>✅ Use <strong>⬅ Back to Hub</strong> to return to main menu.</li>
+            </ul>
+            <div class="rules-badge">
+                <span>⭐ Tip:</span>
+                <span class="x-badge">❌ X wins = green</span>
+                <span class="o-badge">⭕ O wins = red</span>
+                <span>🧠 plan ahead!</span>
+            </div>
+        </div>
+        
         <div class="status" id="status">Player X's turn</div>
         <div class="board" id="board"></div>
         <div class="controls">
@@ -258,12 +359,11 @@
         </div>
     </div>
 
-    <!-- 🧩 BOTTOM AD UNIT (Google Ad Service) -->
+    <!-- 🧩 BOTTOM AD UNIT (Google Ad Service - no data-ad-slot) -->
     <div class="ad-container ad-bottom">
         <ins class="adsbygoogle"
             style="display:block; min-width:300px; width:100%; max-width:780px; height:auto; margin:0 auto;"
-            data-ad-client="ca-pub-3940256099942544"
-            data-ad-slot="9876543210"
+            data-ad-client="ca-pub-9770610643444805"
             data-ad-format="auto"
             data-full-width-responsive="true"></ins>
         <script>
@@ -272,10 +372,10 @@
         <small>✨ advertisement space</small>
     </div>
 
-    <footer>⚡ classic duel — bigger experience</footer>
+    <footer>⚡ classic duel — bigger experience · strategic tic-tac-toe</footer>
 
     <script>
-        // ---------- TIC-TAC-TOE GAME LOGIC (fully functional) ----------
+        // ---------- TIC-TAC-TOE FULL GAME LOGIC + HOW TO PLAY FRIENDLY ----------
         (function() {
             const boardElement = document.getElementById('board');
             const statusDiv = document.getElementById('status');
@@ -290,7 +390,7 @@
                 [0, 4, 8], [2, 4, 6]
             ];
 
-            // Helper: update UI cells
+            // Helper: update UI cells from state
             function updateAllCellsFromState() {
                 const cells = document.querySelectorAll('.cell');
                 cells.forEach((cell, idx) => {
@@ -308,7 +408,7 @@
                 });
             }
 
-            // Render fresh board (create DOM cells)
+            // Create fresh board with event listeners
             function createBoard() {
                 boardElement.innerHTML = '';
                 for (let i = 0; i < 9; i++) {
@@ -318,11 +418,10 @@
                     cell.addEventListener('click', () => handleCellClick(i));
                     boardElement.appendChild(cell);
                 }
-                // sync visuals with current gameState
                 updateAllCellsFromState();
             }
 
-            // Update a single cell after move (performance & style)
+            // Update individual cell display
             function updateCellDisplay(index) {
                 const cells = document.querySelectorAll('.cell');
                 const mark = gameState[index];
@@ -338,48 +437,8 @@
                 }
             }
 
-            // Check for win or draw
-            function checkResult() {
-                let roundWon = false;
-                let winningCombo = null;
-                
-                for (let i = 0; i < winningConditions.length; i++) {
-                    const [a, b, c] = winningConditions[i];
-                    if (gameState[a] && gameState[a] === gameState[b] && gameState[a] === gameState[c]) {
-                        roundWon = true;
-                        winningCombo = [a, b, c];
-                        break;
-                    }
-                }
-                
-                if (roundWon) {
-                    statusDiv.textContent = `🎉 Player ${currentPlayer} wins! 🎉`;
-                    gameActive = false;
-                    // optional: highlight winning cells? can add subtle animation but keep clean
-                    return;
-                }
-                
-                // check for draw
-                if (!gameState.includes('')) {
-                    statusDiv.textContent = "🤝 It's a draw! 🤝";
-                    gameActive = false;
-                    return;
-                }
-                
-                // switch turn
-                currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
-                statusDiv.textContent = `Player ${currentPlayer}'s turn`;
-            }
-
-            function handleCellClick(index) {
-                // validation
-                if (gameState[index] !== '' || !gameActive) return;
-                
-                // apply move
-                gameState[index] = currentPlayer;
-                updateCellDisplay(index);
-                
-                // check win/draw after move
+            // Win detection and game status updates (without double-switch bug)
+            function handleMoveOutcome() {
                 let roundWon = false;
                 for (let i = 0; i < winningConditions.length; i++) {
                     const [a, b, c] = winningConditions[i];
@@ -392,49 +451,92 @@
                 if (roundWon) {
                     statusDiv.textContent = `🏆 Player ${currentPlayer} wins! 🏆`;
                     gameActive = false;
-                    return;
+                    return true; // indicates game ended with win
                 }
                 
                 if (!gameState.includes('')) {
                     statusDiv.textContent = "🤝 It's a draw! 🤝";
                     gameActive = false;
-                    return;
+                    return true; // game ended with draw
                 }
-                
-                // change player
-                currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
-                statusDiv.textContent = `Player ${currentPlayer}'s turn`;
+                return false; // game still active
             }
 
-            // reset everything
+            // Main click handler
+            function handleCellClick(index) {
+                // Validation: cell empty & game active
+                if (gameState[index] !== '' || !gameActive) return;
+                
+                // apply move
+                gameState[index] = currentPlayer;
+                updateCellDisplay(index);
+                
+                // check win/draw after move
+                let gameEnded = false;
+                let roundWon = false;
+                for (let i = 0; i < winningConditions.length; i++) {
+                    const [a, b, c] = winningConditions[i];
+                    if (gameState[a] && gameState[a] === gameState[b] && gameState[a] === gameState[c]) {
+                        roundWon = true;
+                        break;
+                    }
+                }
+                
+                if (roundWon) {
+                    statusDiv.textContent = `🏆 Player ${currentPlayer} wins! 🏆`;
+                    gameActive = false;
+                    gameEnded = true;
+                } else if (!gameState.includes('')) {
+                    statusDiv.textContent = "🤝 It's a draw! 🤝";
+                    gameActive = false;
+                    gameEnded = true;
+                }
+                
+                // if game not ended, switch players
+                if (!gameEnded) {
+                    currentPlayer = (currentPlayer === 'X') ? 'O' : 'X';
+                    statusDiv.textContent = `Player ${currentPlayer}'s turn`;
+                }
+            }
+
+            // Reset everything to initial state
             function resetGame() {
                 currentPlayer = 'X';
                 gameActive = true;
                 gameState = ['', '', '', '', '', '', '', '', ''];
                 statusDiv.textContent = "Player X's turn";
-                // update all cells (clean text & classes)
+                // reset all cell visuals
                 const cells = document.querySelectorAll('.cell');
                 cells.forEach((cell, idx) => {
                     cell.textContent = '';
                     cell.classList.remove('x', 'o');
                 });
-                // also ensures any leftover winning status cleared
+                // extra sync: ensure any leftover
+                updateAllCellsFromState();
             }
 
-            // Back to Hub functionality
+            // Back to Hub navigation (relative path)
             function backToHub() {
-                window.location.href = '../index.html';
+                // navigates to the parent index hub, if exists, else fallback to current origin
+                if (typeof window !== 'undefined') {
+                    window.location.href = '../index.html';
+                }
             }
 
-            // Event binding & initialization
-            document.getElementById('resetBtn').addEventListener('click', resetGame);
-            document.getElementById('backBtn').addEventListener('click', backToHub);
+            // Additional easter: provide a rule reminder via console but not intrusive
+            console.log("✨ Tic-Tac-Toe ready! X goes first. How to play: align 3 marks!");
             
-            // Build the game board and attach fresh listeners
+            // Event listeners
+            const resetBtn = document.getElementById('resetBtn');
+            const backBtn = document.getElementById('backBtn');
+            if (resetBtn) resetBtn.addEventListener('click', resetGame);
+            if (backBtn) backBtn.addEventListener('click', backToHub);
+            
+            // Initialize board
             createBoard();
             
-            // optional: extra safety for reset visual consistency
-            window.additionalResetSync = resetGame;
+            // In case reset is called from external, ensure stability
+            window.gameAPI = { resetGame };  // optional debug
         })();
     </script>
 </body>
