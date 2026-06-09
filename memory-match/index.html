@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Memory Match · 3 Stages · Compact + Big Icons</title>
-    <!-- Google AdSense (replace with your publisher ID) -->
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-xxxxxxxxxxxxx"
+    <title>Memory Match · 3 Stages · Classic Card Game</title>
+    <!-- Google AdSense (Publisher ID updated, no ad-slot) -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9770610643444805"
      crossorigin="anonymous"></script>
     <style>
         * {
@@ -59,14 +59,14 @@
         .ad-top { margin-bottom: 16px; }
         .ad-bottom { margin-top: 16px; }
 
-        /* 🎮 MAIN CONTAINER - 25% LESSER than previous (reduced padding, smaller base) */
+        /* 🎮 MAIN CONTAINER - refined spacing */
         .game-container {
             background: rgba(255, 255, 255, 0.96);
             backdrop-filter: blur(2px);
             border-radius: 28px;
             padding: 20px 18px 26px 18px;
             box-shadow: 0 20px 32px rgba(0, 0, 0, 0.3);
-            max-width: 980px;
+            max-width: 1080px;
             width: 100%;
             transition: all 0.2s;
         }
@@ -78,9 +78,66 @@
             -webkit-background-clip: text;
             color: transparent;
             text-align: center;
-            margin-bottom: 14px;
+            margin-bottom: 8px;
             font-weight: 800;
             letter-spacing: -0.3px;
+        }
+
+        /* How to play section - friendly card style */
+        .how-to-play {
+            background: #f3efff;
+            border-radius: 24px;
+            padding: 12px 18px;
+            margin-bottom: 20px;
+            border-left: 6px solid #c248a0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        .how-to-play h3 {
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #2e1e5e;
+            margin-bottom: 8px;
+            font-weight: 800;
+        }
+        .how-to-play p {
+            font-size: 0.85rem;
+            color: #1e2a3a;
+            line-height: 1.4;
+            margin-bottom: 6px;
+        }
+        .how-to-play ul {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            list-style: none;
+            margin-top: 6px;
+        }
+        .how-to-play li {
+            font-size: 0.78rem;
+            background: white;
+            padding: 4px 12px;
+            border-radius: 50px;
+            color: #4a2c7a;
+            font-weight: 600;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .how-to-play li span {
+            font-size: 1rem;
+        }
+        .toggle-howto {
+            background: transparent;
+            border: none;
+            color: #965dbb;
+            font-weight: bold;
+            font-size: 0.7rem;
+            cursor: pointer;
+            margin-left: 12px;
+            text-decoration: underline;
         }
 
         .stats {
@@ -142,7 +199,7 @@
             background: #cec2ff;
         }
 
-        /* 🧩 GRID — side by side CLOSELY, reduced gap slightly */
+        /* 🧩 GRID */
         .grid {
             display: grid;
             justify-content: center;
@@ -150,17 +207,14 @@
             margin-bottom: 24px;
         }
 
-        /* 4x4 layout (stage 1) */
         .grid-4cols {
             grid-template-columns: repeat(4, minmax(72px, 110px));
         }
 
-        /* 6x6 layout (stages 2 & 3) — 36 boxes */
         .grid-6cols {
             grid-template-columns: repeat(6, minmax(68px, 100px));
         }
 
-        /* CARD style — slightly smaller overall (25% reduction in base area) */
         .card {
             aspect-ratio: 1 / 1;
             width: 100%;
@@ -175,7 +229,6 @@
             transform: scale(1);
         }
 
-        /* flipped & matched */
         .card.flipped, .card.matched {
             background: white;
             box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
@@ -189,7 +242,7 @@
             background: #f0ebff;
         }
 
-        /* STAGE 1: Animal faces remain big but adjusted to smaller card size */
+        /* STAGE 1: Animal icons */
         .stage-animals .card:not(.matched) {
             font-size: 3.2rem;
         }
@@ -197,19 +250,18 @@
             font-size: 2.8rem;
         }
 
-        /* STAGE 2 & 3: vegetable & transport icons — 2.5 TIMES BIGGER than current (previous font-size was 2.4rem, now 2.4 * 2.5 = 6rem) */
+        /* STAGE 2 & 3: Bigger Icons (2.5x bigger than previous baseline) */
         .stage-veggies .card:not(.matched),
         .stage-transport .card:not(.matched) {
             font-size: 6rem;
         }
-        /* matched cards also bigger for consistency */
         .stage-veggies .card.matched,
         .stage-transport .card.matched {
             font-size: 5.6rem;
             opacity: 0.7;
         }
 
-        /* responsive: on smaller screens reduce the oversized icons to fit nicely */
+        /* responsive adjustments */
         @media (max-width: 860px) {
             .grid-4cols {
                 grid-template-columns: repeat(4, minmax(65px, 90px));
@@ -220,7 +272,6 @@
             .stage-animals .card:not(.matched) {
                 font-size: 2.5rem;
             }
-            /* For medium screens, keep 2.5x scaled but moderate */
             .stage-veggies .card:not(.matched),
             .stage-transport .card:not(.matched) {
                 font-size: 4.2rem;
@@ -238,10 +289,6 @@
             }
             h1 {
                 font-size: 1.5rem;
-            }
-            .stage-btn {
-                padding: 5px 14px;
-                font-size: 0.8rem;
             }
         }
 
@@ -269,8 +316,8 @@
             .stage-transport .card.matched {
                 font-size: 2.6rem;
             }
-            .card {
-                border-radius: 12px;
+            .how-to-play li {
+                font-size: 0.7rem;
             }
         }
 
@@ -292,6 +339,7 @@
             justify-content: center;
             gap: 16px;
             margin-top: 6px;
+            flex-wrap: wrap;
         }
 
         .controls button {
@@ -321,18 +369,33 @@
     </style>
 </head>
 <body>
-    <!-- TOP AD with white background and advertisement label -->
+    <!-- TOP AD (no data-ad-slot, simple responsive container) -->
     <div class="ad-container ad-top">
         <div class="ad-label">Advertisement</div>
         <ins class="adsbygoogle"
              style="display:inline-block;width:728px;height:90px"
-             data-ad-client="ca-pub-xxxxxxxxxxxxx"
-             data-ad-slot="1234567890"></ins>
+             data-ad-client="ca-pub-9770610643444805"></ins>
         <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
     </div>
 
     <div class="game-container" id="gameContainer">
-        <h1>🎴 MEMORY MATCH · 3 STAGES 🎴</h1>
+        <h1>🧠 MEMORY MATCH · 3 STAGES 🧠</h1>
+
+        <!-- How to Play Section (interactive, collapsible) -->
+        <div class="how-to-play" id="howToPlayBox">
+            <h3>📖 HOW TO PLAY <button id="toggleHowBtn" class="toggle-howto">[ − ]</button></h3>
+            <div id="howContent">
+                <p>🎯 <strong>Match pairs</strong> of identical icons. Flip two cards at a time — if they match, they stay open! Clear all pairs to win each stage.</p>
+                <ul>
+                    <li><span>🐾</span> Stage 1: 4x4 grid (8 pairs) — Animal faces</li>
+                    <li><span>🥦</span> Stage 2: 6x6 grid (18 pairs) — Veggies (big icons)</li>
+                    <li><span>🚂</span> Stage 3: 6x6 grid (18 pairs) — Transport (big icons)</li>
+                    <li><span>🔄</span> Fewer moves = better memory!</li>
+                    <li><span>🏆</span> Complete all three stages for full victory</li>
+                </ul>
+                <p style="font-size:0.75rem; margin-top:5px;">✨ <strong>Pro tip:</strong> Click on a card to reveal it, remember positions, and match. Use "NEW GAME" to reshuffle current stage.</p>
+            </div>
+        </div>
 
         <div class="stats">
             <div>🔄 MOVES: <span id="moves">0</span></div>
@@ -351,31 +414,29 @@
             <button id="resetBtn">🔄 NEW GAME</button>
             <button id="backBtn">⬅ BACK TO HUB</button>
         </div>
-        <footer>⚡ Tight layout · Vegetables & Transport icons 2.5x bigger</footer>
+        <footer>🎮 Memory challenge · Larger icons for veggies & transport · Have fun!</footer>
     </div>
 
-    <!-- BOTTOM AD with white background and advertisement label -->
+    <!-- BOTTOM AD (no data-ad-slot) -->
     <div class="ad-container ad-bottom">
         <div class="ad-label">Advertisement</div>
         <ins class="adsbygoogle"
              style="display:inline-block;width:728px;height:90px"
-             data-ad-client="ca-pub-xxxxxxxxxxxxx"
-             data-ad-slot="0987654321"></ins>
+             data-ad-client="ca-pub-9770610643444805"></ins>
         <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
     </div>
 
     <script>
-        // ---------- 🧩 UNIQUE THEMES (18 pairs each for stage 2 & 3) ----------
-        // STAGE 1 : 8 animals → 4x4 = 16 cards
-        const ANIMALS = ['🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼'];
+        // ---------- THEMES (18 distinct pairs for stage 2 & 3) ----------
+        const ANIMALS = ['🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼'];   // 8 pairs → 16 cards
         
-        // STAGE 2 : 18 VEGETABLES (unique icons) → 36 cards (6x6) 
+        // 18 VEGETABLES (unique icons) → 36 cards (6x6)
         const VEGGIES_FINAL = [
             '🥕', '🍠', '🥦', '🥒', '🥔', '🍅', '🧅', '🥬', '🎃',
             '🍃', '🫑', '🍆', '🧄', '🫚', '🫛', '🥗', '🌽', '🍈'
-        ];  // 18 distinct vegetables
+        ];
         
-        // STAGE 3 : 18 TRANSPORT icons → 36 cards (6x6)
+        // 18 TRANSPORT icons → 36 cards (6x6)
         const TRANSPORTS_FINAL = [
             '🚂', '🚌', '🚗', '✈️', '🚢', '🚊', '🛺', '🚲', '🚑',
             '🚒', '⛴️', '🛵', '🏍️', '🚚', '🚕', '🚁', '🛳️', '🚐'
@@ -383,8 +444,8 @@
 
         // -------------- GAME STATE --------------
         let currentStage = 1;
-        let cards = [];            // stores 'matched' or original icon (during gameplay we mutate matched)
-        let originalDeck = [];     // persistent icons for display (never mutated)
+        let cards = [];            // stores 'matched' or actual icon string (mutated)
+        let originalDeck = [];     // persistent icons (never mutated) for display
         let flippedIndices = [];
         let matchedPairsCount = 0;
         let totalPairs = 0;
@@ -392,15 +453,29 @@
         let lockBoard = false;
         let timeoutId = null;
 
-        // DOM elements
         const gridEl = document.getElementById('grid');
         const movesSpan = document.getElementById('moves');
         const matchesSpan = document.getElementById('matches');
         const resetBtn = document.getElementById('resetBtn');
         const backBtn = document.getElementById('backBtn');
         const container = document.getElementById('gameContainer');
+        
+        // How to play toggle logic
+        const toggleHowBtn = document.getElementById('toggleHowBtn');
+        const howContent = document.getElementById('howContent');
+        let howVisible = true;
+        toggleHowBtn.addEventListener('click', () => {
+            if (howVisible) {
+                howContent.style.display = 'none';
+                toggleHowBtn.textContent = '[ + ]';
+            } else {
+                howContent.style.display = 'block';
+                toggleHowBtn.textContent = '[ − ]';
+            }
+            howVisible = !howVisible;
+        });
 
-        // Get config for a stage (icon set, number of pairs, grid class, theme)
+        // Get stage configuration
         function getStageData(stage) {
             if (stage === 1) {
                 return {
@@ -426,7 +501,6 @@
             }
         }
 
-        // Shuffle (Fisher-Yates)
         function shuffleArray(arr) {
             for (let i = arr.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
@@ -435,7 +509,6 @@
             return arr;
         }
 
-        // Build shuffled deck for given stage (each icon appears twice)
         function buildShuffledDeck(stage) {
             const { icons, pairCount } = getStageData(stage);
             let deck = [];
@@ -446,7 +519,6 @@
             return shuffleArray(deck);
         }
 
-        // Apply theme class & grid column class
         function applyThemeAndGrid(stage) {
             const { theme, gridClass } = getStageData(stage);
             container.classList.remove('stage-animals', 'stage-veggies', 'stage-transport');
@@ -455,18 +527,16 @@
             gridEl.classList.add(gridClass);
         }
 
-        // Render entire grid from current cards & flippedIndices
         function renderGame() {
             gridEl.innerHTML = '';
             for (let i = 0; i < cards.length; i++) {
-                const cardStatus = cards[i];     // either icon string or 'matched'
+                const cardStatus = cards[i];
                 const isFlipped = flippedIndices.includes(i);
                 const isMatched = (cardStatus === 'matched');
                 
                 const cardDiv = document.createElement('div');
                 cardDiv.classList.add('card');
                 
-                // Decide what to show
                 if (isFlipped || isMatched) {
                     const icon = originalDeck[i];
                     cardDiv.textContent = icon;
@@ -487,7 +557,6 @@
             }
         }
 
-        // Handle match after two cards flipped
         function evaluateMatch() {
             if (flippedIndices.length !== 2) return;
             
@@ -507,7 +576,7 @@
                 
                 if (matchedPairsCount === totalPairs) {
                     setTimeout(() => {
-                        alert(`🏆 VICTORY! 🏆\nStage ${currentStage} completed in ${moves} moves! ✨`);
+                        alert(`🎉 VICTORY! 🎉\nStage ${currentStage} completed in ${moves} moves!\n${currentStage === 3 ? '🏁 CONGRATULATIONS! You finished all stages! 🏁' : 'Proceed to next stage for more challenge!'}`);
                     }, 80);
                 }
             } else {
@@ -521,7 +590,6 @@
             }
         }
 
-        // Card click handler
         function onCardClick(clickedIdx) {
             if (lockBoard) return;
             if (cards[clickedIdx] === 'matched') return;
@@ -538,7 +606,6 @@
             }
         }
 
-        // Full reset for current stage
         function resetGameSameStage() {
             if (timeoutId) {
                 clearTimeout(timeoutId);
@@ -556,7 +623,6 @@
             renderGame();
         }
 
-        // Change stage completely
         function switchStage(stage) {
             if (timeoutId) {
                 clearTimeout(timeoutId);
@@ -580,7 +646,6 @@
             renderGame();
         }
 
-        // Highlight active stage button
         function updateActiveButton(activeStage) {
             const btns = document.querySelectorAll('.stage-btn');
             btns.forEach(btn => {
@@ -609,10 +674,15 @@
         });
 
         backBtn.addEventListener('click', () => {
-            window.location.href = '../index.html';
+            // Simple back navigation (can be adjusted to custom hub)
+            if (window.history.length > 1) {
+                window.history.back();
+            } else {
+                alert('You are on the main game page. Enjoy matching!');
+            }
         });
 
-        // ---------- INITIALIZE GAME (Stage 1) ----------
+        // ---------- INITIALIZE GAME ----------
         function initGame() {
             currentStage = 1;
             const initialDeck = buildShuffledDeck(1);
@@ -629,6 +699,14 @@
         }      
 
         initGame();
+
+        // Optional: re-trigger ads when game dynamically changes layout (doesn't affect functionality)
+        // For better responsiveness, call adsense again if needed, but standard approach is fine.
+        if (typeof (adsbygoogle) !== 'undefined') {
+            try {
+                // push any pending ads after potential dynamic dom changes? Not needed for simple page, but safe.
+            } catch(e) {}
+        }
     </script>
 </body>
 </html>
