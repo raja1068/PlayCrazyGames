@@ -27,7 +27,6 @@
             padding: 24px 20px;
         }
 
-        /* ad placeholders (style similar to request but elegant) */
         .ad-zone {
             width: 100%;
             max-width: 650px;
@@ -48,7 +47,6 @@
             opacity: 0.8;
         }
 
-        /* main game card */
         .game-container {
             text-align: center;
             background: rgba(30, 35, 48, 0.85);
@@ -96,7 +94,6 @@
             gap: 12px;
         }
 
-        /* how to play section - attractive & integrated */
         .how-to-section {
             background: rgba(0, 0, 0, 0.45);
             border-radius: 56px;
@@ -258,7 +255,6 @@
     <a href="#" class="back-home" id="backToHubBtn">← 🏠 Games Hub</a>
     <h1>⬛ ROYAL CHECKERS 👑</h1>
 
-    <!-- HOW TO PLAY integrated inside game area, attractive UI -->
     <div class="how-to-section">
         <div class="how-title">
             <span>📜</span> HOW TO PLAY <span>🎲</span>
@@ -305,29 +301,27 @@
         // ---------- CANVAS SETUP ----------
         const canvas = document.getElementById('checkersCanvas');
         const ctx = canvas.getContext('2d');
-        const squareSize = 70;   // 560/8
+        const squareSize = 70;
         
         let board = [];
-        let currentPlayer = 'red';      // 'red' starts (bottom side)
-        let selectedPiece = null;        // { row, col }
-        let validMoves = [];              // [{ toRow, toCol, captures: {...}?, isJump }]
+        let currentPlayer = 'red';
+        let selectedPiece = null;
+        let validMoves = [];
         let gameActive = true;
         let redPieces = 12;
         let blackPieces = 12;
-        let mustCaptureMode = false;      // if any capture exists for current player, force capture moves only
-        let pendingMultiJumpPiece = null; // after capture, the same piece must continue if further jumps exist
-        let forcedCapturePositions = [];   // store forced jump moves for current turn
+        
+        // Core flag: if true, player is forced to make a capture move (any capture exists)
+        let mustCaptureMode = false;
 
-        // helper: update piece counters
         function updateCountersUI() {
             document.getElementById('redPieces').innerText = redPieces;
             document.getElementById('blackPieces').innerText = blackPieces;
         }
 
-        // initialize or reset board
         function initBoard() {
             board = Array(8).fill().map(() => Array(8).fill(null));
-            // black pieces: rows 0,1,2 (top)
+            // Black pieces (top rows 0,1,2)
             for (let row = 0; row < 3; row++) {
                 for (let col = 0; col < 8; col++) {
                     if ((row + col) % 2 === 1) {
@@ -335,7 +329,7 @@
                     }
                 }
             }
-            // red pieces: rows 5,6,7 (bottom)
+            // Red pieces (bottom rows 5,6,7)
             for (let row = 5; row < 8; row++) {
                 for (let col = 0; col < 8; col++) {
                     if ((row + col) % 2 === 1) {
@@ -345,85 +339,95 @@
             }
         }
 
-        // get all possible captures and normal moves for a specific piece (returns object with captures and normals)
+        // Get all possible moves (normal and captures) for a specific piece
         function getAllMovesForPiece(row, col, piece) {
             if (!piece) return { captures: [], normals: [] };
-            const directions = piece.king ? [[-1,-1],[-1,1],[1,-1],[1,1]] : (piece.type === 'red' ? [[-1,-1],[-1,1]] : [[1,-1],[1,1]]);
+            
+            // Determine direction vectors based on piece type and king status
+            let directions;
+            if (piece.king) {
+                directions = [[-1,-1], [-1,1], [1,-1], [1,1]];
+            } else {
+                directions = (piece.type === 'red') ? [[-1,-1], [-1,1]] : [[1,-1], [1,1]];
+            }
+            
             let captures = [];
             let normals = [];
 
             for (let [dRow, dCol] of directions) {
                 const newRow = row + dRow;
                 const newCol = col + dCol;
-                // normal move (one step)
-                if (newRow >=0 && newRow<8 && newCol>=0 && newCol<8 && !board[newRow][newCol]) {
+                // Normal move (one step)
+                if (newRow >= 0 && newRow < 8 && newCol >= 0 && newCol < 8 && !board[newRow][newCol]) {
                     normals.push({ toRow: newRow, toCol: newCol, captureInfo: null });
                 }
-                // capture move (jump two)
-                const jumpRow = row + dRow*2;
-                const jumpCol = col + dCol*2;
-                if (jumpRow>=0 && jumpRow<8 && jumpCol>=0 && jumpCol<8 && !board[jumpRow][jumpCol]) {
-                    const midRow = row + dRow;
-                    const midCol = col + dCol;
+                
+                // Capture move (jump two squares)
+                const jumpRow = row + dRow * 2;
+                const jumpCol = col + dCol * 2;
+                const midRow = row + dRow;
+                const midCol = col + dCol;
+                
+                if (jumpRow >= 0 && jumpRow < 8 && jumpCol >= 0 && jumpCol < 8 && !board[jumpRow][jumpCol]) {
                     const midPiece = board[midRow][midCol];
                     if (midPiece && midPiece.type !== piece.type) {
-                        captures.push({ toRow: jumpRow, toCol: jumpCol, captureInfo: { row: midRow, col: midCol } });
+                        captures.push({ 
+                            toRow: jumpRow, 
+                            toCol: jumpCol, 
+                            captureInfo: { row: midRow, col: midCol } 
+                        });
                     }
                 }
             }
             return { captures, normals };
         }
 
-        // get all valid moves for current player (considering forced captures)
-        function getAllValidMovesForCurrentPlayer() {
-            let allCaptures = [];
-            let allNormals = [];
-            for (let i=0; i<8; i++) {
-                for (let j=0; j<8; j++) {
+        // Check if current player has any capture moves available anywhere on board
+        function hasAnyCaptureMoves(player) {
+            for (let i = 0; i < 8; i++) {
+                for (let j = 0; j < 8; j++) {
                     const piece = board[i][j];
-                    if (piece && piece.type === currentPlayer) {
-                        const { captures, normals } = getAllMovesForPiece(i, j, piece);
-                        if (captures.length) {
-                            allCaptures.push({ fromRow: i, fromCol: j, moves: captures });
-                        } else if (normals.length && !mustCaptureMode) {
-                            allNormals.push({ fromRow: i, fromCol: j, moves: normals });
-                        }
+                    if (piece && piece.type === player) {
+                        const { captures } = getAllMovesForPiece(i, j, piece);
+                        if (captures.length > 0) return true;
                     }
                 }
             }
-            if (allCaptures.length > 0) {
-                mustCaptureMode = true;
-                return { captureMoves: allCaptures, normalMoves: [], hasCaptures: true };
-            } else {
-                mustCaptureMode = false;
-                return { captureMoves: [], normalMoves: allNormals, hasCaptures: false };
-            }
+            return false;
         }
 
-        // get moves for a specific selected piece, respecting forced capture rule
-        function getFilteredMovesForPiece(row, col, piece, forcedCaptureOnly) {
+        // Update global mustCaptureMode based on current player
+        function updateCaptureMode() {
+            mustCaptureMode = hasAnyCaptureMoves(currentPlayer);
+            return mustCaptureMode;
+        }
+
+        // Get valid moves for a selected piece (respects forced capture rule)
+        function getValidMovesForPiece(row, col, piece) {
             const { captures, normals } = getAllMovesForPiece(row, col, piece);
-            if (forcedCaptureOnly) {
-                return { moves: captures.map(c => ({ toRow: c.toRow, toCol: c.toCol, captureInfo: c.captureInfo })), isCapture: true };
+            if (mustCaptureMode) {
+                // If capture mode is active, ONLY return capture moves
+                return captures.map(c => ({ toRow: c.toRow, toCol: c.toCol, captureInfo: c.captureInfo }));
             } else {
+                // No captures available anywhere: return normal moves (if any)
+                // But if this piece has captures, they should be shown (but global mode false means no captures exist)
                 if (captures.length > 0) {
-                    return { moves: captures.map(c => ({ toRow: c.toRow, toCol: c.toCol, captureInfo: c.captureInfo })), isCapture: true };
-                } else {
-                    return { moves: normals.map(n => ({ toRow: n.toRow, toCol: n.toCol, captureInfo: null })), isCapture: false };
+                    return captures.map(c => ({ toRow: c.toRow, toCol: c.toCol, captureInfo: c.captureInfo }));
                 }
+                return normals.map(n => ({ toRow: n.toRow, toCol: n.toCol, captureInfo: null }));
             }
         }
 
-        // apply move and handle capture, promotion, and multi-jump detection
+        // Apply move, handle capture, promotion, multi-jump, and turn switching
         function applyMove(fromRow, fromCol, toRow, toCol, captureInfo) {
             const piece = board[fromRow][fromCol];
             if (!piece) return false;
             
-            // perform move
+            // Execute move
             board[toRow][toCol] = piece;
             board[fromRow][fromCol] = null;
             
-            // handle capture
+            // Handle capture
             if (captureInfo) {
                 const capturedPiece = board[captureInfo.row][captureInfo.col];
                 if (capturedPiece) {
@@ -434,7 +438,7 @@
                 }
             }
             
-            // king promotion
+            // King promotion
             if ((piece.type === 'red' && toRow === 0) || (piece.type === 'black' && toRow === 7)) {
                 if (!piece.king) {
                     piece.king = true;
@@ -444,68 +448,86 @@
             
             drawBoard();
             
-            // check win condition
+            // Win condition
             if (redPieces === 0) {
                 gameActive = false;
                 document.getElementById('message').innerHTML = '🏆⚫ BLACK WINS THE GAME! 🏆';
-                showTemporaryMessage('GAME OVER - Black Victory!', 3000);
                 return true;
             } else if (blackPieces === 0) {
                 gameActive = false;
                 document.getElementById('message').innerHTML = '🏆🔴 RED WINS THE GAME! 🏆';
-                showTemporaryMessage('GAME OVER - Red Victory!', 3000);
                 return true;
             }
             
-            // MULTI-JUMP possibility: after a capture, same piece might capture again
+            // MULTI-JUMP LOGIC: After a capture, check if the same piece can capture again
             if (captureInfo) {
-                // check if this piece (now at new position) has further captures
-                const newPosPiece = board[toRow][toCol];
-                const { captures: additionalCaptures } = getAllMovesForPiece(toRow, toCol, newPosPiece);
-                if (additionalCaptures.length > 0) {
-                    // stay on same player, force this piece to continue
+                const movedPiece = board[toRow][toCol];
+                const { captures: furtherCaptures } = getAllMovesForPiece(toRow, toCol, movedPiece);
+                if (furtherCaptures.length > 0) {
+                    // Same player continues turn with this piece (forced extra capture)
                     selectedPiece = { row: toRow, col: toCol };
-                    mustCaptureMode = true;
-                    const { moves } = getFilteredMovesForPiece(toRow, toCol, newPosPiece, true);
-                    validMoves = moves;
-                    pendingMultiJumpPiece = { row: toRow, col: toCol };
+                    mustCaptureMode = true; // Stay in capture mode
+                    validMoves = furtherCaptures.map(c => ({ toRow: c.toRow, toCol: c.toCol, captureInfo: c.captureInfo }));
                     drawBoard();
-                    return false; // not switching turn yet
+                    return false; // Do NOT switch turn
                 }
             }
             
-            // switch turn
-            currentPlayer = currentPlayer === 'red' ? 'black' : 'red';
-            document.getElementById('turnIndicator').innerHTML = currentPlayer === 'red' ? '🔴 Red\'s Turn' : '⚫ Black\'s Turn';
+            // Switch turns
+            currentPlayer = (currentPlayer === 'red') ? 'black' : 'red';
+            document.getElementById('turnIndicator').innerHTML = (currentPlayer === 'red') ? '🔴 Red\'s Turn' : '⚫ Black\'s Turn';
+            
+            // Reset selection and move list
             selectedPiece = null;
             validMoves = [];
-            pendingMultiJumpPiece = null;
-            // reset global mustCaptureMode after turn switch (re-evaluate next turn)
-            mustCaptureMode = false;
             
-            // after switch, check if new player has any capture moves and update mustCaptureMode for UI
-            const { hasCaptures } = getAllValidMovesForCurrentPlayer();
-            if (hasCaptures) mustCaptureMode = true;
+            // Update capture mode for the new player
+            updateCaptureMode();
+            
+            // After turn switch, if the new player has no legal moves at all, declare defeat
+            let hasAnyMove = false;
+            for (let i = 0; i < 8 && !hasAnyMove; i++) {
+                for (let j = 0; j < 8; j++) {
+                    const p = board[i][j];
+                    if (p && p.type === currentPlayer) {
+                        const moves = getValidMovesForPiece(i, j, p);
+                        if (moves.length > 0) {
+                            hasAnyMove = true;
+                            break;
+                        }
+                    }
+                }
+            }
+            if (!hasAnyMove && gameActive) {
+                gameActive = false;
+                const loser = currentPlayer;
+                const winner = loser === 'red' ? 'black' : 'red';
+                document.getElementById('message').innerHTML = `🏆 ${winner.toUpperCase()} WINS! (opponent has no moves) 🏆`;
+            }
+            
             drawBoard();
             return true;
         }
 
         function showTemporaryMessage(msg, duration) {
             const msgDiv = document.getElementById('message');
+            const originalMsg = msgDiv.innerHTML;
             msgDiv.innerHTML = msg;
             setTimeout(() => {
-                if (document.getElementById('message').innerHTML === msg) {
-                    if(gameActive) document.getElementById('message').innerHTML = '';
+                if (document.getElementById('message').innerHTML === msg && gameActive) {
+                    if (originalMsg && originalMsg.includes('WINS')) return;
+                    document.getElementById('message').innerHTML = '';
                 }
             }, duration);
         }
 
-        // ------------------ DRAWING ENGINE ------------------
+        // ---------- DRAWING ENGINE (enhanced) ----------
         function drawBoard() {
             for (let row = 0; row < 8; row++) {
                 for (let col = 0; col < 8; col++) {
                     ctx.fillStyle = (row + col) % 2 === 0 ? '#eed9bb' : '#b97f44';
                     ctx.fillRect(col * squareSize, row * squareSize, squareSize, squareSize);
+                    
                     const piece = board[row][col];
                     if (piece) {
                         const centerX = col * squareSize + squareSize/2;
@@ -535,39 +557,48 @@
                     }
                 }
             }
+            
+            // Highlight selected piece
             if (selectedPiece) {
                 ctx.strokeStyle = '#FFD966';
                 ctx.lineWidth = 4;
-                ctx.shadowBlur = 0;
                 ctx.strokeRect(selectedPiece.col * squareSize, selectedPiece.row * squareSize, squareSize, squareSize);
             }
+            
+            // Highlight valid moves with bright green circles
             validMoves.forEach(move => {
-                ctx.fillStyle = 'rgba(80, 220, 100, 0.55)';
+                ctx.fillStyle = 'rgba(80, 220, 100, 0.65)';
                 ctx.fillRect(move.toCol * squareSize, move.toRow * squareSize, squareSize, squareSize);
-                ctx.fillStyle = '#ccff88';
+                ctx.fillStyle = '#eaffaa';
                 ctx.beginPath();
-                ctx.arc(move.toCol * squareSize + squareSize/2, move.toRow * squareSize + squareSize/2, 12, 0, Math.PI*2);
+                ctx.arc(move.toCol * squareSize + squareSize/2, move.toRow * squareSize + squareSize/2, 14, 0, Math.PI*2);
+                ctx.fill();
+                ctx.fillStyle = '#2c6e2c';
+                ctx.beginPath();
+                ctx.arc(move.toCol * squareSize + squareSize/2, move.toRow * squareSize + squareSize/2, 6, 0, Math.PI*2);
                 ctx.fill();
             });
         }
 
-        // ---------- GAME LOGIC ----------
+        // ---------- GAME LOGIC HANDLER ----------
         function handleCanvasClick(e) {
             if (!gameActive) return;
+            
             const rect = canvas.getBoundingClientRect();
-            const scale = canvas.width / rect.width;
-            const col = Math.floor(((e.clientX - rect.left) * scale) / squareSize);
-            const row = Math.floor(((e.clientY - rect.top) * scale) / squareSize);
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            const col = Math.floor(((e.clientX - rect.left) * scaleX) / squareSize);
+            const row = Math.floor(((e.clientY - rect.top) * scaleY) / squareSize);
             if (row < 0 || row >= 8 || col < 0 || col >= 8) return;
             
-            // check if click on a valid move destination
+            // Case 1: Click on a valid move destination while a piece is selected
             const moveTarget = validMoves.find(m => m.toRow === row && m.toCol === col);
             if (moveTarget && selectedPiece) {
                 const fromRow = selectedPiece.row;
                 const fromCol = selectedPiece.col;
                 const success = applyMove(fromRow, fromCol, moveTarget.toRow, moveTarget.toCol, moveTarget.captureInfo);
                 if (success === false && gameActive) {
-                    // multi-jump continues: selection stays
+                    // Multi-jump in progress: selection stays, board already redrawn in applyMove
                     drawBoard();
                     return;
                 }
@@ -575,23 +606,23 @@
                 return;
             }
             
-            // select piece only if it belongs to current player and game active
+            // Case 2: Select a piece belonging to current player
             const clickedPiece = board[row][col];
             if (clickedPiece && clickedPiece.type === currentPlayer && gameActive) {
-                // re-evaluate forced capture context before selecting
-                const globalState = getAllValidMovesForCurrentPlayer();
-                const forcedOnly = globalState.hasCaptures;
-                // compute moves for this piece in current context
-                const { moves } = getFilteredMovesForPiece(row, col, clickedPiece, forcedOnly);
+                // Before selecting, refresh capture mode to ensure forced captures work
+                updateCaptureMode();
+                const moves = getValidMovesForPiece(row, col, clickedPiece);
                 if (moves.length > 0) {
                     selectedPiece = { row, col };
                     validMoves = moves;
                 } else {
+                    // No valid moves for this piece -> deselect
                     selectedPiece = null;
                     validMoves = [];
                 }
                 drawBoard();
             } else {
+                // Clicked on empty or opponent piece -> deselect
                 selectedPiece = null;
                 validMoves = [];
                 drawBoard();
@@ -607,14 +638,13 @@
             redPieces = 12;
             blackPieces = 12;
             mustCaptureMode = false;
-            pendingMultiJumpPiece = null;
             updateCountersUI();
             document.getElementById('turnIndicator').innerHTML = '🔴 Red\'s Turn';
             document.getElementById('message').innerHTML = '';
+            updateCaptureMode(); // refresh after board reset
             drawBoard();
         }
         
-        // back / navigation
         function backToGames() {
             if (confirm("Return to games hub?")) {
                 window.location.href = '../index.html';
@@ -630,6 +660,7 @@
         });
         
         initBoard();
+        updateCaptureMode();
         drawBoard();
         updateCountersUI();
     })();
