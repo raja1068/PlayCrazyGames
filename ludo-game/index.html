@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-  <title>Ludo Classic | Extra Turn on Home | 57 Cells | Right Turn</title>
-  <!-- Google AdSense Service (Test ad unit) -->
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3940256099942544"
+  <title>Ludo Royal | Classic 57 Cells | Extra Turn on Home | Right Turn</title>
+  <!-- Google AdSense Code (provided by user, without data-ad-slot) -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9770610643444805"
      crossorigin="anonymous"></script>
   <style>
     * {
@@ -16,11 +16,11 @@
     }
 
     :root {
-      --red: #df2027;
-      --green: #009b12;
-      --yellow: #dfdb2d;
-      --blue: #176cb0;
-      --border: rgba(0,0,0,0.22);
+      --red: #dc2626;
+      --green: #16a34a;
+      --yellow: #eab308;
+      --blue: #2563eb;
+      --border: rgba(0,0,0,0.2);
     }
 
     body {
@@ -28,160 +28,159 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      background: linear-gradient(145deg, #e0e0e0, #f5f5f5);
-      font-family: 'Segoe UI', Roboto, Arial, sans-serif;
-      overflow-x: hidden;
-      padding: 16px;
+      background: linear-gradient(145deg, #cbd5e1, #e2e8f0);
+      font-family: 'Segoe UI', Roboto, 'Poppins', sans-serif;
+      overflow-x: auto;
+      padding: 20px;
     }
 
     .game-wrapper {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 18px;
+      gap: 20px;
       width: 100%;
-      max-width: 800px;
+      max-width: 1000px;
     }
 
-    /* AD containers */
+    /* Ad Containers */
     .ad-container {
       width: 100%;
-      background: rgba(255,255,240,0.9);
-      border-radius: 20px;
-      padding: 8px 0;
+      background: rgba(0,0,0,0.05);
+      border-radius: 24px;
+      padding: 6px 0;
       text-align: center;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      backdrop-filter: blur(2px);
-      transition: all 0.2s;
+      backdrop-filter: blur(4px);
       min-height: 100px;
       display: flex;
       justify-content: center;
       align-items: center;
     }
-    .ad-top {
-      margin-bottom: 4px;
-    }
-    .ad-bottom {
-      margin-top: 4px;
-    }
+    .ad-top { margin-bottom: 6px; }
+    .ad-bottom { margin-top: 6px; }
     .adsbygoogle {
       display: block;
       width: 100%;
       max-width: 728px;
       margin: 0 auto;
-      border-radius: 12px;
-      background: #fef6e0;
+      border-radius: 16px;
     }
 
-    .top-panel {
+    /* Info & How to Play panel */
+    .info-panel {
+      background: rgba(15, 25, 35, 0.9);
+      backdrop-filter: blur(12px);
+      border-radius: 60px;
+      padding: 8px 20px;
       display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 20px;
       flex-wrap: wrap;
-      background: rgba(255,255,255,0.85);
-      padding: 8px 24px;
-      border-radius: 80px;
-      backdrop-filter: blur(6px);
-      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
       width: 100%;
+      box-shadow: 0 12px 24px rgba(0,0,0,0.3);
     }
 
     .turn-indicator {
       font-size: 1.2rem;
       font-weight: 800;
-      padding: 10px 24px;
-      border-radius: 60px;
-      background: #1e272e;
-      color: white;
-      box-shadow: inset 0 1px 3px rgba(0,0,0,0.3), 0 6px 12px rgba(0,0,0,0.2);
-      min-width: 160px;
+      padding: 8px 20px;
+      border-radius: 40px;
+      background: #0f172a;
+      color: #facc15;
+      letter-spacing: 1px;
+      box-shadow: inset 0 1px 3px rgba(255,255,255,0.2), 0 6px 12px black;
+      min-width: 170px;
       text-align: center;
     }
 
     .action-btn {
-      padding: 10px 22px;
+      padding: 8px 20px;
       border: none;
-      border-radius: 60px;
+      border-radius: 40px;
       font-weight: bold;
-      font-size: 1rem;
+      font-size: 0.95rem;
       cursor: pointer;
-      transition: 0.2s ease;
-      box-shadow: 0 5px 12px rgba(0,0,0,0.2);
+      transition: 0.2s;
+      box-shadow: 0 5px 10px rgba(0,0,0,0.3);
       font-weight: 700;
     }
 
     #rollBtn {
-      background: #2c3e50;
+      background: #2d3e50;
       color: white;
     }
-
-    #rollBtn:hover { background: #1e2b38; transform: scale(0.97); }
+    #rollBtn:hover { background: #1e2e3c; transform: scale(0.97); }
     #newGameBtn {
-      background: linear-gradient(135deg, #8e2de2, #4a00e0);
+      background: linear-gradient(135deg, #7c3aed, #a855f7);
       color: white;
     }
     #newGameBtn:hover { transform: scale(0.97); filter: brightness(1.05); }
 
+    .how-to-btn {
+      background: #2b2d42;
+      color: #f8fafc;
+      border: 1px solid gold;
+    }
+    .how-to-btn:hover { background: #1e1f2e; transform: scale(0.97);}
+
     .dice {
-      width: 78px;
-      height: 78px;
+      width: 70px;
+      height: 70px;
       border-radius: 20px;
-      background: radial-gradient(circle at 30% 25%, #fefefe, #e2e2e2);
+      background: radial-gradient(circle at 35% 30%, #ffffff, #dddddd);
       display: flex;
       justify-content: center;
       align-items: center;
       cursor: pointer;
-      box-shadow: 0 12px 20px rgba(0,0,0,0.3), inset 2px 2px 6px white, inset -3px -3px 8px rgba(0,0,0,0.15);
-      transition: transform 0.2s;
-      border: 2px solid #c0c0c0;
+      box-shadow: 0 12px 18px rgba(0,0,0,0.4), inset 1px 1px 5px white;
+      transition: 0.1s;
+      border: 2px solid #b0b0b0;
     }
     .dice:active { transform: scale(0.96); }
-
     .dice-dot {
       width: 100%;
       height: 100%;
       display: grid;
       grid-template-columns: repeat(3,1fr);
       grid-template-rows: repeat(3,1fr);
-      padding: 14px;
+      padding: 12px;
       gap: 5px;
     }
     .pip {
-      width: 12px;
-      height: 12px;
+      width: 10px;
+      height: 10px;
       border-radius: 50%;
-      background: #111;
+      background: #1e1e2a;
       align-self: center;
       justify-self: center;
       opacity: 0;
-      box-shadow: inset 1px 1px 2px rgba(255,255,255,0.6);
+      box-shadow: inset 0 1px 2px rgba(255,255,255,0.5);
     }
     .show { opacity: 1; }
 
     .board {
-      width: min(95vw, 95vh);
-      height: min(95vw, 95vh);
+      width: min(92vw, 92vh);
+      height: min(92vw, 92vh);
       display: grid;
       grid-template-columns: repeat(15, 1fr);
       grid-template-rows: repeat(15, 1fr);
-      background: #faf3e0;
-      border: 3px solid rgba(0,0,0,0.3);
+      background: #f8f4e6;
+      border: 4px solid #4a3b2c;
       position: relative;
-      box-shadow: 0 20px 30px rgba(0,0,0,0.35);
-      border-radius: 12px;
+      box-shadow: 0 20px 35px rgba(0,0,0,0.5);
+      border-radius: 20px;
       overflow: hidden;
     }
 
     .cell {
-      border: 1px solid var(--border);
-      background: #fff7ed;
-      position: relative;
+      border: 1px solid rgba(0,0,0,0.15);
+      background: #fffaf0;
     }
-    .blue-bg { background: #1e88e5; }
-    .green-bg { background: #2e7d32; }
-    .yellow-bg { background: #f9a825; }
-    .red-bg { background: #c62828; }
+    .blue-bg { background: #3b82f6; }
+    .green-bg { background: #22c55e; }
+    .yellow-bg { background: #facc15; }
+    .red-bg { background: #ef4444; }
 
     .yard {
       position: absolute;
@@ -195,53 +194,58 @@
     .yard-inner {
       width: 78%;
       height: 78%;
-      background: #fef3d6;
-      box-shadow: inset 0 0 0 3px rgba(0,0,0,0.2), 0 8px 20px rgba(0,0,0,0.3);
+      background: #fef3cf;
+      box-shadow: inset 0 0 0 4px rgba(0,0,0,0.2), 0 8px 18px black;
       display: grid;
       grid-template-columns: repeat(2,1fr);
       grid-template-rows: repeat(2,1fr);
       place-items: center;
       padding: 12%;
       gap: 12%;
-      border-radius: 20px;
+      border-radius: 28px;
     }
-    .yard.blue { top: 0; left: 0; background: var(--blue); border-radius: 0 0 20px 0; }
-    .yard.green { top: 0; right: 0; background: var(--green); border-radius: 0 0 0 20px; }
-    .yard.red { bottom: 0; left: 0; background: var(--red); border-radius: 0 20px 0 0; }
-    .yard.yellow { bottom: 0; right: 0; background: var(--yellow); border-radius: 20px 0 0 0; }
+    .yard.blue { top: 0; left: 0; background: #2563eb; border-radius: 0 0 24px 0; }
+    .yard.green { top: 0; right: 0; background: #16a34a; border-radius: 0 0 0 24px; }
+    .yard.red { bottom: 0; left: 0; background: #dc2626; border-radius: 0 24px 0 0; }
+    .yard.yellow { bottom: 0; right: 0; background: #eab308; border-radius: 24px 0 0 0; }
 
     .token {
       width: 100%;
       height: 100%;
       min-width: 28px;
       min-height: 28px;
-      border-radius: 50% 50% 50% 50% / 48% 48% 52% 52%;
-      box-shadow: inset -5px -5px 8px rgba(0,0,0,0.25), inset 3px 3px 10px rgba(255,255,255,0.5), 0 6px 10px rgba(0,0,0,0.35);
-      transition: all 0.1s ease;
+      border-radius: 50% 50% 45% 45%;
+      box-shadow: inset -4px -4px 6px rgba(0,0,0,0.3), inset 2px 2px 8px rgba(255,255,255,0.6), 0 5px 12px black;
+      transition: 0.05s linear;
       cursor: pointer;
       z-index: 100;
       position: relative;
     }
-    .token::before {
-      content: "";
-      width: 38%;
-      height: 38%;
-      border-radius: 50%;
-      background: rgba(255,240,200,0.9);
+    .token::after {
+      content: "●";
+      font-size: 28%;
+      color: rgba(255,255,200,0.8);
       position: absolute;
-      top: 20%;
+      top: 25%;
       left: 50%;
       transform: translateX(-50%);
+      text-shadow: 0 0 2px black;
     }
-    .token.blue { background: radial-gradient(circle at 35% 30%, #3c9eff, #0d4f8a); }
-    .token.green { background: radial-gradient(circle at 35% 30%, #39e654, #0a6b1a); }
-    .token.red { background: radial-gradient(circle at 35% 30%, #ff5e6e, #ac0f1f); }
-    .token.yellow { background: radial-gradient(circle at 35% 30%, #fff468, #c7b42c); }
+    .token.blue { background: radial-gradient(circle at 35% 30%, #60a5fa, #1e3a8a); }
+    .token.green { background: radial-gradient(circle at 35% 30%, #86efac, #166534); }
+    .token.red { background: radial-gradient(circle at 35% 30%, #f87171, #991b1b); }
+    .token.yellow { background: radial-gradient(circle at 35% 30%, #fde047, #a16207); }
 
-    .home-path-blue { background: #1e88e5; }
-    .home-path-green { background: #2e7d32; }
-    .home-path-red { background: #c62828; }
-    .home-path-yellow { background: #f9a825; }
+    .safe-star {
+      font-size: clamp(20px, 3vw, 38px);
+      color: #ffdd77;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-shadow: 0 0 5px black;
+      background: radial-gradient(circle, #5e3a1a, #2c1a08);
+    }
+    .safe-star::before { content: "★"; position: absolute; }
 
     .center {
       grid-column: 7 / 10;
@@ -251,75 +255,129 @@
       display: grid;
       grid-template-columns: repeat(3,1fr);
       grid-template-rows: repeat(3,1fr);
-      background: #2c2c2c;
-      border: 2px solid gold;
+      background: #2d2a24;
+      border: 2px solid #fbbf24;
     }
-    .center .c-blue { background: #176cb0; }
-    .center .c-green { background: #009b12; }
-    .center .c-red { background: #df2027; }
-    .center .c-yellow { background: #dfdb2d; }
-    .center .winner-cup {
-      background: radial-gradient(#ffd966, #d4a017);
+    .winner-cup {
+      background: radial-gradient(#ffd966, #ca8a04);
       border-radius: 50%;
       margin: 15%;
-      border: 3px solid #f9f3c1;
+      border: 3px solid #ffec9f;
     }
 
-    .safe-star {
-      font-size: clamp(24px, 3vw, 42px);
-      color: #ffd966;
+    /* modal styles */
+    .modal {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.75);
+      backdrop-filter: blur(5px);
       display: flex;
       justify-content: center;
       align-items: center;
-      text-shadow: 0 0 6px black;
-      background: radial-gradient(circle, #442200, #1f0f00);
-      border: 1px solid #ffb347;
+      z-index: 2000;
+      visibility: hidden;
+      opacity: 0;
+      transition: 0.2s;
     }
-    .safe-star::before { content: "★"; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
-
-    @media (max-width: 700px) {
+    .modal.active {
+      visibility: visible;
+      opacity: 1;
+    }
+    .modal-content {
+      background: #fef9e8;
+      max-width: 400px;
+      width: 85%;
+      border-radius: 42px;
+      padding: 28px 22px;
+      text-align: center;
+      box-shadow: 0 30px 40px black;
+      border: 2px solid gold;
+    }
+    .modal-content h2 {
+      font-size: 1.9rem;
+      color: #b45309;
+      margin-bottom: 12px;
+    }
+    .modal-content ul {
+      text-align: left;
+      margin: 16px 0;
+      padding-left: 24px;
+      font-weight: 500;
+    }
+    .modal-content li {
+      margin: 10px 0;
+      font-size: 1rem;
+    }
+    .close-modal {
+      background: #2c3e50;
+      color: white;
+      padding: 8px 28px;
+      border: none;
+      border-radius: 60px;
+      font-weight: bold;
+      font-size: 1.1rem;
+      margin-top: 10px;
+      cursor: pointer;
+    }
+    @media (max-width: 650px) {
       .token { min-width: 20px; min-height: 20px; }
-      .turn-indicator { font-size: 0.9rem; padding: 6px 14px; min-width: 120px; }
-      .action-btn { padding: 6px 14px; font-size: 0.8rem; }
-      .ad-container { min-height: 70px; }
+      .turn-indicator { font-size: 0.8rem; padding: 5px 12px; min-width: 110px;}
+      .action-btn { padding: 5px 12px; font-size: 0.7rem;}
+      .dice { width: 55px; height: 55px; }
+      .info-panel { gap: 8px; padding: 5px 12px; }
     }
   </style>
 </head>
 <body>
 <div class="game-wrapper">
-  <!-- TOP AD (Google Ad Service) -->
+  <!-- TOP AD (Google AdSense) -->
   <div class="ad-container ad-top">
     <ins class="adsbygoogle"
          style="display:block"
-         data-ad-client="ca-pub-3940256099942544"
-         data-ad-slot="1783611599"
          data-ad-format="auto"
          data-full-width-responsive="true"></ins>
   </div>
 
-  <div class="top-panel">
-    <div class="turn-indicator" id="turnIndicator">🔴 Red Turn</div>
-    <button class="action-btn" id="rollBtn">🎲 Roll Dice</button>
-    <button class="action-btn" id="newGameBtn">🔄 New Game</button>
+  <div class="info-panel">
+    <div class="turn-indicator" id="turnIndicator">🔴 RED TURN</div>
+    <button class="action-btn" id="rollBtn">🎲 ROLL</button>
+    <button class="action-btn" id="newGameBtn">🔄 NEW GAME</button>
+    <button class="action-btn how-to-btn" id="howToBtn">📖 HOW TO PLAY</button>
     <div class="dice" id="dice"><div class="dice-dot" id="diceValue"></div></div>
   </div>
 
   <div class="board" id="board"></div>
 
-  <!-- BOTTOM AD (Google Ad Service) -->
+  <!-- BOTTOM AD (Google AdSense) -->
   <div class="ad-container ad-bottom">
     <ins class="adsbygoogle"
          style="display:block"
-         data-ad-client="ca-pub-3940256099942544"
-         data-ad-slot="1783611599"
          data-ad-format="auto"
          data-full-width-responsive="true"></ins>
   </div>
 </div>
 
+<!-- How to Play Modal -->
+<div id="howToModal" class="modal">
+  <div class="modal-content">
+    <h2>🎲 Ludo Rules</h2>
+    <ul>
+      <li>✨ <strong>Extra Turn on Home:</strong> Reaching the central WINNER SAFEZONE grants an EXTRA turn!</li>
+      <li>🌟 Roll a <strong>6</strong> to bring a token out or move, and you get another turn.</li>
+      <li>⚡ Capturing an opponent's token also gives an extra turn.</li>
+      <li>🚫 If you roll a 6 and have 3 steps left → blocked (can’t move). No overshoot allowed!</li>
+      <li>🏆 Safe stars ★ protect from capture. Home stretch cells also safe.</li>
+      <li>🔁 Right-turn classic path – 57 cells per color including home run.</li>
+      <li>✅ First to bring all 4 tokens to the center wins!</li>
+    </ul>
+    <button class="close-modal" id="closeModalBtn">GOT IT!</button>
+  </div>
+</div>
+
 <script>
   (function(){
-    // ------------------------- BOARD LAYOUT (15x15, 4 tokens per yard) -------------------------
+    // ----- BOARD CONSTRUCTION (15x15) -----
     const boardEl = document.getElementById('board');
     const cellMap = Array(16).fill().map(() => Array(16).fill(null));
     
@@ -332,33 +390,25 @@
       cellMap[r][c] = cell;
       return cell;
     }
-    
     for(let r=1;r<=15;r++) for(let c=1;c<=15;c++) createCell(r,c);
     
-    // home path visual corridors
+    // visual home corridors
     for(let c=2;c<=6;c++) createCell(8,c,'home-path-blue');
     for(let r=2;r<=6;r++) createCell(r,8,'home-path-green');
     for(let c=10;c<=14;c++) createCell(8,c,'home-path-yellow');
     for(let r=10;r<=14;r++) createCell(r,8,'home-path-red');
-    createCell(15,8);
     
-    // start stars
-    createCell(14,7,'safe-star red-bg');
-    createCell(7,2,'safe-star blue-bg');
-    createCell(2,9,'safe-star green-bg');
-    createCell(9,14,'safe-star yellow-bg');
+    // stars
+    const starSpots = [[14,7],[9,3],[7,2],[3,7],[2,9],[7,13],[9,14],[13,9]];
+    starSpots.forEach(([r,c]) => createCell(r,c,'safe-star'));
     
-    // center winner zone
+    // center podium
     const centerDiv = document.createElement('div');
     centerDiv.className = 'center';
-    centerDiv.innerHTML = `<div class="c-blue"></div><div class="c-green"></div><div class="c-green"></div><div class="c-blue"></div><div class="winner-cup"></div><div class="c-yellow"></div><div class="c-red"></div><div class="c-red"></div><div class="c-yellow"></div>`;
+    centerDiv.innerHTML = `<div style="background:#2563eb"></div><div style="background:#16a34a"></div><div style="background:#16a34a"></div><div style="background:#2563eb"></div><div class="winner-cup"></div><div style="background:#eab308"></div><div style="background:#dc2626"></div><div style="background:#dc2626"></div><div style="background:#eab308"></div>`;
     boardEl.appendChild(centerDiv);
     
-    // extra star cells
-    const starCoords = [[14,7],[9,3],[7,2],[3,7],[2,9],[7,13],[9,14],[13,9]];
-    starCoords.forEach(([r,c]) => createCell(r,c,'safe-star'));
-    
-    // yards with 4 tokens each
+    // color yards
     const yardsData = [{cls:'blue',color:'blue'},{cls:'green',color:'green'},{cls:'red',color:'red'},{cls:'yellow',color:'yellow'}];
     yardsData.forEach(y=>{
       const yardDiv = document.createElement('div');
@@ -373,28 +423,20 @@
         token.dataset.row = '';
         token.dataset.col = '';
         token.dataset.finished = 'false';
-        token.style.position = 'relative';
         inner.appendChild(token);
       }
       yardDiv.appendChild(inner);
       boardEl.appendChild(yardDiv);
     });
     
-    // colored corner backgrounds
-    const zones = [
-      {r1:1,r2:6,c1:1,c2:6,cls:'blue-bg'},
-      {r1:1,r2:6,c1:10,c2:15,cls:'green-bg'},
-      {r1:10,r2:15,c1:1,c2:6,cls:'red-bg'},
-      {r1:10,r2:15,c1:10,c2:15,cls:'yellow-bg'}
+    // corners colored
+    const corners = [
+      {r1:1,r2:6,c1:1,c2:6,cls:'blue-bg'},{r1:1,r2:6,c1:10,c2:15,cls:'green-bg'},
+      {r1:10,r2:15,c1:1,c2:6,cls:'red-bg'},{r1:10,r2:15,c1:10,c2:15,cls:'yellow-bg'}
     ];
-    zones.forEach(z=>{
-      for(let r=z.r1;r<=z.r2;r++) for(let c=z.c1;c<=z.c2;c++){
-        createCell(r,c,z.cls);
-      }
-    });
+    corners.forEach(z=>{ for(let r=z.r1;r<=z.r2;r++) for(let c=z.c1;c<=z.c2;c++) createCell(r,c,z.cls); });
     
-    // ------------------------- PATHWAY (57 cells per color) -------------------------
-    // 52‑cell outer loop (clockwise) right-turn classic path
+    // ------------------------- PATHWAY (57 cells) -------------------------
     const cyclicMain = [
       [14,7],[13,7],[12,7],[11,7],[10,7],
       [9,6],[9,5],[9,4],[9,3],[9,2],[9,1],
@@ -410,7 +452,6 @@
       [15,8],[15,7]
     ];
     
-    // Home stretch: 5 colored cells + final winner [8,8] (total 6 cells)
     const homeStretch = {
       red:   [[14,8],[13,8],[12,8],[11,8],[10,8],[8,8]],
       blue:  [[8,2],[8,3],[8,4],[8,5],[8,6],[8,8]],
@@ -418,25 +459,23 @@
       yellow:[[8,14],[8,13],[8,12],[8,11],[8,10],[8,8]]
     };
     
-    // Starting indices (0‑based) inside the 52‑cell cyclicMain
     const startIndex = { red:0, blue:13, green:26, yellow:39 };
     const players = ['red','blue','green','yellow'];
-    const turnDisplay = { red:'🔴 Red', blue:'🔵 Blue', green:'🟢 Green', yellow:'🟡 Yellow' };
+    const turnDisplay = { red:'🔴 RED', blue:'🔵 BLUE', green:'🟢 GREEN', yellow:'🟡 YELLOW' };
     
-    // Build full path: first 51 cells of the rotated main loop + 6 home cells = 57 cells total
     const fullPaths = {};
     for(let color of players){
       const start = startIndex[color];
       const rotatedMain = [...cyclicMain.slice(start), ...cyclicMain.slice(0, start)];
-      const main51 = rotatedMain.slice(0, 51);
+      const main51 = rotatedMain.slice(0,51);
       fullPaths[color] = [...main51, ...homeStretch[color]];
     }
     
-    function totalPathLength(color) { return fullPaths[color].length; } // 57
+    function totalPathLength(color) { return fullPaths[color].length; } // =57
     
     function getPositionAtStep(color, step){
       const path = fullPaths[color];
-      if(step >= 0 && step < path.length) return path[step];
+      if(step >=0 && step < path.length) return path[step];
       return null;
     }
     
@@ -451,7 +490,6 @@
       const cell = cellMap[row]?.[col];
       return cell && cell.classList.contains('safe-star');
     }
-    
     function isAnyHomePathCell(row, col){
       for(let clr of players){
         if(homeStretch[clr].some(([r,c]) => r===row && c===col)) return true;
@@ -460,21 +498,21 @@
     }
     
     function captureOpponentsAtCell(row, col, currentColor, movingToken){
-      if(isStarCell(row,col)) return false;
-      if(isAnyHomePathCell(row,col)) return false;
-      const activeTokens = getActiveTokens();
+      if(isStarCell(row,col) || isAnyHomePathCell(row,col)) return false;
+      const allTokens = Array.from(document.querySelectorAll('.token'));
       let captured = false;
-      for(let token of activeTokens){
+      for(let token of allTokens){
         if(token === movingToken) continue;
         if(token.dataset.finished === 'true') continue;
+        if(token.dataset.out !== 'true') continue;
         const tRow = parseInt(token.dataset.row);
         const tCol = parseInt(token.dataset.col);
         if(tRow === row && tCol === col){
           let tokenColor = '';
-          if(token.classList.contains('red')) tokenColor = 'red';
-          else if(token.classList.contains('blue')) tokenColor = 'blue';
-          else if(token.classList.contains('green')) tokenColor = 'green';
-          else if(token.classList.contains('yellow')) tokenColor = 'yellow';
+          if(token.classList.contains('red')) tokenColor='red';
+          else if(token.classList.contains('blue')) tokenColor='blue';
+          else if(token.classList.contains('green')) tokenColor='green';
+          else tokenColor='yellow';
           if(tokenColor !== currentColor){
             resetTokenToYard(token, tokenColor);
             captured = true;
@@ -485,7 +523,6 @@
       return captured;
     }
     
-    // Exact movement rule (no overshoot, 3‑steps block)
     function canTokenMoveExactly(token, color, roll){
       if(token.dataset.finished === 'true') return false;
       const isOut = token.dataset.out === 'true';
@@ -495,23 +532,21 @@
       return roll <= remaining;
     }
     
-    // ------------- EXTRA TURN ON HOME (winner's safezone) -------------
-    // rule: reaching final cell [8,8] grants extra turn (already implemented in moveToken)
+    // extra turn on home + extra on capture + extra on 6
+    let rolledNumber = 0, canMove = false, currentPlayer = 0;
+    let activeTimeouts = [];
+    
     function moveToken(token, color){
       if(!canMove) return;
-      if(token.dataset.finished === 'true') return;
-      
       const roll = rolledNumber;
       const isOut = token.dataset.out === 'true';
       
-      // Yard exit (only on 6)
       if(!isOut && roll === 6){
         const startPos = getPositionAtStep(color, 0);
         token.dataset.out = 'true';
         token.dataset.steps = '0';
-        token.style.position = 'absolute';
         updateTokenPositionAndLayout(token, startPos[0], startPos[1]);
-        afterMove(true); // extra turn for rolling 6
+        afterMove(true);
         return;
       }
       if(!isOut) { nextTurn(); return; }
@@ -524,7 +559,6 @@
       let newSteps = stepsTaken + roll;
       const maxSteps = totalPathLength(color);
       if(newSteps > maxSteps) { nextTurn(); return; }
-      
       let finalPos = getPositionAtStep(color, newSteps);
       if(!finalPos) { nextTurn(); return; }
       const newRow = finalPos[0], newCol = finalPos[1];
@@ -538,27 +572,18 @@
       token.dataset.steps = newSteps.toString();
       updateTokenPositionAndLayout(token, newRow, newCol);
       
-      // SPECIAL EXTRA TURN RULE: REACHING WINNER'S SAFEZONE (final cell)
+      // EXTRA TURN ON HOME (winner's safezone): reaching final cell (8,8)
       if(finishedFlag){
         token.dataset.finished = 'true';
-        token.style.opacity = '0.6';
-        token.style.cursor = 'default';
+        token.style.opacity = '0.7';
         repositionAllTokensGrouped();
-        // EXTRA TURN for reaching home (winner's safezone = central [8,8])
-        console.log(`🏆 ${color.toUpperCase()} token reached WINNER SAFEZONE! ${turnDisplay[color]} gets an EXTRA TURN.`);
-        afterMove(true);
+        afterMove(true);   // EXTRA TURN because HOME SAFEZONE!
         return;
       }
       
       const extraTurn = captureHappened || (roll === 6);
       afterMove(extraTurn);
     }
-    
-    // ------------------------- GAME FLOW -------------------------
-    let canMove = false;
-    let rolledNumber = 0;
-    let currentPlayer = 0;
-    let activeTimeouts = [];
     
     function afterMove(extraTurn){
       canMove = false;
@@ -608,7 +633,7 @@
       }
     }
     
-    // ------------------------- SIDE-BY-SIDE STACKING ON BOARD -------------------------
+    // Stacking tokens on same cell
     function getActiveTokens(){
       return Array.from(document.querySelectorAll('.token')).filter(t => t.dataset.out === 'true' && t.dataset.finished !== 'true');
     }
@@ -625,41 +650,35 @@
           groups.get(key).push(token);
         }
       }
-      
       for(let [key, tokenList] of groups.entries()){
         const [row, col] = key.split(',').map(Number);
         const cellElem = cellMap[row]?.[col];
         if(!cellElem) continue;
-        
-        const rect = cellElem.getBoundingClientRect();
         const boardRect = boardEl.getBoundingClientRect();
+        const rect = cellElem.getBoundingClientRect();
         const cellLeftPct = ((rect.left - boardRect.left) / boardRect.width) * 100;
         const cellTopPct = ((rect.top - boardRect.top) / boardRect.height) * 100;
         const cellWidthPct = (rect.width / boardRect.width) * 100;
         const cellHeightPct = (rect.height / boardRect.height) * 100;
-        
         const count = tokenList.length;
-        const cols = Math.min(count, 2);
-        const rows = Math.ceil(count / cols);
-        const tokenWidthPct = cellWidthPct * 0.7;
-        const tokenHeightPct = cellHeightPct * 0.7;
-        const gapX = (cellWidthPct - tokenWidthPct * cols) / (cols + 1);
-        const gapY = (cellHeightPct - tokenHeightPct * rows) / (rows + 1);
-        
-        for(let idx = 0; idx < count; idx++){
-          const colIdx = idx % cols;
-          const rowIdx = Math.floor(idx / cols);
-          const leftPct = cellLeftPct + gapX + colIdx * (tokenWidthPct + gapX);
-          const topPct = cellTopPct + gapY + rowIdx * (tokenHeightPct + gapY);
-          
+        const colsGrid = Math.min(count, 2);
+        const rowsGrid = Math.ceil(count / colsGrid);
+        const tokenWidth = cellWidthPct * 0.7;
+        const tokenHeight = cellHeightPct * 0.7;
+        const gapX = (cellWidthPct - tokenWidth * colsGrid) / (colsGrid + 1);
+        const gapY = (cellHeightPct - tokenHeight * rowsGrid) / (rowsGrid + 1);
+        for(let idx=0; idx<count; idx++){
+          const colIdx = idx % colsGrid;
+          const rowIdx = Math.floor(idx / colsGrid);
+          const leftPct = cellLeftPct + gapX + colIdx * (tokenWidth + gapX);
+          const topPct = cellTopPct + gapY + rowIdx * (tokenHeight + gapY);
           const tk = tokenList[idx];
           tk.style.position = 'absolute';
           tk.style.left = `${leftPct}%`;
           tk.style.top = `${topPct}%`;
-          tk.style.width = `${tokenWidthPct}%`;
-          tk.style.height = `${tokenHeightPct}%`;
+          tk.style.width = `${tokenWidth}%`;
+          tk.style.height = `${tokenHeight}%`;
           tk.style.zIndex = '200';
-          tk.style.transform = 'none';
         }
       }
     }
@@ -684,8 +703,6 @@
       token.style.top = '';
       token.style.width = '';
       token.style.height = '';
-      token.style.transform = '';
-      token.style.zIndex = '';
       const yardInner = document.querySelector(`.yard.${color} .yard-inner`);
       if(yardInner) yardInner.appendChild(token);
       token.style.outline = '';
@@ -701,7 +718,6 @@
       });
     }
     
-    // ------------------------- UI, DICE & RESET -------------------------
     const diceFaces = {1:[5],2:[1,9],3:[1,5,9],4:[1,3,7,9],5:[1,3,5,7,9],6:[1,3,4,6,7,9]};
     function renderDice(num){
       const container = document.getElementById('diceValue');
@@ -715,23 +731,14 @@
       }
     }
     
-    function updateTurnUI(){
-      document.getElementById('turnIndicator').innerText = `${turnDisplay[players[currentPlayer]]} Turn`;
-    }
+    function updateTurnUI(){ document.getElementById('turnIndicator').innerText = `${turnDisplay[players[currentPlayer]]} TURN`; }
     
     function addTimeout(fn, delay){
-      const id = setTimeout(()=>{
-        fn();
-        activeTimeouts = activeTimeouts.filter(tid=>tid!==id);
-      }, delay);
+      const id = setTimeout(()=>{ fn(); activeTimeouts = activeTimeouts.filter(t=>t!==id); }, delay);
       activeTimeouts.push(id);
       return id;
     }
-    
-    function clearAllTimeouts(){
-      for(let id of activeTimeouts) clearTimeout(id);
-      activeTimeouts = [];
-    }
+    function clearAllTimeouts(){ activeTimeouts.forEach(clearTimeout); activeTimeouts = []; }
     
     function resetGame(){
       clearAllTimeouts();
@@ -741,38 +748,25 @@
       updateTurnUI();
       renderDice(1);
       document.getElementById('rollBtn').disabled = false;
-      
       const allTokens = document.querySelectorAll('.token');
       allTokens.forEach(token=>{
         let colorClass = '';
-        if(token.classList.contains('red')) colorClass = 'red';
-        else if(token.classList.contains('blue')) colorClass = 'blue';
-        else if(token.classList.contains('green')) colorClass = 'green';
-        else colorClass = 'yellow';
+        if(token.classList.contains('red')) colorClass='red';
+        else if(token.classList.contains('blue')) colorClass='blue';
+        else if(token.classList.contains('green')) colorClass='green';
+        else colorClass='yellow';
         const yardInner = document.querySelector(`.yard.${colorClass} .yard-inner`);
         if(yardInner) yardInner.appendChild(token);
         token.style.position = 'relative';
-        token.style.left = '';
-        token.style.top = '';
-        token.style.width = '';
-        token.style.height = '';
-        token.style.transform = '';
-        token.style.cursor = '';
-        token.style.outline = '';
-        token.style.zIndex = '';
-        token.style.opacity = '1';
-        token.dataset.out = 'false';
-        token.dataset.steps = '0';
-        token.dataset.row = '';
-        token.dataset.col = '';
-        token.dataset.finished = 'false';
+        token.style.left = ''; token.style.top = ''; token.style.width = ''; token.style.height = '';
+        token.style.outline = ''; token.style.opacity = '1';
+        token.dataset.out = 'false'; token.dataset.steps = '0'; token.dataset.row = ''; token.dataset.col = ''; token.dataset.finished = 'false';
       });
       clearTokenSelection();
-      canMove = false;
       repositionAllTokensGrouped();
     }
     
-    // ------------------------- EVENT LISTENERS -------------------------
+    // EVENT LISTENERS
     const rollBtn = document.getElementById('rollBtn');
     const diceDiv = document.getElementById('dice');
     rollBtn.addEventListener('click', ()=>{
@@ -785,28 +779,31 @@
         diceDiv.style.transform = '';
         canMove = true;
         enableTokensForCurrent();
-      }, 400);
+      }, 350);
     });
+    document.getElementById('newGameBtn').addEventListener('click', ()=>{ resetGame(); });
     
-    document.getElementById('newGameBtn').addEventListener('click', ()=>{
-      resetGame();
-    });
+    // Modal logic
+    const modal = document.getElementById('howToModal');
+    const howBtn = document.getElementById('howToBtn');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+    howBtn.addEventListener('click', ()=>{ modal.classList.add('active'); });
+    closeModalBtn.addEventListener('click', ()=>{ modal.classList.remove('active'); });
+    modal.addEventListener('click', (e)=>{ if(e.target === modal) modal.classList.remove('active'); });
     
     renderDice(1);
     updateTurnUI();
     repositionAllTokensGrouped();
-
-    // Initialize Google Ads (push both ad units after loading)
+    
+    // initialize ads (push both ad units after load)
     if(window.adsbygoogle && typeof window.adsbygoogle.push === 'function'){
-      try {
-        (adsbygoogle = window.adsbygoogle || []).push({});
-      } catch(e) { console.warn("Ad push issue", e); }
+      try { (adsbygoogle = window.adsbygoogle || []).push({}); } catch(e){}
+      try { (adsbygoogle = window.adsbygoogle || []).push({}); } catch(e){}
+    } else {
+      setTimeout(()=>{
+        if(window.adsbygoogle) { (adsbygoogle = window.adsbygoogle || []).push({}); (adsbygoogle = window.adsbygoogle || []).push({}); }
+      }, 200);
     }
-    setTimeout(()=>{
-      try {
-        if(window.adsbygoogle) (adsbygoogle = window.adsbygoogle || []).push({});
-      } catch(e) {}
-    }, 100);
   })();
 </script>
 </body>
