@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <meta name="description" content="Classic Checkers board game with elegant UI, king mechanics, and strategic capture rules!">
     <title>✨ Royal Checkers · Classic Strategy Game</title>
+    <!-- Google AdSense code placed inside head as requested -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9770610643444805"
+     crossorigin="anonymous"></script>
     <style>
         * {
             margin: 0;
@@ -342,17 +345,6 @@
             }
         }
 
-        // check if a move is a capture (jump)
-        function isCaptureMove(piece, fromRow, fromCol, toRow, toCol) {
-            const rowDiff = toRow - fromRow;
-            const colDiff = toCol - fromCol;
-            if (Math.abs(rowDiff) !== 2 || Math.abs(colDiff) !== 2) return false;
-            const midRow = (fromRow + toRow) / 2;
-            const midCol = (fromCol + toCol) / 2;
-            const targetPiece = board[midRow][midCol];
-            return targetPiece && targetPiece.type !== piece.type;
-        }
-
         // get all possible captures and normal moves for a specific piece (returns object with captures and normals)
         function getAllMovesForPiece(row, col, piece) {
             if (!piece) return { captures: [], normals: [] };
@@ -420,20 +412,6 @@
                     return { moves: normals.map(n => ({ toRow: n.toRow, toCol: n.toCol, captureInfo: null })), isCapture: false };
                 }
             }
-        }
-
-        // update valid moves after selecting piece
-        function updateValidMovesForSelected() {
-            if (!selectedPiece) return;
-            const piece = board[selectedPiece.row][selectedPiece.col];
-            if (!piece || piece.type !== currentPlayer) {
-                selectedPiece = null;
-                validMoves = [];
-                return;
-            }
-            const forcedGlobal = mustCaptureMode;
-            const { moves } = getFilteredMovesForPiece(selectedPiece.row, selectedPiece.col, piece, forcedGlobal);
-            validMoves = moves;
         }
 
         // apply move and handle capture, promotion, and multi-jump detection
