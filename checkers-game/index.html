@@ -2,50 +2,659 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Classic Checkers board game! Jump opponent pieces, become king, win the game!">
-    <meta name="keywords" content="checkers, board game, strategy game, draughts, classic game">
-    <title>Checkers - Classic Board Game | PlayCrazyGames</title>
-    <link rel="stylesheet" href="style.css">
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9770610643444805" crossorigin="anonymous"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="description" content="Classic Checkers board game with elegant UI, king mechanics, and strategic capture rules!">
+    <title>✨ Royal Checkers · Classic Strategy Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Poppins', system-ui, -apple-system, 'Inter', sans-serif;
+            background: radial-gradient(circle at 10% 30%, #1e2b3c, #0a121c);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 24px 20px;
+        }
+
+        /* ad placeholders (style similar to request but elegant) */
+        .ad-zone {
+            width: 100%;
+            max-width: 650px;
+            background: rgba(10, 20, 28, 0.7);
+            backdrop-filter: blur(8px);
+            text-align: center;
+            padding: 12px;
+            margin: 8px auto;
+            border-radius: 40px;
+            border: 1px solid rgba(255,215,150,0.3);
+            font-size: 0.75rem;
+            color: #bbaa88;
+        }
+        .ad-label {
+            font-size: 0.7rem;
+            letter-spacing: 1px;
+            margin-bottom: 6px;
+            opacity: 0.8;
+        }
+
+        /* main game card */
+        .game-container {
+            text-align: center;
+            background: rgba(30, 35, 48, 0.85);
+            backdrop-filter: blur(14px);
+            padding: 28px 32px;
+            border-radius: 64px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,215,150,0.35);
+            transition: all 0.2s;
+            max-width: 750px;
+            width: 100%;
+        }
+
+        .back-home {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 18px;
+            color: #ffe1a0;
+            text-decoration: none;
+            font-weight: 600;
+            background: rgba(0,0,0,0.4);
+            padding: 6px 18px;
+            border-radius: 40px;
+            transition: 0.2s;
+            font-size: 0.9rem;
+        }
+        .back-home:hover {
+            background: #ffc28540;
+            color: #ffefc0;
+            transform: translateX(-3px);
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #F9E0A0, #E6B87E);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            letter-spacing: -0.5px;
+            margin-bottom: 18px;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* how to play section - attractive & integrated */
+        .how-to-section {
+            background: rgba(0, 0, 0, 0.45);
+            border-radius: 56px;
+            padding: 14px 20px;
+            margin-bottom: 20px;
+            border-left: 5px solid #FFB347;
+            border-right: 1px solid #ffdfaa40;
+        }
+        .how-title {
+            font-weight: 800;
+            font-size: 1.1rem;
+            color: #FFE5AE;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+        .rules-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 12px;
+        }
+        .rule-chip {
+            background: #1e2a2fe6;
+            padding: 6px 16px;
+            border-radius: 40px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #f7eedb;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            backdrop-filter: blur(4px);
+            border: 1px solid #c9aa6e60;
+        }
+
+        .game-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding: 12px 20px;
+            background: rgba(0, 0, 0, 0.35);
+            border-radius: 60px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .turn-indicator {
+            font-size: 1.3rem;
+            font-weight: bold;
+            background: #2c2c2eaa;
+            padding: 6px 18px;
+            border-radius: 40px;
+            letter-spacing: 1px;
+            backdrop-filter: blur(5px);
+        }
+
+        .scores {
+            display: flex;
+            gap: 28px;
+            font-weight: 700;
+            background: #00000055;
+            padding: 6px 20px;
+            border-radius: 60px;
+        }
+        .scores div {
+            font-size: 1rem;
+        }
+
+        canvas {
+            display: block;
+            margin: 0 auto;
+            border-radius: 24px;
+            box-shadow: 0 12px 28px black;
+            cursor: pointer;
+            transition: transform 0.1s ease;
+            width: 100%;
+            height: auto;
+            background: #deb887;
+            border: 2px solid #e9c891;
+        }
+
+        .controls {
+            display: flex;
+            gap: 18px;
+            justify-content: center;
+            margin: 22px 0 16px;
+        }
+
+        .controls button {
+            background: linear-gradient(120deg, #e4a35a, #c57f2e);
+            border: none;
+            padding: 10px 28px;
+            border-radius: 60px;
+            font-weight: bold;
+            font-size: 1rem;
+            color: #2c1e0f;
+            cursor: pointer;
+            transition: 0.15s;
+            box-shadow: 0 4px 0 0 #7a481e;
+            font-family: inherit;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .controls button:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 0 #7a481e;
+        }
+        .controls button:last-child {
+            background: linear-gradient(120deg, #5f7f6e, #3f5e4c);
+            box-shadow: 0 4px 0 0 #26412e;
+            color: white;
+        }
+
+        .message {
+            font-size: 1rem;
+            font-weight: 600;
+            background: #00000077;
+            padding: 8px 14px;
+            border-radius: 60px;
+            display: inline-block;
+            margin-bottom: 12px;
+            color: #ffdfb3;
+        }
+
+        .instructions {
+            background: #1f2c2eaa;
+            padding: 12px 20px;
+            border-radius: 48px;
+            font-size: 0.85rem;
+            line-height: 1.45;
+            color: #ffefcf;
+            margin-top: 5px;
+            backdrop-filter: blur(3px);
+        }
+
+        @media (max-width: 600px) {
+            .game-container { padding: 18px; }
+            h1 { font-size: 1.6rem; }
+            .rule-chip { font-size: 0.7rem; }
+            .turn-indicator { font-size: 1rem; }
+        }
+    </style>
 </head>
 <body>
-    <div class="ad-top">
-        <div class="ad-label">Advertisement</div>
-        <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-9770610643444805" data-ad-slot="4587389292" data-ad-format="auto" data-full-width-responsive="true"></ins>
-        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-    </div>
 
-    <div class="game-container">
-        <a href="../index.html" class="back-home">← Back to All Games</a>
-        <h1>⬛ Checkers Game</h1>
-        <div class="game-info">
-            <div class="turn-indicator" id="turnIndicator">🔴 Red's Turn</div>
-            <div class="scores">
-                <div>Red Pieces: <span id="redPieces">12</span></div>
-                <div>Black Pieces: <span id="blackPieces">12</span></div>
-            </div>
+<div class="ad-zone">
+    <div class="ad-label">✦ Advertisement ✦</div>
+    <div style="height: 70px; background: #2c3e2f40; border-radius: 32px; display: flex; align-items: center; justify-content: center; gap: 10px;">
+        <span>📢</span> strategic challenge <span>🎯</span>
+    </div>
+</div>
+
+<div class="game-container">
+    <a href="#" class="back-home" id="backToHubBtn">← 🏠 Games Hub</a>
+    <h1>⬛ ROYAL CHECKERS 👑</h1>
+
+    <!-- HOW TO PLAY integrated inside game area, attractive UI -->
+    <div class="how-to-section">
+        <div class="how-title">
+            <span>📜</span> HOW TO PLAY <span>🎲</span>
         </div>
-        <canvas id="checkersCanvas" width="560" height="560"></canvas>
-        <div class="controls">
-            <button id="resetBtn">🔄 New Game</button>
-            <button id="backBtn">🏠 Games Hub</button>
-        </div>
-        <div class="message" id="message"></div>
-        <div class="instructions">
-            👑 Click a piece, then click a valid square to move<br>
-            ⭐ Jump over opponent pieces to capture them<br>
-            👑 Reach the opposite end to become KING!<br>
-            🏆 Capture all opponent pieces to win!
+        <div class="rules-grid">
+            <div class="rule-chip">🎯 Click piece → valid green square</div>
+            <div class="rule-chip">⚡ Jump over enemy = capture!</div>
+            <div class="rule-chip">👑 Reach last row → KING (moves backward)</div>
+            <div class="rule-chip">🏆 Capture all enemy pieces to win</div>
+            <div class="rule-chip">🔄 Multiple jumps possible in one turn</div>
         </div>
     </div>
 
-    <div class="ad-bottom">
-        <div class="ad-label">Advertisement</div>
-        <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-9770610643444805" data-ad-slot="4587389292" data-ad-format="auto" data-full-width-responsive="true"></ins>
-        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    <div class="game-info">
+        <div class="turn-indicator" id="turnIndicator">🔴 Red's Turn</div>
+        <div class="scores">
+            <div>🔴 Red: <span id="redPieces">12</span></div>
+            <div>⚫ Black: <span id="blackPieces">12</span></div>
+        </div>
     </div>
 
-    <script src="script.js"></script>
+    <canvas id="checkersCanvas" width="560" height="560"></canvas>
+
+    <div class="controls">
+        <button id="resetBtn">🔄 New Game</button>
+        <button id="backBtn">🏠 Main Menu</button>
+    </div>
+    <div class="message" id="message"></div>
+    <div class="instructions">
+        ✨ TIP: You MUST capture if a jump is available. Kings move diagonally any direction.<br>
+        🧠 After a capture, you may continue capturing with the same piece (multi-jump)!
+    </div>
+</div>
+
+<div class="ad-zone">
+    <div class="ad-label">Advertisement</div>
+    <div style="height: 70px; background: #14262e60; border-radius: 32px; display: flex; align-items: center; justify-content: center;">
+        🧩 classic board · sharp mind
+    </div>
+</div>
+
+<script>
+    (function(){
+        // ---------- CANVAS SETUP ----------
+        const canvas = document.getElementById('checkersCanvas');
+        const ctx = canvas.getContext('2d');
+        const squareSize = 70;   // 560/8
+        
+        let board = [];
+        let currentPlayer = 'red';      // 'red' starts (bottom side)
+        let selectedPiece = null;        // { row, col }
+        let validMoves = [];              // [{ toRow, toCol, captures: {...}?, isJump }]
+        let gameActive = true;
+        let redPieces = 12;
+        let blackPieces = 12;
+        let mustCaptureMode = false;      // if any capture exists for current player, force capture moves only
+        let pendingMultiJumpPiece = null; // after capture, the same piece must continue if further jumps exist
+        let forcedCapturePositions = [];   // store forced jump moves for current turn
+
+        // helper: update piece counters
+        function updateCountersUI() {
+            document.getElementById('redPieces').innerText = redPieces;
+            document.getElementById('blackPieces').innerText = blackPieces;
+        }
+
+        // initialize or reset board
+        function initBoard() {
+            board = Array(8).fill().map(() => Array(8).fill(null));
+            // black pieces: rows 0,1,2 (top)
+            for (let row = 0; row < 3; row++) {
+                for (let col = 0; col < 8; col++) {
+                    if ((row + col) % 2 === 1) {
+                        board[row][col] = { type: 'black', king: false };
+                    }
+                }
+            }
+            // red pieces: rows 5,6,7 (bottom)
+            for (let row = 5; row < 8; row++) {
+                for (let col = 0; col < 8; col++) {
+                    if ((row + col) % 2 === 1) {
+                        board[row][col] = { type: 'red', king: false };
+                    }
+                }
+            }
+        }
+
+        // check if a move is a capture (jump)
+        function isCaptureMove(piece, fromRow, fromCol, toRow, toCol) {
+            const rowDiff = toRow - fromRow;
+            const colDiff = toCol - fromCol;
+            if (Math.abs(rowDiff) !== 2 || Math.abs(colDiff) !== 2) return false;
+            const midRow = (fromRow + toRow) / 2;
+            const midCol = (fromCol + toCol) / 2;
+            const targetPiece = board[midRow][midCol];
+            return targetPiece && targetPiece.type !== piece.type;
+        }
+
+        // get all possible captures and normal moves for a specific piece (returns object with captures and normals)
+        function getAllMovesForPiece(row, col, piece) {
+            if (!piece) return { captures: [], normals: [] };
+            const directions = piece.king ? [[-1,-1],[-1,1],[1,-1],[1,1]] : (piece.type === 'red' ? [[-1,-1],[-1,1]] : [[1,-1],[1,1]]);
+            let captures = [];
+            let normals = [];
+
+            for (let [dRow, dCol] of directions) {
+                const newRow = row + dRow;
+                const newCol = col + dCol;
+                // normal move (one step)
+                if (newRow >=0 && newRow<8 && newCol>=0 && newCol<8 && !board[newRow][newCol]) {
+                    normals.push({ toRow: newRow, toCol: newCol, captureInfo: null });
+                }
+                // capture move (jump two)
+                const jumpRow = row + dRow*2;
+                const jumpCol = col + dCol*2;
+                if (jumpRow>=0 && jumpRow<8 && jumpCol>=0 && jumpCol<8 && !board[jumpRow][jumpCol]) {
+                    const midRow = row + dRow;
+                    const midCol = col + dCol;
+                    const midPiece = board[midRow][midCol];
+                    if (midPiece && midPiece.type !== piece.type) {
+                        captures.push({ toRow: jumpRow, toCol: jumpCol, captureInfo: { row: midRow, col: midCol } });
+                    }
+                }
+            }
+            return { captures, normals };
+        }
+
+        // get all valid moves for current player (considering forced captures)
+        function getAllValidMovesForCurrentPlayer() {
+            let allCaptures = [];
+            let allNormals = [];
+            for (let i=0; i<8; i++) {
+                for (let j=0; j<8; j++) {
+                    const piece = board[i][j];
+                    if (piece && piece.type === currentPlayer) {
+                        const { captures, normals } = getAllMovesForPiece(i, j, piece);
+                        if (captures.length) {
+                            allCaptures.push({ fromRow: i, fromCol: j, moves: captures });
+                        } else if (normals.length && !mustCaptureMode) {
+                            allNormals.push({ fromRow: i, fromCol: j, moves: normals });
+                        }
+                    }
+                }
+            }
+            if (allCaptures.length > 0) {
+                mustCaptureMode = true;
+                return { captureMoves: allCaptures, normalMoves: [], hasCaptures: true };
+            } else {
+                mustCaptureMode = false;
+                return { captureMoves: [], normalMoves: allNormals, hasCaptures: false };
+            }
+        }
+
+        // get moves for a specific selected piece, respecting forced capture rule
+        function getFilteredMovesForPiece(row, col, piece, forcedCaptureOnly) {
+            const { captures, normals } = getAllMovesForPiece(row, col, piece);
+            if (forcedCaptureOnly) {
+                return { moves: captures.map(c => ({ toRow: c.toRow, toCol: c.toCol, captureInfo: c.captureInfo })), isCapture: true };
+            } else {
+                if (captures.length > 0) {
+                    return { moves: captures.map(c => ({ toRow: c.toRow, toCol: c.toCol, captureInfo: c.captureInfo })), isCapture: true };
+                } else {
+                    return { moves: normals.map(n => ({ toRow: n.toRow, toCol: n.toCol, captureInfo: null })), isCapture: false };
+                }
+            }
+        }
+
+        // update valid moves after selecting piece
+        function updateValidMovesForSelected() {
+            if (!selectedPiece) return;
+            const piece = board[selectedPiece.row][selectedPiece.col];
+            if (!piece || piece.type !== currentPlayer) {
+                selectedPiece = null;
+                validMoves = [];
+                return;
+            }
+            const forcedGlobal = mustCaptureMode;
+            const { moves } = getFilteredMovesForPiece(selectedPiece.row, selectedPiece.col, piece, forcedGlobal);
+            validMoves = moves;
+        }
+
+        // apply move and handle capture, promotion, and multi-jump detection
+        function applyMove(fromRow, fromCol, toRow, toCol, captureInfo) {
+            const piece = board[fromRow][fromCol];
+            if (!piece) return false;
+            
+            // perform move
+            board[toRow][toCol] = piece;
+            board[fromRow][fromCol] = null;
+            
+            // handle capture
+            if (captureInfo) {
+                const capturedPiece = board[captureInfo.row][captureInfo.col];
+                if (capturedPiece) {
+                    board[captureInfo.row][captureInfo.col] = null;
+                    if (capturedPiece.type === 'red') redPieces--;
+                    else blackPieces--;
+                    updateCountersUI();
+                }
+            }
+            
+            // king promotion
+            if ((piece.type === 'red' && toRow === 0) || (piece.type === 'black' && toRow === 7)) {
+                if (!piece.king) {
+                    piece.king = true;
+                    showTemporaryMessage(`✨ ${piece.type.toUpperCase()} becomes KING! 👑`, 1500);
+                }
+            }
+            
+            drawBoard();
+            
+            // check win condition
+            if (redPieces === 0) {
+                gameActive = false;
+                document.getElementById('message').innerHTML = '🏆⚫ BLACK WINS THE GAME! 🏆';
+                showTemporaryMessage('GAME OVER - Black Victory!', 3000);
+                return true;
+            } else if (blackPieces === 0) {
+                gameActive = false;
+                document.getElementById('message').innerHTML = '🏆🔴 RED WINS THE GAME! 🏆';
+                showTemporaryMessage('GAME OVER - Red Victory!', 3000);
+                return true;
+            }
+            
+            // MULTI-JUMP possibility: after a capture, same piece might capture again
+            if (captureInfo) {
+                // check if this piece (now at new position) has further captures
+                const newPosPiece = board[toRow][toCol];
+                const { captures: additionalCaptures } = getAllMovesForPiece(toRow, toCol, newPosPiece);
+                if (additionalCaptures.length > 0) {
+                    // stay on same player, force this piece to continue
+                    selectedPiece = { row: toRow, col: toCol };
+                    mustCaptureMode = true;
+                    const { moves } = getFilteredMovesForPiece(toRow, toCol, newPosPiece, true);
+                    validMoves = moves;
+                    pendingMultiJumpPiece = { row: toRow, col: toCol };
+                    drawBoard();
+                    return false; // not switching turn yet
+                }
+            }
+            
+            // switch turn
+            currentPlayer = currentPlayer === 'red' ? 'black' : 'red';
+            document.getElementById('turnIndicator').innerHTML = currentPlayer === 'red' ? '🔴 Red\'s Turn' : '⚫ Black\'s Turn';
+            selectedPiece = null;
+            validMoves = [];
+            pendingMultiJumpPiece = null;
+            // reset global mustCaptureMode after turn switch (re-evaluate next turn)
+            mustCaptureMode = false;
+            
+            // after switch, check if new player has any capture moves and update mustCaptureMode for UI
+            const { hasCaptures } = getAllValidMovesForCurrentPlayer();
+            if (hasCaptures) mustCaptureMode = true;
+            drawBoard();
+            return true;
+        }
+
+        function showTemporaryMessage(msg, duration) {
+            const msgDiv = document.getElementById('message');
+            msgDiv.innerHTML = msg;
+            setTimeout(() => {
+                if (document.getElementById('message').innerHTML === msg) {
+                    if(gameActive) document.getElementById('message').innerHTML = '';
+                }
+            }, duration);
+        }
+
+        // ------------------ DRAWING ENGINE ------------------
+        function drawBoard() {
+            for (let row = 0; row < 8; row++) {
+                for (let col = 0; col < 8; col++) {
+                    ctx.fillStyle = (row + col) % 2 === 0 ? '#eed9bb' : '#b97f44';
+                    ctx.fillRect(col * squareSize, row * squareSize, squareSize, squareSize);
+                    const piece = board[row][col];
+                    if (piece) {
+                        const centerX = col * squareSize + squareSize/2;
+                        const centerY = row * squareSize + squareSize/2;
+                        const gradient = ctx.createRadialGradient(centerX-10, centerY-8, 8, centerX, centerY, squareSize/2.2);
+                        if (piece.type === 'red') {
+                            gradient.addColorStop(0, '#ff7a5c');
+                            gradient.addColorStop(1, '#b12a1a');
+                        } else {
+                            gradient.addColorStop(0, '#5a5a5a');
+                            gradient.addColorStop(1, '#1f1f1f');
+                        }
+                        ctx.beginPath();
+                        ctx.arc(centerX, centerY, squareSize/2.5, 0, Math.PI*2);
+                        ctx.fillStyle = gradient;
+                        ctx.fill();
+                        ctx.strokeStyle = '#f7e6b0';
+                        ctx.lineWidth = 2;
+                        ctx.stroke();
+                        if (piece.king) {
+                            ctx.font = `${squareSize/2.2}px "Segoe UI", "Arial"`;
+                            ctx.fillStyle = '#FFD966';
+                            ctx.shadowBlur = 4;
+                            ctx.fillText('👑', centerX-16, centerY+12);
+                            ctx.shadowBlur = 0;
+                        }
+                    }
+                }
+            }
+            if (selectedPiece) {
+                ctx.strokeStyle = '#FFD966';
+                ctx.lineWidth = 4;
+                ctx.shadowBlur = 0;
+                ctx.strokeRect(selectedPiece.col * squareSize, selectedPiece.row * squareSize, squareSize, squareSize);
+            }
+            validMoves.forEach(move => {
+                ctx.fillStyle = 'rgba(80, 220, 100, 0.55)';
+                ctx.fillRect(move.toCol * squareSize, move.toRow * squareSize, squareSize, squareSize);
+                ctx.fillStyle = '#ccff88';
+                ctx.beginPath();
+                ctx.arc(move.toCol * squareSize + squareSize/2, move.toRow * squareSize + squareSize/2, 12, 0, Math.PI*2);
+                ctx.fill();
+            });
+        }
+
+        // ---------- GAME LOGIC ----------
+        function handleCanvasClick(e) {
+            if (!gameActive) return;
+            const rect = canvas.getBoundingClientRect();
+            const scale = canvas.width / rect.width;
+            const col = Math.floor(((e.clientX - rect.left) * scale) / squareSize);
+            const row = Math.floor(((e.clientY - rect.top) * scale) / squareSize);
+            if (row < 0 || row >= 8 || col < 0 || col >= 8) return;
+            
+            // check if click on a valid move destination
+            const moveTarget = validMoves.find(m => m.toRow === row && m.toCol === col);
+            if (moveTarget && selectedPiece) {
+                const fromRow = selectedPiece.row;
+                const fromCol = selectedPiece.col;
+                const success = applyMove(fromRow, fromCol, moveTarget.toRow, moveTarget.toCol, moveTarget.captureInfo);
+                if (success === false && gameActive) {
+                    // multi-jump continues: selection stays
+                    drawBoard();
+                    return;
+                }
+                drawBoard();
+                return;
+            }
+            
+            // select piece only if it belongs to current player and game active
+            const clickedPiece = board[row][col];
+            if (clickedPiece && clickedPiece.type === currentPlayer && gameActive) {
+                // re-evaluate forced capture context before selecting
+                const globalState = getAllValidMovesForCurrentPlayer();
+                const forcedOnly = globalState.hasCaptures;
+                // compute moves for this piece in current context
+                const { moves } = getFilteredMovesForPiece(row, col, clickedPiece, forcedOnly);
+                if (moves.length > 0) {
+                    selectedPiece = { row, col };
+                    validMoves = moves;
+                } else {
+                    selectedPiece = null;
+                    validMoves = [];
+                }
+                drawBoard();
+            } else {
+                selectedPiece = null;
+                validMoves = [];
+                drawBoard();
+            }
+        }
+        
+        function resetGame() {
+            initBoard();
+            currentPlayer = 'red';
+            selectedPiece = null;
+            validMoves = [];
+            gameActive = true;
+            redPieces = 12;
+            blackPieces = 12;
+            mustCaptureMode = false;
+            pendingMultiJumpPiece = null;
+            updateCountersUI();
+            document.getElementById('turnIndicator').innerHTML = '🔴 Red\'s Turn';
+            document.getElementById('message').innerHTML = '';
+            drawBoard();
+        }
+        
+        // back / navigation
+        function backToGames() {
+            if (confirm("Return to games hub?")) {
+                window.location.href = '../index.html';
+            }
+        }
+        
+        canvas.addEventListener('click', handleCanvasClick);
+        document.getElementById('resetBtn').addEventListener('click', resetGame);
+        document.getElementById('backBtn').addEventListener('click', backToGames);
+        document.getElementById('backToHubBtn').addEventListener('click', (e) => {
+            e.preventDefault();
+            backToGames();
+        });
+        
+        initBoard();
+        drawBoard();
+        updateCountersUI();
+    })();
+</script>
 </body>
 </html>
