@@ -4,9 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>Chess Royale — Precious Edition | Golden Chess</title>
-    <!-- Google AdSense Script (Placeholder – Replace with your Publisher ID) -->
-    <!-- IMPORTANT: Replace 'ca-pub-XXXXXXXXXXXXXXXX' with your actual AdSense publisher ID -->
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX"
+    <!-- ✅ CORRECT Google AdSense Script (Publisher ID Integrated) -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9770610643444805"
             crossorigin="anonymous"></script>
     <style>
         * {
@@ -24,8 +23,8 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 24px;
-            gap: 28px;
+            padding: 20px 16px;
+            gap: 24px;
         }
 
         /* Premium ad container styling — elegant, non-intrusive */
@@ -59,18 +58,22 @@
             margin-top: 6px;
         }
 
-        /* main card - luxurious feel */
+        /* ✅ FIXED: main card container — now fully responsive & contains board perfectly */
         .game-container {
             text-align: center;
             background: rgba(255, 248, 235, 0.98);
             backdrop-filter: blur(0px);
-            padding: 32px 40px;
+            padding: 24px 24px 32px 24px;
             border-radius: 56px;
             box-shadow: 0 25px 45px rgba(0, 0, 0, 0.4), inset 0 1px 2px rgba(255, 255, 255, 0.6);
             transition: all 0.2s ease;
             border: 1px solid rgba(218, 185, 115, 0.6);
-            width: fit-content;
+            width: auto;
             max-width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
 
         h1 {
@@ -96,6 +99,7 @@
             border-radius: 60px;
             box-shadow: inset 0 1px 3px rgba(0,0,0,0.4), 0 6px 12px rgba(0,0,0,0.1);
             color: #f2e1c0;
+            width: 100%;
         }
 
         .turn-indicator {
@@ -131,25 +135,27 @@
             margin-left: 8px;
         }
 
-        /* CHESSBOARD — 1.4x BIGGER (from 60px → 84px) - no distortion */
+        /* ✅ CHESSBOARD — FIXED: always stays within parent container (white background) 
+           responsive scaling with dynamic grid, no overflow */
         .chessboard {
             display: grid;
-            grid-template-columns: repeat(8, 84px);
+            grid-template-columns: repeat(8, minmax(0, 84px));
             border: 4px solid #d9b382;
             border-radius: 14px;
             overflow: hidden;
             box-shadow: 0 16px 28px rgba(0, 0, 0, 0.35), inset 0 0 0 1px rgba(255, 245, 200, 0.6);
-            margin-bottom: 28px;
             background: #e2caa7;
-            width: fit-content;
-            margin-left: auto;
-            margin-right: auto;
+            width: 100%;
+            max-width: 100%;
+            justify-content: center;
+            margin: 0 auto 20px auto;
         }
 
         .square {
             position: relative;
-            width: 84px;
-            height: 84px;
+            aspect-ratio: 1 / 1;
+            width: 100%;
+            height: auto;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -218,7 +224,7 @@
             100% { filter: brightness(1); }
         }
 
-        /* PRECIOUS PIECES STYLES — distinct metallic / gemstone look */
+        /* PRECIOUS PIECES STYLES */
         .white-piece {
             color: #f8e3b0;
             text-shadow: 0 0 5px #eab308, 2px 2px 2px #9e6d2b;
@@ -277,25 +283,26 @@
             letter-spacing: 1px;
         }
 
-        /* RESPONSIVE: scale down gracefully on smaller screens */
+        /* ✅ IMPROVED RESPONSIVE: board stays inside white background on any device */
         @media (max-width: 780px) {
+            .game-container {
+                padding: 20px 16px 26px 16px;
+                width: 100%;
+            }
             .chessboard {
-                grid-template-columns: repeat(8, 54px);
+                grid-template-columns: repeat(8, minmax(0, 1fr));
+                max-width: 100%;
+                border-width: 3px;
             }
             .square {
-                width: 54px;
-                height: 54px;
-                font-size: 2.3rem;
+                font-size: 2.6rem;
             }
             .square.valid-move::after {
-                font-size: 1.5rem;
-                content: "●";
-            }
-            .game-container {
-                padding: 18px 20px;
+                font-size: 1.8rem;
+                content: "✨";
             }
             .turn-indicator {
-                font-size: 1.2rem;
+                font-size: 1.3rem;
             }
             .controls button {
                 padding: 8px 20px;
@@ -303,46 +310,75 @@
                 margin: 5px;
             }
             h1 {
-                font-size: 1.7rem;
+                font-size: 1.8rem;
             }
             .ad-container {
-                max-width: 95%;
+                max-width: 100%;
                 padding: 8px 12px;
+            }
+            .captured-pieces {
+                font-size: 0.9rem;
+                gap: 12px;
+            }
+            .captured-pieces span {
+                font-size: 1rem;
+                letter-spacing: 2px;
             }
         }
 
         @media (max-width: 560px) {
-            .chessboard {
-                grid-template-columns: repeat(8, 44px);
+            .game-container {
+                padding: 16px 12px 20px 12px;
             }
             .square {
-                width: 44px;
-                height: 44px;
-                font-size: 1.9rem;
+                font-size: 2rem;
             }
-            .captured-pieces {
-                font-size: 0.8rem;
+            .square.valid-move::after {
+                font-size: 1.5rem;
+                content: "✨";
+            }
+            .controls button {
+                padding: 6px 16px;
+                font-size: 0.9rem;
+            }
+            .game-info {
+                padding: 10px 14px;
+            }
+            h1 {
+                font-size: 1.5rem;
+            }
+        }
+
+        /* Extra small devices: ensure no overflow and board scales gracefully */
+        @media (max-width: 480px) {
+            .square {
+                font-size: 1.7rem;
+            }
+            .square.valid-move::after {
+                font-size: 1.2rem;
+            }
+            .turn-indicator {
+                font-size: 1.1rem;
             }
         }
     </style>
 </head>
 <body>
 
-<!-- 🟡 TOP GOOGLE AD UNIT 🟡 -->
+<!-- 🟡 TOP GOOGLE AD UNIT (correct publisher ID) -->
 <div class="ad-container top-ad">
     <ins class="adsbygoogle"
          style="display:block; width:100%; max-width:728px; margin:0 auto;"
-         data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
-         data-ad-slot="1234567890"
+         data-ad-client="ca-pub-9770610643444805"
          data-ad-format="auto"
          data-full-width-responsive="true"></ins>
     <script>
         (adsbygoogle = window.adsbygoogle || []).push({});
     </script>
-    <!-- 🔹 Replace 'ca-pub-XXXXXXXXXXXXXXXX' and 'data-ad-slot' with your actual AdSense credentials -->
+    <!-- Ad slot will be active after you replace data-ad-slot with actual slot ID from AdSense -->
 </div>
 
-<!-- MAIN CHESS CARD -->
+<!-- ✅ MAIN CHESS CARD (White background contains board fully) -->
 <div class="game-container">
     <h1>♛ GOLDEN CHESS ♚</h1>
     <div class="game-info">
@@ -360,18 +396,16 @@
     <div class="status" id="status"></div>
 </div>
 
-<!-- 🔻 BOTTOM GOOGLE AD UNIT 🔻 -->
+<!-- 🔻 BOTTOM GOOGLE AD UNIT -->
 <div class="ad-container bottom-ad">
     <ins class="adsbygoogle"
          style="display:block; width:100%; max-width:728px; margin:0 auto;"
-         data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
-         data-ad-slot="0987654321"
+         data-ad-client="ca-pub-9770610643444805"
          data-ad-format="auto"
          data-full-width-responsive="true"></ins>
     <script>
         (adsbygoogle = window.adsbygoogle || []).push({});
     </script>
-    <!-- 🔹 Replace 'ca-pub-XXXXXXXXXXXXXXXX' and data-ad-slot with your AdSense details -->
 </div>
 
 <script>
@@ -575,7 +609,7 @@
         if (blackSpan) blackSpan.innerHTML = blackCaptured.join(' ') || '—';
     }
 
-    // --- RENDER BOARD with PRECIOUS PIECES + fix distortion ---
+    // --- RENDER BOARD with PRECIOUS PIECES + dynamic responsiveness ---
     function renderBoard() {
         const chessboard = document.getElementById('chessboard');
         if (!chessboard) return;
@@ -591,7 +625,7 @@
                 square.dataset.row = i;
                 square.dataset.col = j;
                 
-                // precious piece styling: white pieces vs black pieces
+                // precious piece styling
                 if (piece) {
                     if ('♙♖♘♗♕♔'.includes(piece)) {
                         square.classList.add('white-piece');
@@ -605,7 +639,7 @@
                     square.classList.add('selected');
                 }
                 
-                // show check on king (dynamic)
+                // show check on king
                 if (piece === '♔' && isKingInCheck(board, 'white')) {
                     square.classList.add('check');
                 }
@@ -619,6 +653,10 @@
                 
                 chessboard.appendChild(square);
             }
+        }
+        // after render, re-show valid moves if any piece selected
+        if (selectedSquare) {
+            showValidMoves(selectedSquare.row, selectedSquare.col);
         }
     }
 
@@ -640,7 +678,7 @@
         document.querySelectorAll('.square').forEach(sq => sq.classList.remove('valid-move'));
     }
 
-    // --- square click handler with robust game flow ---
+    // --- square click handler ---
     function handleSquareClick(row, col) {
         if (!gameActive) return;
         
@@ -648,18 +686,16 @@
         
         // No piece selected yet
         if (selectedSquare === null) {
-            // select piece if it belongs to current player
             if (piece) {
                 const isWhitePiece = '♙♖♘♗♕♔'.includes(piece);
                 const isBlackPiece = '♟♜♞♝♛♚'.includes(piece);
                 if ((currentPlayer === 'white' && isWhitePiece) || (currentPlayer === 'black' && isBlackPiece)) {
                     selectedSquare = { row, col };
-                    renderBoard();               // fresh render
-                    showValidMoves(row, col);    // show highlights
+                    renderBoard();               // fresh render with selection
+                    showValidMoves(row, col);
                 }
             }
         } else {
-            // attempt to move
             const fromRow = selectedSquare.row;
             const fromCol = selectedSquare.col;
             const movingPiece = board[fromRow][fromCol];
@@ -673,7 +709,6 @@
                         turnElem.innerHTML = currentPlayer === 'white' ? '⚜️ White\'s Turn ⚜️' : '🖤 Black\'s Turn 🖤';
                     }
                     
-                    // check for checkmate after move
                     if (isCheckmate()) {
                         const winner = currentPlayer === 'white' ? 'Black' : 'White';
                         const statusDiv = document.getElementById('status');
@@ -684,7 +719,6 @@
                         return;
                     }
                     
-                    // display check status
                     const statusDiv = document.getElementById('status');
                     if (isKingInCheck(board, currentPlayer)) {
                         if (statusDiv) statusDiv.innerHTML = `⚠️ ${currentPlayer === 'white' ? 'White' : 'Black'} is in CHECK! ⚠️`;
@@ -694,11 +728,11 @@
                 }
             }
             selectedSquare = null;
-            renderBoard();   // final board update, highlights cleared
+            renderBoard();
         }
     }
 
-    // --- full reset: no distortion, no leftover highlights, clean state ---
+    // --- full reset ---
     function resetGame() {
         board = JSON.parse(JSON.stringify(initialBoard));
         currentPlayer = 'white';
