@@ -4,11 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <meta name="description" content="Realistic Snake Game with Serpentine Movement! Level up from 1 to 3, authentic reptile visuals, slithering motion. Eat, grow, avoid walls!">
-    <meta name="keywords" content="snake game, realistic snake, serpentine movement, level up, arcade">
+    <meta name="keywords" content="snake game, realistic snake, serpentine movement, level up, arcade, how to play">
     <title>🐍 SERPENT RISING | Realistic Snake Game</title>
     
-    <!-- Google AdSense -->
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9770610643444805" crossorigin="anonymous"></script>
+    <!-- Google AdSense - Standard code without data-ad-slot -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9770610643444805"
+     crossorigin="anonymous"></script>
     
     <style>
         * {
@@ -243,17 +244,71 @@
             transform: translateY(3px);
         }
 
-        .instructions {
-            display: flex;
-            justify-content: center;
-            gap: 18px;
-            flex-wrap: wrap;
-            padding: 14px;
-            background: rgba(0,0,0,0.4);
-            border-radius: 48px;
-            backdrop-filter: blur(4px);
+        /* HOW TO PLAY SECTION - New stylish panel */
+        .how-to-play {
+            margin-top: 20px;
+            background: rgba(0, 0, 0, 0.55);
+            backdrop-filter: blur(8px);
+            border-radius: 42px;
+            padding: 18px 20px;
+            border: 1px solid rgba(255, 170, 60, 0.5);
+            transition: all 0.2s;
         }
-
+        
+        .how-to-play h3 {
+            color: #FFB347;
+            font-size: 1.2rem;
+            letter-spacing: 1.5px;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-weight: 800;
+        }
+        
+        .how-to-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 16px;
+            row-gap: 12px;
+        }
+        
+        .how-card {
+            background: rgba(30, 25, 15, 0.7);
+            border-radius: 28px;
+            padding: 10px 16px;
+            min-width: 140px;
+            text-align: center;
+            border-left: 3px solid #ff8c00;
+            transition: transform 0.2s, background 0.2s;
+        }
+        
+        .how-card:hover {
+            transform: translateY(-3px);
+            background: rgba(60, 50, 25, 0.8);
+        }
+        
+        .how-icon {
+            font-size: 1.7rem;
+            display: block;
+            margin-bottom: 6px;
+        }
+        
+        .how-title {
+            font-weight: bold;
+            color: #ffcf9a;
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+        }
+        
+        .how-desc {
+            font-size: 0.7rem;
+            color: #ddb582;
+            margin-top: 4px;
+        }
+        
         .instruction-item {
             color: #ffb86b;
             font-size: 0.85rem;
@@ -348,6 +403,8 @@
             .score-value { font-size: 1.6rem; }
             .level-glow { font-size: 1.6rem; }
             .game-header h1 { font-size: 1.9rem; }
+            .how-card { min-width: 110px; padding: 8px 10px; }
+            .how-icon { font-size: 1.3rem; }
             .instruction-item { font-size: 0.7rem; }
         }
     </style>
@@ -356,7 +413,11 @@
 
 <div class="ad-top">
     <div class="ad-label">Advertisement</div>
-    <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-9770610643444805" data-ad-slot="4587389292" data-ad-format="auto" data-full-width-responsive="true"></ins>
+    <ins class="adsbygoogle"
+         style="display:block"
+         data-ad-client="ca-pub-9770610643444805"
+         data-ad-format="auto"
+         data-full-width-responsive="true"></ins>
     <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
 </div>
 
@@ -393,17 +454,52 @@
             <button id="backBtn" class="game-btn back">🏠 GAMES HUB</button>
         </div>
         
-        <div class="instructions">
-            <div class="instruction-item">🎮 ↑ ↓ ← →  or  WASD</div>
-            <div class="instruction-item">🍎 Eat to Level Up & Speed Up!</div>
-            <div class="instruction-item">⚠️ Avoid walls & yourself</div>
+        <!-- HOW TO PLAY SECTION (integrated with detailed instructions) -->
+        <div class="how-to-play">
+            <h3>📖 HOW TO PLAY & RULES</h3>
+            <div class="how-to-grid">
+                <div class="how-card">
+                    <span class="how-icon">🎮</span>
+                    <div class="how-title">CONTROLS</div>
+                    <div class="how-desc">↑ ↓ ← → &nbsp;|&nbsp; W A S D</div>
+                </div>
+                <div class="how-card">
+                    <span class="how-icon">🍎</span>
+                    <div class="how-title">EAT FRUIT</div>
+                    <div class="how-desc">+1 point, grow longer</div>
+                </div>
+                <div class="how-card">
+                    <span class="how-icon">⚡</span>
+                    <div class="how-title">LEVEL UP</div>
+                    <div class="how-desc">Score 5 ➜ Level 2 | Score 12 ➜ Level 3<br>Speed increases!</div>
+                </div>
+                <div class="how-card">
+                    <span class="how-icon">⚠️</span>
+                    <div class="how-title">GAME OVER</div>
+                    <div class="how-desc">Hit wall or your own body</div>
+                </div>
+                <div class="how-card">
+                    <span class="how-icon">🐍</span>
+                    <div class="how-title">SERPENTINE</div>
+                    <div class="how-desc">Realistic wavy movement & reptile scales</div>
+                </div>
+            </div>
+            <div class="instructions" style="margin-top: 14px; background: rgba(0,0,0,0.3); border-radius: 48px; padding: 10px; display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;">
+                <div class="instruction-item">🎮 ↑ ↓ ← →  or  WASD</div>
+                <div class="instruction-item">🍎 Eat to Level Up & Speed Up!</div>
+                <div class="instruction-item">⚠️ Avoid walls & yourself</div>
+            </div>
         </div>
     </div>
 </div>
 
 <div class="ad-bottom">
     <div class="ad-label">Advertisement</div>
-    <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-9770610643444805" data-ad-slot="4587389292" data-ad-format="auto" data-full-width-responsive="true"></ins>
+    <ins class="adsbygoogle"
+         style="display:block"
+         data-ad-client="ca-pub-9770610643444805"
+         data-ad-format="auto"
+         data-full-width-responsive="true"></ins>
     <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
 </div>
 
@@ -421,7 +517,7 @@
         const TILE_COUNT = canvas.width / GRID_SIZE; // 25x25 grid
         const TILE_SIZE = GRID_SIZE;
         
-        // Level & speed mapping (low to moderately high)
+        // Level & speed mapping 
         const SPEED_MAP = {
             1: 170,    // leisurely start
             2: 105,    // brisk
@@ -435,7 +531,7 @@
         }
         
         // ---------------------- Game State ----------------------
-        let snake = [];            // array of {x, y}
+        let snake = [];           
         let direction = { x: 1, y: 0 };
         let nextDirection = { x: 1, y: 0 };
         let food = { x: 15, y: 15 };
@@ -446,15 +542,12 @@
         let currentLevel = 1;
         let currentSpeed = SPEED_MAP[1];
         
-        // For serpentine animation (time-based undulation)
         let animationTime = 0;
-        let lastTimestamp = 0;
         
         highScoreSpan.textContent = highScore;
         
-        // ---------------------- Helper: realistic scale texture (reusable) ----------------------
+        // Scale pattern drawing
         function drawScalePattern(x, y, w, h, intensity = 0.6) {
-            // subtle overlapping arcs to mimic reptile scales
             ctx.save();
             ctx.globalAlpha = intensity;
             ctx.strokeStyle = "#1E3A1E";
@@ -480,12 +573,9 @@
             ctx.restore();
         }
         
-        // ---------------------- Draw realistic snake with serpentine offset ----------------------
-        // "serpentine movement" : each body segment gets a slight vertical/horizontal wave offset based on index and time
         function getSerpentineOffset(segmentIndex, totalSegments, time) {
-            // sin wave creates slithering look. offsets smaller than tile size to not break grid.
             const phase = (segmentIndex * 0.65 + time * 0.012) * Math.PI * 2;
-            const amplitude = 2.8; // max 2.8px offset, stays within tile bounds
+            const amplitude = 2.8;
             return {
                 dx: Math.sin(phase) * amplitude * 0.5,
                 dy: Math.cos(phase + 1.2) * amplitude
@@ -502,7 +592,6 @@
                 const baseX = seg.x * TILE_SIZE;
                 const baseY = seg.y * TILE_SIZE;
                 let offset = { dx: 0, dy: 0 };
-                // apply serpentine offset only if segment is not isolated (adds fluid motion)
                 if (snake.length > 2 && gameRunning) {
                     offset = getSerpentineOffset(i, snake.length, timeSec);
                 }
@@ -511,14 +600,11 @@
                 const segW = TILE_SIZE - 2;
                 const segH = TILE_SIZE - 2;
                 
-                // 3D cylindrical gradient
                 const grad = ctx.createLinearGradient(xPos, yPos, xPos + segW, yPos + segH);
                 if (i === 0) {
-                    // Head: richer brownish-green for realism
                     grad.addColorStop(0, '#4A6A2F');
                     grad.addColorStop(1, '#2C4A1E');
                 } else {
-                    // Body: scale-like variation by level
                     if (currentLevel === 3) {
                         grad.addColorStop(0, '#5F8140');
                         grad.addColorStop(1, '#3A5A28');
@@ -530,15 +616,12 @@
                 ctx.fillStyle = grad;
                 ctx.shadowBlur = 4;
                 ctx.shadowColor = "rgba(0,0,0,0.3)";
-                // rounded base body
                 ctx.beginPath();
                 ctx.ellipse(xPos + segW/2, yPos + segH/2, segW/2, segH/2.2, 0, 0, Math.PI*2);
                 ctx.fill();
                 
-                // Scales overlay
                 drawScalePattern(xPos, yPos, segW, segH, 0.5);
                 
-                // Dorsal line (realistic stripe)
                 ctx.beginPath();
                 ctx.moveTo(xPos + 5, yPos + segH/2);
                 ctx.lineTo(xPos + segW - 5, yPos + segH/2);
@@ -546,11 +629,8 @@
                 ctx.lineWidth = 1.8;
                 ctx.stroke();
                 
-                // ----- Head details (realistic eyes, nostrils, tongue) -----
                 if (i === 0) {
-                    // Eye sockets (reptilian)
                     ctx.fillStyle = "#F0E68C";
-                    ctx.shadowBlur = 2;
                     ctx.beginPath();
                     ctx.ellipse(xPos + segW - 6, yPos + 7, 3, 3.5, 0, 0, Math.PI*2);
                     ctx.fill();
@@ -564,7 +644,6 @@
                     ctx.beginPath();
                     ctx.arc(xPos + 6, yPos + 6.5, 1.8, 0, Math.PI*2);
                     ctx.fill();
-                    // pupil highlights
                     ctx.fillStyle = "white";
                     ctx.beginPath();
                     ctx.arc(xPos + segW - 7, yPos + 5.5, 0.6, 0, Math.PI*2);
@@ -573,7 +652,6 @@
                     ctx.arc(xPos + 5, yPos + 5.5, 0.6, 0, Math.PI*2);
                     ctx.fill();
                     
-                    // Nostrils
                     ctx.fillStyle = "#3A2A1A";
                     ctx.beginPath();
                     ctx.arc(xPos + segW - 4, yPos + 12, 1.2, 0, Math.PI*2);
@@ -582,20 +660,16 @@
                     ctx.arc(xPos + 4, yPos + 12, 1.2, 0, Math.PI*2);
                     ctx.fill();
                     
-                    // Forked tongue animation (wavy based on level)
-                    if (currentLevel >= 2 || true) {
-                        const tongueWiggle = Math.sin(timeSec * 15) * 1.5;
-                        ctx.beginPath();
-                        ctx.moveTo(xPos + segW/2, yPos + segH - 3);
-                        ctx.lineTo(xPos + segW/2 - 5 + tongueWiggle, yPos + segH + 5);
-                        ctx.lineTo(xPos + segW/2, yPos + segH + 1);
-                        ctx.lineTo(xPos + segW/2 + 5 + tongueWiggle, yPos + segH + 5);
-                        ctx.fillStyle = "#CC5533";
-                        ctx.fill();
-                    }
+                    const tongueWiggle = Math.sin(timeSec * 15) * 1.5;
+                    ctx.beginPath();
+                    ctx.moveTo(xPos + segW/2, yPos + segH - 3);
+                    ctx.lineTo(xPos + segW/2 - 5 + tongueWiggle, yPos + segH + 5);
+                    ctx.lineTo(xPos + segW/2, yPos + segH + 1);
+                    ctx.lineTo(xPos + segW/2 + 5 + tongueWiggle, yPos + segH + 5);
+                    ctx.fillStyle = "#CC5533";
+                    ctx.fill();
                 }
                 
-                // Tapered tail effect (last segment smaller)
                 if (i === snake.length - 1 && snake.length > 3) {
                     ctx.fillStyle = "#4B6E32";
                     ctx.beginPath();
@@ -606,7 +680,6 @@
             ctx.shadowBlur = 0;
         }
         
-        // ---------------------- Realistic Food (glowing berry) ----------------------
         function drawRealisticFood() {
             ctx.shadowBlur = 8;
             ctx.shadowColor = "#ff884d";
@@ -619,7 +692,6 @@
             ctx.beginPath();
             ctx.ellipse(fx + TILE_SIZE/2, fy + TILE_SIZE/2, TILE_SIZE/2 - 2, TILE_SIZE/2 - 2, 0, 0, Math.PI*2);
             ctx.fill();
-            // seeds
             ctx.fillStyle = "#FFCF9A";
             ctx.beginPath();
             ctx.arc(fx + 6, fy + 7, 1.3, 0, Math.PI*2);
@@ -630,14 +702,12 @@
             ctx.shadowBlur = 0;
         }
         
-        // ---------------------- Draw Board (light green gradient) ----------------------
         function drawBoard() {
             const grad = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
             grad.addColorStop(0, '#C5E0B4');
             grad.addColorStop(1, '#A8D08D');
             ctx.fillStyle = grad;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
             ctx.strokeStyle = '#86b57a';
             ctx.lineWidth = 0.6;
             for (let i = 0; i <= TILE_COUNT; i++) {
@@ -652,14 +722,12 @@
             }
         }
         
-        // ---------------------- Main Draw ----------------------
         function draw() {
             drawBoard();
             drawRealisticFood();
             drawRealisticSnake();
         }
         
-        // ---------------------- Game Logic ----------------------
         function generateValidFood() {
             const maxAttempts = 2000;
             for (let i = 0; i < maxAttempts; i++) {
@@ -774,7 +842,6 @@
         
         function restartGame() {
             if (gameLoopInterval) clearInterval(gameLoopInterval);
-            // reset snake
             snake = [
                 { x: 12, y: 12 },
                 { x: 11, y: 12 },
@@ -812,12 +879,10 @@
             updateGame();
         }
         
-        // Event binding
         document.addEventListener('keydown', handleKeyPress);
         document.getElementById('restartBtn').addEventListener('click', () => restartGame());
         document.getElementById('backBtn').addEventListener('click', () => { window.location.href = '../index.html'; });
         
-        // Initialization
         function init() {
             snake = [
                 { x: 12, y: 12 },
