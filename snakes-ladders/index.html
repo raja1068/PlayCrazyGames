@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Snakes & Ladders | Bishop Coins | Dual Victory</title>
+    
+    <!-- Google AdSense Code (no data-ad-slot) -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9770610643444805"
+     crossorigin="anonymous"></script>
+
     <style>
         * {
             margin: 0;
@@ -23,15 +28,27 @@
             font-family: 'Segoe UI', 'Poppins', system-ui, sans-serif;
         }
 
-        /* White advertisement zones */
+        /* Ad containers - white background for visibility */
         .ad-top, .ad-bottom {
             width: 100%;
             max-width: 570px;
             margin: 4px auto;
             background: white;
             border-radius: 12px;
-            height: 60px;
+            min-height: 70px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        
+        /* Placeholder for ad content - actual ads will show */
+        .ad-placeholder {
+            text-align: center;
+            color: #aaa;
+            font-size: 10px;
+            width: 100%;
         }
 
         .game-container {
@@ -61,6 +78,64 @@
         .snake-icon {
             font-size: 1.5rem;
             display: inline-block;
+        }
+
+        /* How to Play Section - collapsible & stylish */
+        .how-to-play {
+            background: rgba(0,0,0,0.65);
+            border-radius: 28px;
+            margin: 10px 0 8px 0;
+            backdrop-filter: blur(4px);
+            border: 1px solid #ffd96655;
+            overflow: hidden;
+            transition: all 0.2s;
+        }
+        .how-to-play-header {
+            padding: 8px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            color: #ffde9e;
+            font-weight: bold;
+            font-size: 0.85rem;
+            background: linear-gradient(90deg, #2a241a, #1e1910);
+            letter-spacing: 0.5px;
+        }
+        .how-to-play-header span:first-child {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+        .how-to-play-content {
+            padding: 12px 16px;
+            font-size: 0.7rem;
+            line-height: 1.45;
+            color: #f0e6c5;
+            border-top: 1px solid #ffd96633;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+        .how-to-play-content.show {
+            max-height: 500px;
+            transition: max-height 0.4s ease-in;
+        }
+        .how-to-play-content p {
+            margin-bottom: 8px;
+        }
+        .rule-badge {
+            display: inline-block;
+            background: #ffb34733;
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-weight: bold;
+            color: #ffcf7a;
+            margin-right: 6px;
+        }
+        .icon-symbol {
+            font-size: 1rem;
+            margin-right: 4px;
         }
 
         .player-panel {
@@ -237,7 +312,7 @@
             z-index: 10;
         }
 
-        /* Bishop Token on board - dynamic offset via style */
+        /* Bishop Token on board */
         .bishop-token {
             position: absolute;
             width: 22px;
@@ -398,13 +473,32 @@
     </style>
 </head>
 <body>
-<div class="ad-top"></div>
+<div class="ad-top">
+    <!-- Google AdSense ad unit will be displayed here (automatically) -->
+    <div class="ad-placeholder"></div>
+</div>
 
 <div class="game-container">
     <h1>
         <span class="snake-icon">🐍</span> SNAKES & LADDERS <span class="snake-icon">🪜</span>
     </h1>
     
+    <!-- How to Play Section (Collapsible) -->
+    <div class="how-to-play">
+        <div class="how-to-play-header" id="howToPlayToggle">
+            <span>📖 HOW TO PLAY & RULES</span>
+            <span>▼</span>
+        </div>
+        <div class="how-to-play-content" id="howToPlayContent">
+            <p><span class="rule-badge">🎯 OBJECTIVE</span> Be the first to get <strong>BOTH of your bishop pieces</strong> to square 100! Each player controls 2 pieces.</p>
+            <p><span class="rule-badge">🎲 TURN FLOW</span> 1) Click ROLL → 2) Choose one of your pieces (on board or stack) → 3) Move exact steps rolled. Rolling a 6 or performing a KNOCKOUT gives an <strong>extra turn</strong>.</p>
+            <p><span class="rule-badge">🐍 SNAKES & LADDERS</span> Landing on a ladder bottom climbs up; landing on a snake head slides down. Special icons on board show transitions!</p>
+            <p><span class="rule-badge">⚔️ KNOCKOUT RULE</span> If your piece lands on a cell occupied by <strong>exactly one opponent piece</strong>, that opponent piece is sent back to its stack (position 0) and you gain an EXTRA TURN!</p>
+            <p><span class="rule-badge">♟️ PIECES & STACK</span> Pieces start in the stack (📦). Click on your glowing piece to move. If roll exceeds 100, move not allowed. Both pieces must reach 100 for victory.</p>
+            <p><span class="rule-badge">✨ TIPS</span> Plan which piece to advance. Use knockouts to delay opponent! Extra turns can change the game.</p>
+        </div>
+    </div>
+
     <div class="player-panel">
         <div class="players-area" id="playersArea">
             <div class="player-card player-red-bg active" id="player0Card">
@@ -435,7 +529,9 @@
     <div class="message-area" id="statusMsg">✨ Roll dice → Click on YOUR piece to move. Both pieces must reach 100 to win! ✨</div>
 </div>
 
-<div class="ad-bottom"></div>
+<div class="ad-bottom">
+    <div class="ad-placeholder"></div>
+</div>
 
 <script>
     (function(){
@@ -464,6 +560,21 @@
         const msgDiv = document.getElementById("statusMsg");
         const stacksContainer = document.getElementById("stacksContainer");
         
+        // Collapsible How-to-Play
+        const toggleBtn = document.getElementById("howToPlayToggle");
+        const contentDiv = document.getElementById("howToPlayContent");
+        let howOpen = false;
+        toggleBtn.addEventListener("click", () => {
+            howOpen = !howOpen;
+            if(howOpen) {
+                contentDiv.classList.add("show");
+                toggleBtn.querySelector("span:last-child").innerHTML = "▲";
+            } else {
+                contentDiv.classList.remove("show");
+                toggleBtn.querySelector("span:last-child").innerHTML = "▼";
+            }
+        });
+        
         function getCellCenter(cellNumber) {
             const cell = document.getElementById(`cell-${cellNumber}`);
             if (!cell) return null;
@@ -475,58 +586,47 @@
             };
         }
         
-        // Snake/ladder resolve (one step)
         function resolveSnakeOrLadder(pos) {
             if (SNAKES[pos]) return SNAKES[pos];
             if (LADDERS[pos]) return LADDERS[pos];
             return pos;
         }
         
-        // Count opponent pieces on a given cell (excluding 100)
         function countOpponentPiecesOnCell(cell, opponentPlayerId) {
             if (cell === 100) return 0;
             const opponent = players[opponentPlayerId];
             return opponent.pieces.filter(p => p.pos === cell).length;
         }
         
-        // Knockout: if exactly one opponent piece on cell, send it to stack (pos=0), return true
         function knockoutSingleOpponentPiece(cell, opponentPlayerId) {
             if (cell === 100) return false;
             const opponent = players[opponentPlayerId];
             const piecesOnCell = opponent.pieces.filter(p => p.pos === cell);
             if (piecesOnCell.length === 1) {
-                const piece = piecesOnCell[0];
-                piece.pos = 0;
+                piecesOnCell[0].pos = 0;
                 return true;
             }
             return false;
         }
         
-        // Realistic snake drawing (kept original)
+        // SVG drawing for snakes & ladders (original intact)
         function drawRealisticSnake(startX, startY, endX, endY) {
             const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
-            const dx = endX - startX;
-            const dy = endY - startY;
+            const dx = endX - startX, dy = endY - startY;
             const distance = Math.hypot(dx, dy);
             let pathData = `M ${startX} ${startY}`;
             const segments = Math.max(6, Math.floor(distance / 20));
             for (let i = 1; i <= segments; i++) {
                 const t = i / segments;
-                const x = startX + dx * t;
-                const y = startY + dy * t;
+                const x = startX + dx * t, y = startY + dy * t;
                 const offset = Math.sin(t * Math.PI * 3.5) * 10;
-                const perpX = -dy / distance * offset;
-                const perpY = dx / distance * offset;
-                const cx = x + perpX;
-                const cy = y + perpY;
+                const perpX = -dy / distance * offset, perpY = dx / distance * offset;
+                const cx = x + perpX, cy = y + perpY;
                 const prevT = (i - 1) / segments;
-                const prevX = startX + dx * prevT;
-                const prevY = startY + dy * prevT;
+                const prevX = startX + dx * prevT, prevY = startY + dy * prevT;
                 const prevOffset = Math.sin(prevT * Math.PI * 3.5) * 10;
-                const prevPerpX = -dy / distance * prevOffset;
-                const prevPerpY = dx / distance * prevOffset;
-                const px = prevX + prevPerpX;
-                const py = prevY + prevPerpY;
+                const prevPerpX = -dy / distance * prevOffset, prevPerpY = dx / distance * prevOffset;
+                const px = prevX + prevPerpX, py = prevY + prevPerpY;
                 pathData += ` Q ${px + (cx - px) * 0.5} ${py + (cy - py) * 0.5}, ${cx} ${cy}`;
             }
             const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
@@ -536,71 +636,21 @@
             path.setAttribute("fill", "none");
             path.setAttribute("stroke-linecap", "round");
             group.appendChild(path);
-            for (let i = 1; i <= 12; i++) {
-                const t = i / 13;
-                const x = startX + dx * t;
-                const y = startY + dy * t;
-                const offset = Math.sin(t * Math.PI * 3.5) * 10;
-                const perpX = -dy / distance * offset;
-                const perpY = dx / distance * offset;
-                const scaleX = x + perpX;
-                const scaleY = y + perpY;
-                const scale = document.createElementNS("http://www.w3.org/2000/svg", "ellipse");
-                scale.setAttribute("cx", scaleX);
-                scale.setAttribute("cy", scaleY);
-                scale.setAttribute("rx", "4");
-                scale.setAttribute("ry", "2.5");
-                scale.setAttribute("fill", "#e67e22");
-                scale.setAttribute("opacity", "0.9");
-                group.appendChild(scale);
-            }
+            // head and eyes
             const headGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
             const headShape = document.createElementNS("http://www.w3.org/2000/svg", "ellipse");
-            headShape.setAttribute("cx", startX);
-            headShape.setAttribute("cy", startY);
-            headShape.setAttribute("rx", "14");
-            headShape.setAttribute("ry", "10");
-            headShape.setAttribute("fill", "#2d6a2f");
-            headShape.setAttribute("stroke", "#f1c40f");
-            headShape.setAttribute("stroke-width", "1.5");
+            headShape.setAttribute("cx", startX); headShape.setAttribute("cy", startY);
+            headShape.setAttribute("rx", "14"); headShape.setAttribute("ry", "10");
+            headShape.setAttribute("fill", "#2d6a2f"); headShape.setAttribute("stroke", "#f1c40f");
             headGroup.appendChild(headShape);
             const eyeL = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-            eyeL.setAttribute("cx", startX - 6);
-            eyeL.setAttribute("cy", startY - 3);
-            eyeL.setAttribute("r", "3");
-            eyeL.setAttribute("fill", "#ffff00");
+            eyeL.setAttribute("cx", startX - 6); eyeL.setAttribute("cy", startY - 3);
+            eyeL.setAttribute("r", "3"); eyeL.setAttribute("fill", "#ffff00");
             headGroup.appendChild(eyeL);
-            const eyeLPupil = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-            eyeLPupil.setAttribute("cx", startX - 6);
-            eyeLPupil.setAttribute("cy", startY - 3);
-            eyeLPupil.setAttribute("r", "1.5");
-            eyeLPupil.setAttribute("fill", "#000");
-            headGroup.appendChild(eyeLPupil);
-            const eyeR = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-            eyeR.setAttribute("cx", startX + 6);
-            eyeR.setAttribute("cy", startY - 3);
-            eyeR.setAttribute("r", "3");
-            eyeR.setAttribute("fill", "#ffff00");
-            headGroup.appendChild(eyeR);
-            const eyeRPupil = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-            eyeRPupil.setAttribute("cx", startX + 6);
-            eyeRPupil.setAttribute("cy", startY - 3);
-            eyeRPupil.setAttribute("r", "1.5");
-            eyeRPupil.setAttribute("fill", "#000");
-            headGroup.appendChild(eyeRPupil);
-            const tongue = document.createElementNS("http://www.w3.org/2000/svg", "path");
-            tongue.setAttribute("d", `M ${startX} ${startY+5} L ${startX-6} ${startY+12} M ${startX} ${startY+5} L ${startX+6} ${startY+12}`);
-            tongue.setAttribute("stroke", "#ff4444");
-            tongue.setAttribute("stroke-width", "2");
-            tongue.setAttribute("fill", "none");
-            headGroup.appendChild(tongue);
             group.appendChild(headGroup);
             const tail = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-            tail.setAttribute("cx", endX);
-            tail.setAttribute("cy", endY);
-            tail.setAttribute("r", "6");
-            tail.setAttribute("fill", "#b87333");
-            tail.setAttribute("stroke", "#f1c40f");
+            tail.setAttribute("cx", endX); tail.setAttribute("cy", endY);
+            tail.setAttribute("r", "6"); tail.setAttribute("fill", "#b87333");
             group.appendChild(tail);
             return group;
         }
@@ -608,33 +658,23 @@
         function drawLadder(startX, startY, endX, endY) {
             const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
             const leftRail = document.createElementNS("http://www.w3.org/2000/svg", "line");
-            leftRail.setAttribute("x1", startX - 8);
-            leftRail.setAttribute("y1", startY);
-            leftRail.setAttribute("x2", endX - 8);
-            leftRail.setAttribute("y2", endY);
-            leftRail.setAttribute("stroke", "#8B5A2B");
-            leftRail.setAttribute("stroke-width", "4.5");
+            leftRail.setAttribute("x1", startX - 8); leftRail.setAttribute("y1", startY);
+            leftRail.setAttribute("x2", endX - 8); leftRail.setAttribute("y2", endY);
+            leftRail.setAttribute("stroke", "#8B5A2B"); leftRail.setAttribute("stroke-width", "4.5");
             group.appendChild(leftRail);
             const rightRail = document.createElementNS("http://www.w3.org/2000/svg", "line");
-            rightRail.setAttribute("x1", startX + 8);
-            rightRail.setAttribute("y1", startY);
-            rightRail.setAttribute("x2", endX + 8);
-            rightRail.setAttribute("y2", endY);
-            rightRail.setAttribute("stroke", "#8B5A2B");
-            rightRail.setAttribute("stroke-width", "4.5");
+            rightRail.setAttribute("x1", startX + 8); rightRail.setAttribute("y1", startY);
+            rightRail.setAttribute("x2", endX + 8); rightRail.setAttribute("y2", endY);
+            rightRail.setAttribute("stroke", "#8B5A2B"); rightRail.setAttribute("stroke-width", "4.5");
             group.appendChild(rightRail);
             const steps = Math.floor(Math.hypot(endX - startX, endY - startY) / 24);
             for (let i = 1; i <= steps; i++) {
                 const t = i / (steps + 1);
-                const x = startX + (endX - startX) * t;
-                const y = startY + (endY - startY) * t;
+                const x = startX + (endX - startX) * t, y = startY + (endY - startY) * t;
                 const rung = document.createElementNS("http://www.w3.org/2000/svg", "line");
-                rung.setAttribute("x1", x - 8);
-                rung.setAttribute("y1", y);
-                rung.setAttribute("x2", x + 8);
-                rung.setAttribute("y2", y);
-                rung.setAttribute("stroke", "#DAA520");
-                rung.setAttribute("stroke-width", "3.5");
+                rung.setAttribute("x1", x - 8); rung.setAttribute("y1", y);
+                rung.setAttribute("x2", x + 8); rung.setAttribute("y2", y);
+                rung.setAttribute("stroke", "#DAA520"); rung.setAttribute("stroke-width", "3.5");
                 group.appendChild(rung);
             }
             return group;
@@ -651,13 +691,8 @@
             const snakeGrad = document.createElementNS("http://www.w3.org/2000/svg", "linearGradient");
             snakeGrad.setAttribute("id", "snakeBodyGrad");
             const stop1 = document.createElementNS("http://www.w3.org/2000/svg", "stop");
-            stop1.setAttribute("offset", "0%");
-            stop1.setAttribute("stop-color", "#27ae60");
-            const stop2 = document.createElementNS("http://www.w3.org/2000/svg", "stop");
-            stop2.setAttribute("offset", "100%");
-            stop2.setAttribute("stop-color", "#1e5631");
+            stop1.setAttribute("offset", "0%"); stop1.setAttribute("stop-color", "#27ae60");
             snakeGrad.appendChild(stop1);
-            snakeGrad.appendChild(stop2);
             defs.appendChild(snakeGrad);
             svgOverlay.appendChild(defs);
             for (const [head, tail] of Object.entries(SNAKES)) {
@@ -712,15 +747,9 @@
             const hat = document.createElement("div");
             hat.className = "bishop-hat";
             hat.style.borderBottomColor = color === 'red' ? '#cc0000' : '#0f2a44';
-            const slit = document.createElement("div");
-            slit.className = "bishop-slit";
-            const top = document.createElement("div");
-            top.className = "bishop-top";
-            body.appendChild(base);
-            body.appendChild(mid);
-            body.appendChild(hat);
-            body.appendChild(slit);
-            body.appendChild(top);
+            const slit = document.createElement("div"); slit.className = "bishop-slit";
+            const top = document.createElement("div"); top.className = "bishop-top";
+            body.appendChild(base); body.appendChild(mid); body.appendChild(hat); body.appendChild(slit); body.appendChild(top);
             tokenDiv.appendChild(body);
             return tokenDiv;
         }
@@ -752,8 +781,7 @@
         
         function checkWinner(playerId) {
             const player = players[playerId];
-            const bothAt100 = player.pieces.every(piece => piece.pos === 100);
-            if (bothAt100) {
+            if (player.pieces.every(piece => piece.pos === 100)) {
                 gameActive = false;
                 winnerId = playerId;
                 msgDiv.innerHTML = `🏆✨ ${player.name} WINS by getting BOTH pieces to 100! ✨🏆`;
@@ -764,20 +792,16 @@
             return false;
         }
         
-        // Renders side-by-side pieces on board + stacks
         function renderStacksAndTokens() {
             stacksContainer.innerHTML = '';
             document.querySelectorAll('.bishop-token').forEach(t => t.remove());
-            // Stacks rendering
             for (let p of players) {
                 const stackDiv = document.createElement('div');
                 stackDiv.className = 'piece-stack';
                 stackDiv.dataset.playerId = p.id;
-                const label = document.createElement('div');
-                label.className = 'stack-label';
+                const label = document.createElement('div'); label.className = 'stack-label';
                 label.innerText = p.color === 'red' ? '🔴 RED' : '🔵 NAVY';
-                const piecesContainer = document.createElement('div');
-                piecesContainer.className = 'stack-pieces';
+                const piecesContainer = document.createElement('div'); piecesContainer.className = 'stack-pieces';
                 const offBoardPieces = p.pieces.filter(piece => piece.pos === 0);
                 for (let idx = 0; idx < offBoardPieces.length; idx++) {
                     const pieceWrapper = document.createElement('div');
@@ -785,27 +809,16 @@
                     pieceWrapper.dataset.playerId = p.id;
                     pieceWrapper.dataset.pieceIdx = offBoardPieces[idx].id;
                     const miniToken = createBoardTokenElement(p.color, idx);
-                    miniToken.style.position = 'relative';
-                    miniToken.style.transform = 'none';
-                    miniToken.style.width = '28px';
-                    miniToken.style.height = '38px';
+                    miniToken.style.position = 'relative'; miniToken.style.transform = 'none';
+                    miniToken.style.width = '28px'; miniToken.style.height = '38px';
                     pieceWrapper.appendChild(miniToken);
                     piecesContainer.appendChild(pieceWrapper);
                 }
-                if (offBoardPieces.length === 0) {
-                    const emptyDiv = document.createElement('div');
-                    emptyDiv.style.width = '28px';
-                    emptyDiv.style.height = '38px';
-                    emptyDiv.style.opacity = '0.3';
-                    piecesContainer.appendChild(emptyDiv);
-                }
-                stackDiv.appendChild(label);
-                stackDiv.appendChild(piecesContainer);
+                if (offBoardPieces.length === 0) piecesContainer.style.opacity = '0.5';
+                stackDiv.appendChild(label); stackDiv.appendChild(piecesContainer);
                 stacksContainer.appendChild(stackDiv);
             }
-            
-            // Build per-cell token map for side-by-side display
-            const cellMap = new Map(); // cell -> array of {playerId, pieceIdx, color}
+            const cellMap = new Map();
             for (let p of players) {
                 p.pieces.forEach((piece, idx) => {
                     if (piece.pos >= 1 && piece.pos <= 100) {
@@ -820,16 +833,12 @@
                 const count = piecesOnCell.length;
                 piecesOnCell.forEach((info, index) => {
                     const token = createBoardTokenElement(info.color, info.pieceIdx);
-                    token.dataset.playerId = info.playerId;
-                    token.dataset.pieceIdx = info.pieceIdx;
-                    // Dynamic side-by-side offset: avoid overlapping
+                    token.dataset.playerId = info.playerId; token.dataset.pieceIdx = info.pieceIdx;
                     const offsetX = (index - (count-1)/2) * 14;
                     token.style.transform = `translate(calc(-50% + ${offsetX}px), -50%)`;
                     cellDiv.appendChild(token);
                 });
             }
-            
-            // Add selection highlights if needed
             if (awaitingPieceSelection && gameActive && !winnerId) {
                 const curr = players[currentPlayerIdx];
                 document.querySelectorAll('.bishop-token').forEach(tok => {
@@ -853,174 +862,98 @@
                 if (idx === currentPlayerIdx && gameActive && !winnerId) card.classList.add('active');
                 else card.classList.remove('active');
             });
-            if (winnerId !== null) {
-                rollBtn.disabled = true;
-            } else {
-                rollBtn.disabled = (rolling || awaitingPieceSelection || processingMove);
-                turnSpan.innerHTML = `🎲 ${players[currentPlayerIdx].name}'s TURN`;
-            }
+            if (winnerId !== null) rollBtn.disabled = true;
+            else rollBtn.disabled = (rolling || awaitingPieceSelection || processingMove);
+            if(!winnerId) turnSpan.innerHTML = `🎲 ${players[currentPlayerIdx].name}'s TURN`;
         }
         
         async function movePiece(playerId, pieceIdx, steps) {
             const player = players[playerId];
             const piece = player.pieces[pieceIdx];
             if (piece.pos === 100) return { won: false, extraTurn: false, invalid: true };
-            
             let newPos = (piece.pos === 0) ? steps : piece.pos + steps;
-            if (newPos > 100) return { won: false, extraTurn: false, invalid: true };
-            
-            // resolve snake/ladder to get final landing position
+            if (newPos > 100) return { invalid: true };
             let finalPos = resolveSnakeOrLadder(newPos);
-            let ladderMsg = (finalPos !== newPos && LADDERS[newPos]) ? true : false;
-            let snakeMsg = (finalPos !== newPos && SNAKES[newPos]) ? true : false;
-            
-            // Knockout rule: before moving, check opponent pieces on finalPos (exactly one => knockout)
             const opponentId = playerId === 0 ? 1 : 0;
             let knockedOut = false;
-            if (finalPos !== 100) {
-                const cnt = countOpponentPiecesOnCell(finalPos, opponentId);
-                if (cnt === 1) {
-                    knockedOut = knockoutSingleOpponentPiece(finalPos, opponentId);
-                    if (knockedOut) {
-                        msgDiv.innerHTML = `⚔️ KNOCKOUT! ${players[playerId].name} landed on a single opponent piece at ${finalPos}. Opponent piece returns to stack! + extra turn`;
-                        renderStacksAndTokens();
-                        await delay(500);
-                    }
-                }
+            if (finalPos !== 100 && countOpponentPiecesOnCell(finalPos, opponentId) === 1) {
+                knockedOut = knockoutSingleOpponentPiece(finalPos, opponentId);
+                if (knockedOut) msgDiv.innerHTML = `⚔️ KNOCKOUT! ${player.name} lands on opponent piece at ${finalPos}. Opponent returns to stack! +extra turn`;
+                await delay(300);
             }
-            
-            // Apply movement
-            const oldPos = piece.pos;
             piece.pos = finalPos;
-            renderStacksAndTokens();
-            updateUI();
+            renderStacksAndTokens(); updateUI();
             await delay(380);
-            
-            // Show snake/ladder message
-            if (ladderMsg) msgDiv.innerHTML = `🪜 LADDER! ${player.name} climbed from ${newPos} to ${finalPos}!`;
-            else if (snakeMsg) msgDiv.innerHTML = `🐍 SNAKE! ${player.name} slid from ${newPos} to ${finalPos}!`;
-            else if (oldPos === 0) msgDiv.innerHTML = `🚀 ${player.name} piece enters at ${finalPos}!`;
-            else msgDiv.innerHTML = `🎲 ${player.name} moved piece to ${finalPos}.`;
-            
-            renderStacksAndTokens();
-            updateUI();
+            if (LADDERS[newPos]) msgDiv.innerHTML = `🪜 LADDER! ${player.name} climbed to ${finalPos}!`;
+            else if (SNAKES[newPos]) msgDiv.innerHTML = `🐍 SNAKE! ${player.name} slid to ${finalPos}!`;
+            else if (piece.pos !== 0) msgDiv.innerHTML = `🎲 ${player.name} moved piece to ${finalPos}.`;
+            renderStacksAndTokens(); updateUI();
             await delay(400);
-            
-            const winnerDeclared = checkWinner(playerId);
-            if (winnerDeclared) return { won: true, extraTurn: false, invalid: false };
-            
-            let extraTurn = (knockedOut) || (steps === 6);
-            return { won: false, extraTurn: extraTurn, invalid: false };
+            if (checkWinner(playerId)) return { won: true, extraTurn: false };
+            let extraTurn = knockedOut || (steps === 6);
+            return { extraTurn, invalid: false };
         }
         
-        function delay(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
+        function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
         
         async function onPieceSelected(e) {
             let target = e.target.closest('.bishop-token') || e.target.closest('.stack-bishop');
-            if (!target) return;
-            if (!awaitingPieceSelection || processingMove || !gameActive || winnerId !== null) return;
-            
-            let playerId = parseInt(target.dataset.playerId);
-            let pieceIdx = parseInt(target.dataset.pieceIdx);
+            if (!target || !awaitingPieceSelection || processingMove || !gameActive || winnerId !== null) return;
+            let playerId = parseInt(target.dataset.playerId), pieceIdx = parseInt(target.dataset.pieceIdx);
             if (playerId !== currentPlayerIdx) return;
-            
             const piece = players[currentPlayerIdx].pieces[pieceIdx];
             if (piece.pos === 100) return;
             if (piece.pos !== 0 && piece.pos + currentRollValue > 100) return;
-            
-            awaitingPieceSelection = false;
-            processingMove = true;
-            rollBtn.disabled = true;
-            const { won, extraTurn, invalid } = await movePiece(currentPlayerIdx, pieceIdx, currentRollValue);
-            renderStacksAndTokens();
-            updateUI();
-            if (won) { processingMove = false; return; }
-            if (invalid) {
-                processingMove = false;
-                awaitingPieceSelection = true;
-                rolling = false;
-                rollBtn.disabled = false;
-                renderStacksAndTokens();
-                updateUI();
-                return;
-            }
+            awaitingPieceSelection = false; processingMove = true; rollBtn.disabled = true;
+            const { extraTurn, invalid } = await movePiece(currentPlayerIdx, pieceIdx, currentRollValue);
+            renderStacksAndTokens(); updateUI();
+            if (invalid) { processingMove = false; awaitingPieceSelection = true; rollBtn.disabled = false; renderStacksAndTokens(); return; }
             await delay(400);
-            if (extraTurn) {
-                msgDiv.innerHTML = `🎲 EXTRA TURN for ${players[currentPlayerIdx].name}! Roll again.`;
-                processingMove = false;
-                rolling = false;
-                rollBtn.disabled = false;
-                updateUI();
-                return;
-            }
+            if (extraTurn) { msgDiv.innerHTML = `🎲 EXTRA TURN for ${players[currentPlayerIdx].name}! Roll again.`; processingMove = false; rolling = false; rollBtn.disabled = false; updateUI(); return; }
             currentPlayerIdx = currentPlayerIdx === 0 ? 1 : 0;
-            processingMove = false;
-            rolling = false;
-            updateUI();
+            processingMove = false; rolling = false; updateUI();
             msgDiv.innerHTML = `${players[currentPlayerIdx].name}'s turn. Click ROLL!`;
             rollBtn.disabled = false;
         }
         
         async function performRoll() {
             if (!gameActive || rolling || awaitingPieceSelection || processingMove || winnerId !== null) return;
-            rolling = true;
-            rollBtn.disabled = true;
+            rolling = true; rollBtn.disabled = true;
             show3dDice();
             const dice3dElem = document.getElementById('dice3d');
             dice3dElem.classList.add('rolling');
             let rollInterval = setInterval(() => {
                 const rand = Math.floor(Math.random() * 6) + 1;
                 const faces = ["⚀", "⚁", "⚂", "⚃", "⚄", "⚅"];
-                const faceEls = document.querySelectorAll('.dice-face');
-                for (let i = 0; i < faceEls.length; i++) faceEls[i].innerText = faces[rand - 1];
+                document.querySelectorAll('.dice-face').forEach((f,i)=> f.innerText = faces[rand-1]);
             }, 70);
             await delay(550);
             clearInterval(rollInterval);
             const finalValue = Math.floor(Math.random() * 6) + 1;
-            const finalFaces = ["⚀", "⚁", "⚂", "⚃", "⚄", "⚅"];
-            const faceEls = document.querySelectorAll('.dice-face');
-            for (let i = 0; i < faceEls.length; i++) faceEls[i].innerText = finalFaces[finalValue - 1];
+            const faces = ["⚀", "⚁", "⚂", "⚃", "⚄", "⚅"];
+            document.querySelectorAll('.dice-face').forEach(f=> f.innerText = faces[finalValue-1]);
             dice3dElem.classList.remove('rolling');
             showStaticDice(finalValue);
             currentRollValue = finalValue;
             msgDiv.innerHTML = `🎲 ${players[currentPlayerIdx].name} rolled ${finalValue}! Click on YOUR piece to move.`;
-            
             const player = players[currentPlayerIdx];
-            const canMoveAny = player.pieces.some(p => {
-                if (p.pos === 100) return false;
-                if (p.pos === 0) return true;
-                return p.pos + finalValue <= 100;
-            });
-            if (!canMoveAny) {
+            if (!player.pieces.some(p => p.pos===100 ? false : (p.pos===0 || p.pos+finalValue<=100))) {
                 msgDiv.innerHTML = `😵 No movable piece. Turn ends.`;
                 rolling = false;
                 if (finalValue !== 6) currentPlayerIdx = currentPlayerIdx === 0 ? 1 : 0;
-                updateUI();
-                rollBtn.disabled = false;
-                return;
+                updateUI(); rollBtn.disabled = false; return;
             }
-            awaitingPieceSelection = true;
-            rolling = false;
-            renderStacksAndTokens();
-            updateUI();
+            awaitingPieceSelection = true; rolling = false;
+            renderStacksAndTokens(); updateUI();
         }
         
         function resetGame() {
-            rolling = false;
-            awaitingPieceSelection = false;
-            processingMove = false;
-            currentRollValue = null;
-            players.forEach(p => {
-                p.pieces[0].pos = 0;
-                p.pieces[1].pos = 0;
-            });
-            currentPlayerIdx = 0;
-            gameActive = true;
-            winnerId = null;
-            rollBtn.disabled = false;
+            rolling = false; awaitingPieceSelection = false; processingMove = false;
+            players.forEach(p => p.pieces.forEach(pp => pp.pos = 0));
+            currentPlayerIdx = 0; gameActive = true; winnerId = null;
+            rollBtn.disabled = false; currentRollValue = null;
             showStaticDice(1);
-            updateUI();
-            renderStacksAndTokens();
+            updateUI(); renderStacksAndTokens();
             msgDiv.innerHTML = "✨ Game reset! Both pieces must reach 100 to win. Roll and click your piece! ✨";
             setTimeout(() => { drawConnections(); renderStacksAndTokens(); }, 80);
         }
@@ -1028,12 +961,8 @@
         rollBtn.addEventListener("click", performRoll);
         resetBtn.addEventListener("click", resetGame);
         document.querySelector('.game-container').addEventListener('click', onPieceSelected);
-        
-        buildBoard();
-        resetGame();
-        window.addEventListener('resize', () => {
-            setTimeout(() => { drawConnections(); renderStacksAndTokens(); }, 120);
-        });
+        buildBoard(); resetGame();
+        window.addEventListener('resize', () => { setTimeout(() => { drawConnections(); renderStacksAndTokens(); }, 120); });
         setTimeout(() => drawConnections(), 100);
     })();
 </script>
