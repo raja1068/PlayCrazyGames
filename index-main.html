@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="description" content="PlayCrazyGames - cinematic lobby with 9 classic games">
+  <title>PlayCrazyGames</title>
+  <!-- Google Font for clean modern look -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #d4edda;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background-image:
+        radial-gradient(circle at 20% 30%, rgba(60, 130, 70, 0.10) 0%, transparent 35%),
+        radial-gradient(circle at 80% 70%, rgba(40, 110, 60, 0.08) 0%, transparent 40%),
+        linear-gradient(145deg, #d4edda 0%, #b7dbbd 100%);
+    }
+
+    .lobby {
+      max-width: 1300px;
+      width: 100%;
+      background: rgba(220, 245, 220, 0.65);
+      backdrop-filter: blur(14px) saturate(180%);
+      -webkit-backdrop-filter: blur(14px) saturate(180%);
+      border-radius: 56px;
+      padding: 30px 30px 40px;
+      box-shadow:
+        0 30px 60px rgba(0, 30, 0, 0.25),
+        0 0 0 1px rgba(40, 100, 50, 0.20) inset,
+        0 0 40px rgba(60, 140, 70, 0.10);
+      border: 1px solid rgba(40, 100, 50, 0.15);
+      transition: all 0.2s ease;
+    }
+
+    .cinema-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 35px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid rgba(40, 100, 50, 0.15);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand h1 {
+      font-weight: 800;
+      font-size: 2.2rem;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, #1f4a2a, #2d6e3a, #1f5a2a);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      text-shadow: 0 0 20px rgba(30, 80, 40, 0.15);
+    }
+
+    .brand .sub {
+      font-weight: 400;
+      font-size: 0.75rem;
+      color: #2d6e3a;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      background: rgba(30, 80, 40, 0.08);
+      padding: 4px 14px;
+      border-radius: 40px;
+      border: 1px solid rgba(30, 80, 40, 0.10);
+    }
+
+    .game-arena-link {
+      background: rgba(30, 80, 40, 0.08);
+      border: 1px solid rgba(30, 80, 40, 0.25);
+      padding: 10px 28px;
+      border-radius: 60px;
+      font-weight: 700;
+      font-size: 1rem;
+      color: #1f4a2a;
+      text-decoration: none;
+      letter-spacing: 0.5px;
+      backdrop-filter: blur(4px);
+      transition: all 0.25s ease;
+      box-shadow: 0 0 15px rgba(30, 80, 40, 0.05);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .game-arena-link:hover {
+      background: rgba(30, 80, 40, 0.15);
+      border-color: #2d6e3a;
+      color: #0f2a18;
+      box-shadow: 0 0 30px rgba(30, 80, 40, 0.10);
+      transform: scale(1.02);
+    }
+
+    .game-arena-link:active {
+      transform: scale(0.96);
+    }
+
+    .games-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 24px 20px;
+    }
+
+    .game-card {
+      background: rgba(220, 245, 220, 0.5);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      border-radius: 32px;
+      padding: 18px 12px 16px;
+      text-align: center;
+      border: 1px solid rgba(30, 80, 40, 0.10);
+      box-shadow: 0 10px 25px -8px rgba(0, 30, 0, 0.15);
+      transition: all 0.25s cubic-bezier(0.2, 0.9, 0.4, 1);
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .game-card::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle at 30% 20%, rgba(30, 80, 40, 0.04), transparent 70%);
+      pointer-events: none;
+    }
+
+    .game-card:active {
+      transform: scale(0.94);
+      background: rgba(180, 220, 180, 0.6);
+      border-color: rgba(30, 80, 40, 0.3);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+    }
+
+    .game-logo {
+      height: 110px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3.8rem;
+      filter: drop-shadow(0 8px 12px rgba(0, 30, 0, 0.15));
+      background: radial-gradient(circle at 30% 30%, rgba(30, 80, 40, 0.06), transparent 70%);
+      border-radius: 28px;
+      margin-bottom: 8px;
+      transition: transform 0.2s;
+      position: relative;
+    }
+
+    /* each game gets a unique green-tinted gradient */
+    .game-card[data-game="snake"] .game-logo { background: radial-gradient(circle at 20% 30%, #b8d9b8, #8fbf8f); }
+    .game-card[data-game="chess"] .game-logo { background: radial-gradient(circle at 70% 20%, #c2d4b0, #9ab88a); }
+    .game-card[data-game="ludo"] .game-logo { background: radial-gradient(circle at 40% 60%, #c4d9b0, #9bb88a); }
+    .game-card[data-game="tictactoe"] .game-logo { background: radial-gradient(circle at 60% 40%, #b0c9b0, #84a884); }
+    .game-card[data-game="memory"] .game-logo { background: radial-gradient(circle at 30% 70%, #bdd6b0, #8fb88a); }
+    .game-card[data-game="snakesladders"] .game-logo { background: radial-gradient(circle at 70% 70%, #b8d4b0, #8bb88a); }
+    /* Carrom gets a special warm wood tone */
+    .game-card[data-game="carrom"] .game-logo { background: radial-gradient(circle at 50% 30%, #d4b896, #b8946a); }
+    .game-card[data-game="gunshooting"] .game-logo { background: radial-gradient(circle at 30% 50%, #c2d0b0, #8ab08a); }
+    .game-card[data-game="checkers"] .game-logo { background: radial-gradient(circle at 60% 60%, #b8ccb0, #84a884); }
+
+    .game-logo span {
+      filter: drop-shadow(0 4px 8px rgba(0, 20, 0, 0.20));
+      transform: scale(1);
+      transition: transform 0.2s;
+    }
+    .game-card:active .game-logo span {
+      transform: scale(0.9);
+    }
+
+    /* Carrom custom SVG board image */
+    .carrom-board-svg {
+      width: 80px;
+      height: 80px;
+      display: block;
+      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
+    }
+
+    .game-card h3 {
+      font-weight: 700;
+      font-size: 1rem;
+      color: #1a3a1a;
+      letter-spacing: 0.3px;
+      margin: 5px 0 4px;
+      text-shadow: 0 1px 4px rgba(255, 255, 255, 0.2);
+    }
+
+    .game-card .play-badge {
+      display: inline-block;
+      background: rgba(30, 80, 40, 0.08);
+      border: 1px solid rgba(30, 80, 40, 0.12);
+      padding: 4px 18px;
+      border-radius: 40px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: #1f4a2a;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      backdrop-filter: blur(4px);
+      transition: all 0.2s;
+      margin-top: 4px;
+    }
+
+    .game-card:active .play-badge {
+      background: rgba(30, 80, 40, 0.15);
+      border-color: #2d6e3a;
+      color: #0f2a18;
+    }
+
+    .footer-links {
+      margin-top: 32px;
+      text-align: center;
+      border-top: 1px solid rgba(30, 80, 40, 0.08);
+      padding-top: 28px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .footer-links .game-arena-link {
+      background: rgba(30, 80, 40, 0.06);
+      border-color: rgba(30, 80, 40, 0.15);
+    }
+
+    .privacy-link {
+      color: #2d6e3a;
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 500;
+      opacity: 0.7;
+      transition: opacity 0.2s;
+    }
+
+    .privacy-link:hover {
+      opacity: 1;
+    }
+
+    @media (max-width: 600px) {
+      .lobby { padding: 20px 16px 30px; border-radius: 36px; }
+      .brand h1 { font-size: 1.6rem; }
+      .game-arena-link { padding: 8px 18px; font-size: 0.85rem; }
+      .games-grid { gap: 16px; }
+      .game-logo { height: 90px; font-size: 3rem; }
+      .carrom-board-svg { width: 65px; height: 65px; }
+    }
+
+    @media (max-width: 420px) {
+      .cinema-header { flex-direction: column; align-items: flex-start; gap: 12px; }
+      .game-arena-link { align-self: flex-start; }
+    }
+
+    .game-card {
+      animation: cardFade 0.6s ease backwards;
+    }
+    .game-card:nth-child(1) { animation-delay: 0.02s; }
+    .game-card:nth-child(2) { animation-delay: 0.06s; }
+    .game-card:nth-child(3) { animation-delay: 0.10s; }
+    .game-card:nth-child(4) { animation-delay: 0.14s; }
+    .game-card:nth-child(5) { animation-delay: 0.18s; }
+    .game-card:nth-child(6) { animation-delay: 0.22s; }
+    .game-card:nth-child(7) { animation-delay: 0.26s; }
+    .game-card:nth-child(8) { animation-delay: 0.30s; }
+    .game-card:nth-child(9) { animation-delay: 0.34s; }
+
+    @keyframes cardFade {
+      0% { opacity: 0; transform: translateY(18px) scale(0.96); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .interstitial-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(180, 215, 180, 0.75);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      z-index: 9999;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 20px;
+      padding: 30px;
+    }
+    .interstitial-overlay.active {
+      display: flex;
+    }
+    .interstitial-box {
+      background: rgba(220, 245, 220, 0.9);
+      border: 1px solid rgba(30, 80, 40, 0.15);
+      border-radius: 60px;
+      padding: 40px 40px 30px;
+      max-width: 380px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 40px 80px rgba(0, 30, 0, 0.20);
+      backdrop-filter: blur(10px);
+    }
+    .interstitial-box h2 {
+      color: #1f4a2a;
+      font-weight: 700;
+      font-size: 1.6rem;
+      margin-bottom: 6px;
+    }
+    .interstitial-box p {
+      color: #2d6e3a;
+      font-size: 0.9rem;
+      margin-bottom: 20px;
+      opacity: 0.8;
+    }
+    .interstitial-box .ad-unit-id {
+      background: rgba(30, 80, 40, 0.04);
+      border-radius: 60px;
+      padding: 12px 16px;
+      font-size: 0.65rem;
+      color: #2d6e3a;
+      border: 1px dashed rgba(30, 80, 40, 0.10);
+      margin-bottom: 20px;
+      word-break: break-all;
+      opacity: 0.6;
+    }
+    .interstitial-btn {
+      background: rgba(30, 80, 40, 0.08);
+      border: 1px solid #2d6e3a;
+      color: #1f4a2a;
+      padding: 14px 28px;
+      border-radius: 60px;
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      width: 100%;
+      backdrop-filter: blur(4px);
+    }
+    .interstitial-btn:active {
+      transform: scale(0.94);
+      background: rgba(30, 80, 40, 0.15);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="lobby" role="main">
+
+    <div class="cinema-header">
+      <div class="brand">
+        <h1>🎮 PlayCrazyGames</h1>
+        <span class="sub">9 classics</span>
+      </div>
+      <a href="#" class="game-arena-link" id="gameArenaLinkTop">
+        ⚡ Game Arena
+        <span style="font-size:0.7rem; opacity:0.6;">→</span>
+      </a>
+    </div>
+
+    <div class="games-grid">
+      <div class="game-card" data-game="snake" data-name="snake">
+        <div class="game-logo"><span>🐍</span></div>
+        <h3>Snake</h3>
+        <div class="play-badge">▶ play</div>
+      </div>
+      <div class="game-card" data-game="chess" data-name="chess">
+        <div class="game-logo"><span>♟️</span></div>
+        <h3>Chess</h3>
+        <div class="play-badge">▶ play</div>
+      </div>
+      <div class="game-card" data-game="ludo" data-name="ludo">
+        <div class="game-logo"><span>🎲</span></div>
+        <h3>Ludo</h3>
+        <div class="play-badge">▶ play</div>
+      </div>
+      <div class="game-card" data-game="tictactoe" data-name="tic tac toe">
+        <div class="game-logo"><span>❌</span></div>
+        <h3>Tic-Tac-Toe</h3>
+        <div class="play-badge">▶ play</div>
+      </div>
+      <div class="game-card" data-game="memory" data-name="memory match">
+        <div class="game-logo"><span>🧠</span></div>
+        <h3>Memory</h3>
+        <div class="play-badge">▶ play</div>
+      </div>
+      <div class="game-card" data-game="snakesladders" data-name="snakes ladders">
+        <div class="game-logo"><span>🪜</span></div>
+        <h3>S &amp; L</h3>
+        <div class="play-badge">▶ play</div>
+      </div>
+      <!-- Carrom with custom designed board image -->
+      <div class="game-card" data-game="carrom" data-name="carrom">
+        <div class="game-logo">
+          <svg class="carrom-board-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <!-- Board base -->
+            <rect x="5" y="5" width="90" height="90" rx="8" fill="#c49a6c" stroke="#8b6b43" stroke-width="3"/>
+            <!-- Inner border -->
+            <rect x="12" y="12" width="76" height="76" rx="6" fill="#dbb07c" stroke="#a87d50" stroke-width="2"/>
+            <!-- Corner pockets -->
+            <circle cx="18" cy="18" r="8" fill="#6b4c2a" stroke="#4d3420" stroke-width="1.5"/>
+            <circle cx="82" cy="18" r="8" fill="#6b4c2a" stroke="#4d3420" stroke-width="1.5"/>
+            <circle cx="18" cy="82" r="8" fill="#6b4c2a" stroke="#4d3420" stroke-width="1.5"/>
+            <circle cx="82" cy="82" r="8" fill="#6b4c2a" stroke="#4d3420" stroke-width="1.5"/>
+            <!-- Center circle -->
+            <circle cx="50" cy="50" r="16" fill="none" stroke="#8b6b43" stroke-width="2"/>
+            <circle cx="50" cy="50" r="10" fill="none" stroke="#8b6b43" stroke-width="1.5"/>
+            <!-- Center star / base -->
+            <circle cx="50" cy="50" r="4" fill="#8b6b43"/>
+            <!-- Outer ring dashed -->
+            <circle cx="50" cy="50" r="22" fill="none" stroke="#a87d50" stroke-width="1" stroke-dasharray="4 4"/>
+            <!-- Queen (red disk) -->
+            <circle cx="50" cy="50" r="5" fill="#d43f3f" stroke="#a02020" stroke-width="1.5"/>
+            <!-- White disks (men) -->
+            <circle cx="36" cy="36" r="4" fill="#f5f0e0" stroke="#c0b8a0" stroke-width="1"/>
+            <circle cx="64" cy="36" r="4" fill="#f5f0e0" stroke="#c0b8a0" stroke-width="1"/>
+            <circle cx="36" cy="64" r="4" fill="#f5f0e0" stroke="#c0b8a0" stroke-width="1"/>
+            <circle cx="64" cy="64" r="4" fill="#f5f0e0" stroke="#c0b8a0" stroke-width="1"/>
+            <!-- Black disks -->
+            <circle cx="43" cy="30" r="4" fill="#2a2a2a" stroke="#111" stroke-width="1"/>
+            <circle cx="57" cy="30" r="4" fill="#2a2a2a" stroke="#111" stroke-width="1"/>
+            <circle cx="30" cy="43" r="4" fill="#2a2a2a" stroke="#111" stroke-width="1"/>
+            <circle cx="70" cy="43" r="4" fill="#2a2a2a" stroke="#111" stroke-width="1"/>
+            <circle cx="30" cy="57" r="4" fill="#2a2a2a" stroke="#111" stroke-width="1"/>
+            <circle cx="70" cy="57" r="4" fill="#2a2a2a" stroke="#111" stroke-width="1"/>
+            <circle cx="43" cy="70" r="4" fill="#2a2a2a" stroke="#111" stroke-width="1"/>
+            <circle cx="57" cy="70" r="4" fill="#2a2a2a" stroke="#111" stroke-width="1"/>
+            <!-- Extra white men near corners -->
+            <circle cx="28" cy="28" r="3.5" fill="#f5f0e0" stroke="#c0b8a0" stroke-width="1"/>
+            <circle cx="72" cy="28" r="3.5" fill="#f5f0e0" stroke="#c0b8a0" stroke-width="1"/>
+            <circle cx="28" cy="72" r="3.5" fill="#f5f0e0" stroke="#c0b8a0" stroke-width="1"/>
+            <circle cx="72" cy="72" r="3.5" fill="#f5f0e0" stroke="#c0b8a0" stroke-width="1"/>
+          </svg>
+        </div>
+        <h3>Carrom</h3>
+        <div class="play-badge">▶ play</div>
+      </div>
+      <div class="game-card" data-game="gunshooting" data-name="gun shooting">
+        <div class="game-logo"><span>🔫</span></div>
+        <h3>Shooting</h3>
+        <div class="play-badge">▶ play</div>
+      </div>
+      <div class="game-card" data-game="checkers" data-name="checkers">
+        <div class="game-logo"><span>🏁</span></div>
+        <h3>Checkers</h3>
+        <div class="play-badge">▶ play</div>
+      </div>
+    </div>
+
+    <div class="footer-links">
+      <a href="#" class="game-arena-link" id="gameArenaLinkBottom">
+        ⚡ Game Arena
+        <span style="font-size:0.7rem; opacity:0.6;">→</span>
+      </a>
+      <a href="privacy-policy.html" class="privacy-link">🛡️ Privacy Policy</a>
+    </div>
+
+  </div>
+
+  <!-- INTERSTITIAL OVERLAY -->
+  <div class="interstitial-overlay" id="interstitialOverlay">
+    <div class="interstitial-box">
+      <h2>🎮 PlayCrazyGames</h2>
+      <p>continue to the game lobby</p>
+      <div class="ad-unit-id">ca-app-pub-9770610643444805/1219419760</div>
+      <button class="interstitial-btn" id="interstitialContinueBtn">⚡ Continue to Arena</button>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      "use strict";
+
+      const gameUrls = {
+        snake: 'snake-game/index.html',
+        chess: 'chess-game/index.html',
+        ludo: 'ludo-game/index.html',
+        tictactoe: 'tic-tac-toe/index.html',
+        memory: 'memory-match/index.html',
+        snakesladders: 'snakes-ladders/index.html',
+        carrom: 'carrom-game/index.html',
+        gunshooting: 'gun-shooting/index.html',
+        checkers: 'checkers-game/index.html'
+      };
+
+      const topLink = document.getElementById('gameArenaLinkTop');
+      const bottomLink = document.getElementById('gameArenaLinkBottom');
+      const overlay = document.getElementById('interstitialOverlay');
+      const continueBtn = document.getElementById('interstitialContinueBtn');
+
+      let pendingDestination = null;
+
+      function showInterstitial(destination) {
+        if (typeof Android !== 'undefined' && Android.showInterstitialAd) {
+          Android.showInterstitialAd(destination);
+        } else {
+          window.location.href = destination;
+        }
+      }
+
+      function dismissInterstitialAndNavigate() {
+        if (!pendingDestination) return;
+        overlay.classList.remove('active');
+        setTimeout(function() {
+          window.location.href = pendingDestination;
+        }, 120);
+      }
+
+      function handleArenaLink(e) {
+        e.preventDefault();
+        showInterstitial('index.html');
+      }
+
+      topLink.addEventListener('click', handleArenaLink);
+      bottomLink.addEventListener('click', handleArenaLink);
+
+      continueBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        dismissInterstitialAndNavigate();
+      });
+
+      document.querySelectorAll('.game-card').forEach(function(card) {
+        const gameKey = card.dataset.game;
+        if (!gameKey || !gameUrls[gameKey]) return;
+
+        const handler = function(e) {
+          e.preventDefault();
+          if (typeof Android !== 'undefined' && Android.vibrate) {
+            Android.vibrate(15);
+          }
+          const destination = gameUrls[gameKey];
+          if (typeof Android !== 'undefined' && Android.showInterstitialAd) {
+            Android.showInterstitialAd(destination);
+          } else {
+            window.location.href = destination;
+          }
+        };
+
+        card.addEventListener('click', handler);
+        card.addEventListener('touchstart', function(e) {
+          e.preventDefault();
+          handler(e);
+        }, { passive: false });
+      });
+
+      window.openShop = function() {
+        if (typeof Android !== 'undefined' && Android.openShop) {
+          Android.openShop();
+        } else {
+          window.location.href = 'shop.html';
+        }
+      };
+
+      console.log('🎮 PlayCrazyGames lobby ready. Ad unit: ca-app-pub-9770610643444805/1219419760');
+    })();
+  </script>
+
+</body>
+</html>
